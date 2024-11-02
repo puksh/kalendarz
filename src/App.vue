@@ -10,13 +10,22 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 export default {
   name: "VueCalendar",
   components: {
-    CalendarComponent: () => import("./components/CalendarComponent.vue"),
-    SideBarComponent: () => import("./components/SideBarComponent.vue"),
-    AboutComponent: () => import("./components/AboutComponent.vue"),
-    SettingsComponent: () => import("./components/SettingsComponent.vue"),
+    CalendarComponent: defineAsyncComponent(() =>
+      import("./components/CalendarComponent.vue")
+    ),
+    SideBarComponent: defineAsyncComponent(() =>
+      import("./components/SideBarComponent.vue")
+    ),
+    AboutComponent: defineAsyncComponent(() =>
+      import("./components/AboutComponent.vue")
+    ),
+    SettingsComponent: defineAsyncComponent(() =>
+      import("./components/SettingsComponent.vue")
+    ),
   },
   data() {
     return {

@@ -1,7 +1,7 @@
 <template>
   <aside class="sidebar">
     <button @click="navigateTo('CalendarComponent')" class="sidebar-button">
-      Collection
+      Calendar
     </button>
     <button @click="navigateTo('AboutComponent')" class="sidebar-button">
       About
@@ -39,7 +39,7 @@ export default {
 }
 
 .sidebar-button {
-  background-color: #ffeed5;
+  background-color: #eeeeee;
   color: #333;
   height: 66px;
   padding: 10px;
@@ -49,6 +49,7 @@ export default {
   border-color: #3b1e54;
   border-width: 1px;
   transition: all 0.3s ease;
+  font-weight: bold;
 }
 .sidebar-button:hover {
   background-color: #9b7ebd;
