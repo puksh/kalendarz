@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <Sidebar @navigate="handleNavigation" />
+    <SideBarComponent @navigate="handleNavigation" />
     <main class="main-content">
-      <fishChecklist v-if="currentPage === 'Calendar'" />
-      <About v-if="currentPage === 'about'" />
-      <Settings v-if="currentPage === 'settings'" />
+      <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
+      <AboutComponent v-if="currentPage === 'AboutComponent'" />
+      <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
     </main>
   </div>
 </template>
@@ -13,14 +13,14 @@
 export default {
   name: "VueCalendar",
   components: {
-    Calendar: () => import("./components/Calendar.vue"),
-    SideBar: () => import("./components/SideBar.vue"),
-    About,
-    Settings,
+    CalendarComponent: () => import("./components/CalendarComponent.vue"),
+    SideBarComponent: () => import("./components/SideBarComponent.vue"),
+    AboutComponent: () => import("./components/AboutComponent.vue"),
+    SettingsComponent: () => import("./components/SettingsComponent.vue"),
   },
   data() {
     return {
-      currentPage: "fishChecklist",
+      currentPage: "CalendarComponent",
     };
   },
   methods: {
