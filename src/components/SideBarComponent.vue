@@ -1,10 +1,12 @@
 <template>
   <aside class="sidebar">
-    <button @click="navigateTo('fishChecklist')" class="sidebar-button">
+    <button @click="navigateTo('CalendarComponent')" class="sidebar-button">
       Collection
     </button>
-    <button @click="navigateTo('about')" class="sidebar-button">About</button>
-    <button @click="navigateTo('settings')" class="sidebar-button">
+    <button @click="navigateTo('AboutComponent')" class="sidebar-button">
+      About
+    </button>
+    <button @click="navigateTo('SettingsComponent')" class="sidebar-button">
       Settings
     </button>
   </aside>
@@ -12,7 +14,7 @@
 
 <script>
 export default {
-  name: "SideBar",
+  name: "SideBarComponent",
   methods: {
     navigateTo(section) {
       this.$emit("navigate", section); // Emit navigation events to parent
@@ -28,7 +30,7 @@ export default {
   top: 0;
   bottom: 0;
   width: 88px;
-  background-color: #5a755a;
+  background-color: #3b1e54;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -44,22 +46,22 @@ export default {
   font-size: 12px;
   border-radius: 8px;
   cursor: pointer;
-  border-color: #5a755a;
+  border-color: #3b1e54;
   border-width: 1px;
   transition: all 0.3s ease;
 }
 .sidebar-button:hover {
-  background-color: #ffd7ae;
+  background-color: #9b7ebd;
   color: #222;
-  border-color: #3e8e41;
+  border-color: #9b7ebd;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   transform: scale(1.05) ease;
 }
 
 .sidebar-button:active {
-  background-color: #ff9900;
+  background-color: #562b7a;
   color: #111;
-  border-color: #2f6f2f;
+  border-color: #562b7a;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   transform: scale(0.95) ease;
 }
@@ -81,7 +83,7 @@ export default {
 
   .sidebar-button {
     height: 39px;
-    border-color: #5a755a;
+    border-color: #3b1e54;
     border-width: 1px;
     flex: 1 1 33.33%; /* Make all buttons one-third of the width */
     font-size: 14px;
