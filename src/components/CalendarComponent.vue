@@ -45,22 +45,42 @@
               <div
                 class="shift-slot"
                 @dragover.prevent
-                @drop="handleDrop(day.date, 'day')"
+                @drop="handleDrop(day.date, 'day1')"
               >
-                <div class="assigned-person day" v-if="day.dayShift">
-                  {{ day.dayShift.name }}
+                <div class="assigned-person day" v-if="day.dayShift1">
+                  {{ day.dayShift1.name }}
                 </div>
-                <div class="empty-slot day" v-else>7 - 19</div>
+                <div class="empty-slot day" v-else>D</div>
               </div>
               <div
                 class="shift-slot"
                 @dragover.prevent
-                @drop="handleDrop(day.date, 'night')"
+                @drop="handleDrop(day.date, 'day2')"
               >
-                <div class="assigned-person night" v-if="day.nightShift">
-                  {{ day.nightShift.name }}
+                <div class="assigned-person day" v-if="day.dayShift2">
+                  {{ day.dayShift2.name }}
                 </div>
-                <div class="empty-slot night" v-else>19 - 7</div>
+                <div class="empty-slot day" v-else>D</div>
+              </div>
+              <div
+                class="shift-slot"
+                @dragover.prevent
+                @drop="handleDrop(day.date, 'night1')"
+              >
+                <div class="assigned-person night" v-if="day.nightShift1">
+                  {{ day.nightShift1.name }}
+                </div>
+                <div class="empty-slot night" v-else>N</div>
+              </div>
+              <div
+                class="shift-slot"
+                @dragover.prevent
+                @drop="handleDrop(day.date, 'night2')"
+              >
+                <div class="assigned-person night" v-if="day.nightShift2">
+                  {{ day.nightShift2.name }}
+                </div>
+                <div class="empty-slot night" v-else>N</div>
               </div>
             </div>
           </div>
@@ -104,10 +124,19 @@ export default {
           (day) => day.date.toDateString() === date.toDateString()
         );
         if (day) {
-          if (shiftType === "day") {
-            day.dayShift = this.draggedPerson; // Assign to day shift
-          } else if (shiftType === "night") {
-            day.nightShift = this.draggedPerson; // Assign to night shift
+          switch (shiftType) {
+            case "day1":
+              day.dayShift1 = this.draggedPerson;
+              break;
+            case "day2":
+              day.dayShift2 = this.draggedPerson;
+              break;
+            case "night1":
+              day.nightShift1 = this.draggedPerson;
+              break;
+            case "night2":
+              day.nightShift2 = this.draggedPerson;
+              break;
           }
           this.draggedPerson = null; // Clear the reference after dropping
         }
@@ -116,40 +145,20 @@ export default {
     generateMonthDays() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
-      const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
       const daysInMonth = lastDay.getDate();
 
       this.monthDays = [];
 
-      // Fill in the empty slots for the previous month's days
-      for (let i = 0; i < firstDay.getDay(); i++) {
-        this.monthDays.push({
-          date: new Date(year, month, i - firstDay.getDay() + 1),
-          dayShift: null,
-          nightShift: null,
-          isCurrentMonth: false,
-        });
-      }
-
       // Add the current month's days
       for (let i = 1; i <= daysInMonth; i++) {
         this.monthDays.push({
           date: new Date(year, month, i),
-          dayShift: null,
-          nightShift: null,
+          dayShift1: null,
+          dayShift2: null,
+          nightShift1: null,
+          nightShift2: null,
           isCurrentMonth: true,
-        });
-      }
-
-      // Fill in the empty slots for the next month's days
-      const nextMonthDaysToFill = 42 - this.monthDays.length; // Fill a complete 6x7 grid
-      for (let i = 1; i <= nextMonthDaysToFill; i++) {
-        this.monthDays.push({
-          date: new Date(year, month + 1, i),
-          dayShift: null,
-          nightShift: null,
-          isCurrentMonth: false,
         });
       }
     },
@@ -182,6 +191,7 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow-x: visible;
 }
 .calendar-header {
   text-align: center;
@@ -197,8 +207,10 @@ export default {
 }
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(31, 1fr);
   flex: 1;
+  overflow-x: visible;
+  scrollbar-width: auto;
 }
 .day-column {
   display: flex;
