@@ -46,7 +46,6 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   image-rendering: pixelated;
-  scrollbar-width: none;
 }
 body::-webkit-scrollbar {
   display: none; /* Hide scrollbar on Chrome, Safari */
@@ -60,14 +59,17 @@ body::-webkit-scrollbar {
 }
 
 .main-content {
-  flex: 1;
+  display: flex;
   padding: 20px;
-  max-width: 800px;
+  max-width: 1600px;
+  height: auto;
   text-align: center;
   border-left: 4px solid transparent;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
-  overflow: visible;
+  overflow-x: visible;
+  overflow-y: hidden;
+  justify-content: center;
 }
 /* Remove left padding on smaller screens */
 @media (max-width: 900px) {
