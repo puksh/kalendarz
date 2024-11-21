@@ -1,8 +1,23 @@
 <template>
+  <button
+    :disabled="!madeChanges"
+    @click="showPasswordPrompt"
+    class="submit-button"
+  >
+    Submit
+  </button>
+  <section v-if="showPasswordModal" class="modal">
+    <div class="modal-content">
+      <p>Enter Password:</p>
+      <input type="password" v-model="password" />
+      <button @click="authorize">Submit</button>
+      <button @click="cancel">Cancel</button>
+    </div>
+  </section>
   <div class="calendar-container">
     <!-- People List Section -->
     <div class="people-list">
-      <h3>People</h3>
+      <h3>Załoga</h3>
       <div
         v-for="person in people"
         :key="person.id"
@@ -15,13 +30,13 @@
     </div>
 
     <!-- Calendar Section -->
-    <div class="calendar">
-      <div class="calendar-header">
-        <h2>{{ monthYear }}</h2>
-        <div class="days-header">
-          <div v-for="day in daysOfWeek" :key="day" class="day-header">
-            {{ day }}
-          </div>
+    <div class="calendar-header">
+      <h2>{{ monthYear }}</h2>
+    </div>
+    <section class="calendar">
+      <div class="days-header">
+        <div v-for="day in daysOfWeek" :key="day" class="day-header">
+          {{ day }}
         </div>
       </div>
       <div class="calendar-grid">
@@ -86,7 +101,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -99,10 +114,13 @@ export default {
   data() {
     return {
       monthDays: [],
+      daysOfWeek, // Assign imported daysOfWeek list to component data
       currentDate: new Date(), // Current date
       draggedPerson: null,
       people, // Assign imported people list to component data
-      daysOfWeek, // Assign imported daysOfWeek list to component data
+      madeChanges: false,
+      showPasswordModal: false,
+      password: "",
     };
   },
   computed: {
@@ -127,20 +145,51 @@ export default {
           switch (shiftType) {
             case "day1":
               day.dayShift1 = this.draggedPerson;
+              localStorage.setItem("dayShift1", JSON.stringify(day.dayShift1));
+              this.madeChanges = true;
               break;
             case "day2":
               day.dayShift2 = this.draggedPerson;
+              localStorage.setItem("dayShift2", JSON.stringify(day.dayShift2));
+              this.madeChanges = true;
               break;
             case "night1":
               day.nightShift1 = this.draggedPerson;
+              localStorage.setItem(
+                "nightShift1",
+                JSON.stringify(day.nightShift1)
+              );
+              this.madeChanges = true;
               break;
             case "night2":
               day.nightShift2 = this.draggedPerson;
+              localStorage.setItem(
+                "nightShift2",
+                JSON.stringify(day.nightShift2)
+              );
+              this.madeChanges = true;
               break;
           }
           this.draggedPerson = null; // Clear the reference after dropping
         }
       }
+    },
+
+    getLatestCommit() {
+      const latestCommit = localStorage.getItem("latestCommit");
+      if (latestCommit) {
+        this.latestCommit = JSON.parse(latestCommit);
+      }
+    },
+
+    updateSchedule() {
+      let buttonUpdateSchedule = document.getElementById(
+        "buttonUpdateSchedule"
+      );
+
+      //TODO: Add logic to update schedule
+
+      buttonUpdateSchedule.classList.add("hidden");
     },
     generateMonthDays() {
       const year = this.currentDate.getFullYear();
@@ -162,6 +211,24 @@ export default {
         });
       }
     },
+    showPasswordPrompt() {
+      this.showPasswordModal = true;
+    },
+    authorize() {
+      if (this.password === "yourPassword") {
+        // Submit the changes
+        console.log("Changes submitted");
+        this.madeChanges = false;
+      } else {
+        alert("Incorrect password");
+      }
+      this.showPasswordModal = false;
+      this.password = "";
+    },
+    cancel() {
+      this.showPasswordModal = false;
+      this.password = "";
+    },
   },
   mounted() {
     this.generateMonthDays();
@@ -173,20 +240,34 @@ export default {
 .calendar-container {
   display: flex;
   height: 100vh;
+  overflow-x: visible;
+  height: auto;
+  max-width: 1600px;
 }
+/* Peaople Bar styles */
 .people-list {
   width: 200px;
   padding: 10px;
-  border-right: 1px solid #ddd;
-  background-color: #f9f9f9;
+  height: 430px;
+}
+.people-list h3 {
+  color: #fff;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
 }
 .person-item {
   padding: 10px;
-  background-color: #e0e0e0;
+  color: #fff;
+  background-color: #83d8ff;
+  border-radius: 25px;
   margin-bottom: 8px;
   cursor: grab;
   text-align: center;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
 }
+.person-item {
+  cursor: grabbing;
+}
+/* Calendar styles */
 .calendar {
   flex: 1;
   display: flex;
@@ -195,10 +276,21 @@ export default {
 }
 .calendar-header {
   text-align: center;
-  padding: 10px 0;
+  position: fixed;
+  top: 0;
+  left: 250px;
+  color: #fff;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+  margin: 0;
+  padding: 10px;
 }
+.current-month {
+  background-color: #e1f5fe; /* Highlight color for current month */
+}
+/* Calendar styles */
 .days-header {
   display: flex;
+  margin-top: 40px;
 }
 .day-header {
   flex: 1;
@@ -212,6 +304,8 @@ export default {
   overflow-x: visible;
   scrollbar-width: auto;
 }
+
+/* Day (24h cycle) styles */
 .day-column {
   display: flex;
   flex-direction: column;
@@ -220,52 +314,112 @@ export default {
   flex: 1;
   border: 1px solid #ddd;
   position: relative;
-  display: flex;
   flex-direction: column;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 5px;
   width: 120px;
-  background-color: #f5f5f5;
 }
 .day-date {
   font-weight: bold;
 }
+
+/* Shifts styles */
 .shift {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 .shift-slot {
-  flex: 1;
   border: 1px solid #ccc;
   margin-top: 4px;
-  position: relative;
 }
 .empty-slot {
   color: #494949;
   font-size: 0.8em;
-  text-align: center;
-  padding: 8px;
+  padding: 5px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
 }
+/* Assigned person styles */
 .assigned-person.day {
   padding: 5px;
   background-color: #3dc2ff;
-  text-align: center;
-  font-weight: bold;
+  font-weight: bolder;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.assigned-person.night {
+  padding: 5px;
+  background-color: #83d8ff;
+  font-weight: bolder;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
 }
 .shift-label {
   background-color: #e0e0e0;
   padding: 5px;
-  text-align: center;
 }
-.current-month {
-  background-color: #e1f5fe; /* Highlight color for current month */
-}
+/* Shift types colors */
 .day {
   background-color: #aaddf5;
 }
 .night {
   background-color: #83d8ff;
+}
+
+/* Button styles */
+.submit-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #3b1e54;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 24px;
+  transition: background-color 0.3s ease;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+}
+.submit-button:hover {
+  background-color: #6f4592;
+}
+/*disabled style*/
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 </style>
