@@ -15,20 +15,6 @@
     </div>
   </section>
   <div class="calendar-container">
-    <!-- People List Section -->
-    <div class="people-list">
-      <h3>Załoga</h3>
-      <div
-        v-for="person in people"
-        :key="person.id"
-        class="person-item"
-        draggable="true"
-        @dragstart="startDrag(person)"
-      >
-        {{ person.name }}
-      </div>
-    </div>
-
     <!-- Calendar Section -->
     <div class="calendar-header">
       <h2>{{ monthYear }}</h2>
@@ -103,6 +89,22 @@
       </div>
     </section>
   </div>
+
+  <section>
+    <!-- People List Section -->
+    <div class="people-list">
+      <h3>Załoga</h3>
+      <div
+        v-for="person in people"
+        :key="person.id"
+        class="person-item"
+        draggable="true"
+        @dragstart="startDrag(person)"
+      >
+        {{ person.name }}
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -240,13 +242,13 @@ export default {
 .calendar-container {
   display: flex;
   height: 100vh;
-  overflow-x: visible;
   height: auto;
   max-width: 1600px;
 }
 /* Peaople Bar styles */
 .people-list {
   width: 200px;
+  position: fixed;
   padding: 10px;
   height: 430px;
 }
