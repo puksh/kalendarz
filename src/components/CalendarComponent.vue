@@ -231,25 +231,27 @@ export default {
       this.password = "";
     },
     loadFromLocalStorage() {
-      const savedStates = localStorage.getItem(this.currentDate.toDateString());
-      try {
-        const parsedStates = JSON.parse(savedStates);
-        this.clickedStates = parsedStates
-          ? parsedStates
-          : {
-              dayShift1: null,
-              dayShift2: null,
-              nightShift1: null,
-              nightShift2: null,
-            };
-      } catch (error) {
-        console.warn("Failed to load from localStorage:", error);
-        this.clickedStates = {
-          dayShift1: null,
-          dayShift2: null,
-          nightShift1: null,
-          nightShift2: null,
-        };
+      const year = this.currentDate.getFullYear();
+      const month = this.currentDate.getMonth();
+      for (let i = 1; i <= 31; i++) {
+        const date = new Date(year, month, i);
+        const savedStates = localStorage.getItem(date.toDateString());
+        if (savedStates) {
+          try {
+            const parsedStates = JSON.parse(savedStates);
+            const day = this.monthDays.find(
+              (day) => day.date.toDateString() === date.toDateString()
+            );
+            if (day) {
+              day.dayShift1 = parsedStates.dayShift1;
+              day.dayShift2 = parsedStates.dayShift2;
+              day.nightShift1 = parsedStates.nightShift1;
+              day.nightShift2 = parsedStates.nightShift2;
+            }
+          } catch (error) {
+            console.warn("Failed to load from localStorage:", error);
+          }
+        }
       }
     },
   },
