@@ -20,11 +20,6 @@
       <h2>{{ monthYear }}</h2>
     </div>
     <section class="calendar">
-      <div class="days-header">
-        <div v-for="day in daysOfWeek" :key="day" class="day-header">
-          {{ day }}
-        </div>
-      </div>
       <div class="calendar-grid">
         <div
           v-for="(day, index) in monthDays"
@@ -33,55 +28,60 @@
           @dragover.prevent
           @drop="handleDrop(day.date, 'day')"
         >
-          <div
-            class="day-cell"
-            :class="{ 'current-month': day.isCurrentMonth }"
-          >
-            <div class="day-date">{{ day.date.getDate() }}</div>
+          <div class="days-header">
             <div
-              class="shift"
-              @drop="handleDrop(day.date, 'day')"
-              @dragover.prevent
+              class="day-cell"
+              :class="{ 'current-month': day.isCurrentMonth }"
             >
-              <div
-                class="shift-slot"
-                @dragover.prevent
-                @drop="handleDrop(day.date, 'day1')"
-              >
-                <div class="assigned-person day" v-if="day.dayShift1">
-                  {{ day.dayShift1.name }}
-                </div>
-                <div class="empty-slot day" v-else>D</div>
+              <div class="day-header">
+                {{ daysOfWeek[day.date.getDay()] }}
               </div>
               <div
-                class="shift-slot"
+                class="shift"
+                @drop="handleDrop(day.date, 'day')"
                 @dragover.prevent
-                @drop="handleDrop(day.date, 'day2')"
               >
-                <div class="assigned-person day" v-if="day.dayShift2">
-                  {{ day.dayShift2.name }}
+                <div class="day-date">{{ day.date.getDate() }}</div>
+                <div
+                  class="shift-slot"
+                  @dragover.prevent
+                  @drop="handleDrop(day.date, 'day1')"
+                >
+                  <div class="assigned-person day" v-if="day.dayShift1">
+                    {{ day.dayShift1.name }}
+                  </div>
+                  <div class="empty-slot day" v-else>D</div>
                 </div>
-                <div class="empty-slot day" v-else>D</div>
-              </div>
-              <div
-                class="shift-slot"
-                @dragover.prevent
-                @drop="handleDrop(day.date, 'night1')"
-              >
-                <div class="assigned-person night" v-if="day.nightShift1">
-                  {{ day.nightShift1.name }}
+                <div
+                  class="shift-slot"
+                  @dragover.prevent
+                  @drop="handleDrop(day.date, 'day2')"
+                >
+                  <div class="assigned-person day" v-if="day.dayShift2">
+                    {{ day.dayShift2.name }}
+                  </div>
+                  <div class="empty-slot day" v-else>D</div>
                 </div>
-                <div class="empty-slot night" v-else>N</div>
-              </div>
-              <div
-                class="shift-slot"
-                @dragover.prevent
-                @drop="handleDrop(day.date, 'night2')"
-              >
-                <div class="assigned-person night" v-if="day.nightShift2">
-                  {{ day.nightShift2.name }}
+                <div
+                  class="shift-slot"
+                  @dragover.prevent
+                  @drop="handleDrop(day.date, 'night1')"
+                >
+                  <div class="assigned-person night" v-if="day.nightShift1">
+                    {{ day.nightShift1.name }}
+                  </div>
+                  <div class="empty-slot night" v-else>N</div>
                 </div>
-                <div class="empty-slot night" v-else>N</div>
+                <div
+                  class="shift-slot"
+                  @dragover.prevent
+                  @drop="handleDrop(day.date, 'night2')"
+                >
+                  <div class="assigned-person night" v-if="day.nightShift2">
+                    {{ day.nightShift2.name }}
+                  </div>
+                  <div class="empty-slot night" v-else>N</div>
+                </div>
               </div>
             </div>
           </div>
@@ -138,40 +138,39 @@ export default {
       this.draggedPerson = person;
     },
     handleDrop(date, shiftType) {
-      // Assign the dragged person to the selected date's shift
       if (this.draggedPerson) {
         const day = this.monthDays.find(
           (day) => day.date.toDateString() === date.toDateString()
         );
         if (day) {
+          // Assign the dragged person to the selected date's shift
           switch (shiftType) {
             case "day1":
               day.dayShift1 = this.draggedPerson;
-              localStorage.setItem("dayShift1", JSON.stringify(day.dayShift1));
-              this.madeChanges = true;
               break;
             case "day2":
               day.dayShift2 = this.draggedPerson;
-              localStorage.setItem("dayShift2", JSON.stringify(day.dayShift2));
-              this.madeChanges = true;
               break;
             case "night1":
               day.nightShift1 = this.draggedPerson;
-              localStorage.setItem(
-                "nightShift1",
-                JSON.stringify(day.nightShift1)
-              );
-              this.madeChanges = true;
               break;
             case "night2":
               day.nightShift2 = this.draggedPerson;
-              localStorage.setItem(
-                "nightShift2",
-                JSON.stringify(day.nightShift2)
-              );
-              this.madeChanges = true;
               break;
           }
+
+          // Save the updated day object in localStorage
+          localStorage.setItem(
+            date.toDateString(),
+            JSON.stringify({
+              dayShift1: day.dayShift1,
+              dayShift2: day.dayShift2,
+              nightShift1: day.nightShift1,
+              nightShift2: day.nightShift2,
+            })
+          );
+
+          this.madeChanges = true;
           this.draggedPerson = null; // Clear the reference after dropping
         }
       }
@@ -231,9 +230,32 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
     },
+    loadFromLocalStorage() {
+      const savedStates = localStorage.getItem(this.currentDate.toDateString());
+      try {
+        const parsedStates = JSON.parse(savedStates);
+        this.clickedStates = parsedStates
+          ? parsedStates
+          : {
+              dayShift1: null,
+              dayShift2: null,
+              nightShift1: null,
+              nightShift2: null,
+            };
+      } catch (error) {
+        console.warn("Failed to load from localStorage:", error);
+        this.clickedStates = {
+          dayShift1: null,
+          dayShift2: null,
+          nightShift1: null,
+          nightShift2: null,
+        };
+      }
+    },
   },
-  mounted() {
+  async mounted() {
     this.generateMonthDays();
+    this.loadFromLocalStorage();
   },
 };
 </script>
@@ -247,6 +269,7 @@ export default {
 }
 /* Peaople Bar styles */
 .people-list {
+  margin-top: 20px;
   width: 200px;
   position: fixed;
   padding: 10px;
@@ -257,7 +280,7 @@ export default {
   filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
 }
 .person-item {
-  padding: 10px;
+  padding: 0.3rem;
   color: #fff;
   background-color: #83d8ff;
   border-radius: 25px;
