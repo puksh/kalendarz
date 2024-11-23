@@ -59,6 +59,5 @@ body::-webkit-scrollbar {
   text-align: center;
   overflow-x: visible !important;
   overflow-y: hidden;
-  padding-bottom: 60px; /* Offset for bottom-positioned sidebar */
 }
 </style>
