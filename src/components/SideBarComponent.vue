@@ -27,27 +27,28 @@ export default {
 .sidebar {
   position: fixed;
   left: 0;
-  top: 0;
   bottom: 0;
-  width: 88px;
+  width: 100%;
   background-color: #3b1e54;
   padding: 10px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  justify-content: space-around;
   z-index: 10; /* Ensures it stays on top of other content */
 }
 
 .sidebar-button {
   background-color: #eeeeee;
   color: #333;
-  height: 66px;
-  padding: 10px;
-  font-size: 12px;
-  border-radius: 8px;
-  cursor: pointer;
+  height: 39px;
   border-color: #3b1e54;
   border-width: 1px;
+  flex: 1 1 33.33%; /* Make all buttons one-third of the width */
+  font-size: 14px;
+  padding: 0px;
+  margin: 0 auto;
+  cursor: pointer;
+  border-radius: 8px;
   transition: all 0.3s ease;
   font-weight: bold;
 }
@@ -65,31 +66,5 @@ export default {
   border-color: #562b7a;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   transform: scale(0.95) ease;
-}
-/* Mobile styling: Move sidebar to the bottom */
-@media (max-width: 900px) {
-  .sidebar {
-    background-color: transparent;
-    position: fixed;
-    left: 0;
-    bottom: 33px;
-    top: auto; /* Remove top alignment */
-    width: 100%;
-    height: 33px;
-    flex-direction: row;
-    justify-content: space-around;
-    z-index: 10;
-    box-sizing: border-box; /* Include scrollbar in width calculation */
-  }
-
-  .sidebar-button {
-    height: 39px;
-    border-color: #3b1e54;
-    border-width: 1px;
-    flex: 1 1 33.33%; /* Make all buttons one-third of the width */
-    font-size: 14px;
-    padding: 0px;
-    margin: 0 auto;
-  }
 }
 </style>
