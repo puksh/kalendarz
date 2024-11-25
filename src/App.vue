@@ -50,9 +50,6 @@ export default {
 body::-webkit-scrollbar {
   display: none; /* Hide scrollbar on Chrome, Safari */
 }
-.app-container {
-}
-
 .main-content {
   padding: 20px;
   max-width: 1600px;
