@@ -6,6 +6,13 @@
   >
     Submit
   </button>
+  <button
+    :disabled="!outdatedChanges"
+    @click="showPasswordPrompt"
+    class="submit-button"
+  >
+    Submit
+  </button>
   <section v-if="showPasswordModal" class="modal">
     <div class="modal-content">
       <p>Enter Password:</p>
@@ -110,13 +117,15 @@
 <script>
 import { people } from "@/data/people.js";
 import { daysOfWeek } from "@/data/daysOfWeek.js";
-import { md5 } from "crypto-js";
+import { MD5 } from "crypto-js";
+import { addNotification } from "./NotificationMessage.vue";
 
 export default {
   name: "CalendarComponent",
   data() {
     return {
       monthDays: [],
+      localData: {},
       daysOfWeek, // Assign imported daysOfWeek list to component data
       currentDate: new Date(), // Current date
       draggedPerson: null,
@@ -124,6 +133,7 @@ export default {
       madeChanges: false,
       showPasswordModal: false,
       password: "",
+      githubToken: import.meta.env.VITE_TOKEN,
     };
   },
   computed: {
@@ -144,7 +154,6 @@ export default {
           (day) => day.date.toDateString() === date.toDateString()
         );
         if (day) {
-          // Assign the dragged person to the selected date's shift
           switch (shiftType) {
             case "day1":
               day.dayShift1 = this.draggedPerson;
@@ -160,28 +169,36 @@ export default {
               break;
           }
 
-          // Save the updated day object in localStorage
+          // Save the updated day object in localStorage and in-memory data
+          const updatedData = {
+            dayShift1: day.dayShift1,
+            dayShift2: day.dayShift2,
+            nightShift1: day.nightShift1,
+            nightShift2: day.nightShift2,
+          };
+          this.localData[date.toDateString()] = updatedData;
           localStorage.setItem(
             date.toDateString(),
-            JSON.stringify({
-              dayShift1: day.dayShift1,
-              dayShift2: day.dayShift2,
-              nightShift1: day.nightShift1,
-              nightShift2: day.nightShift2,
-            })
+            JSON.stringify(updatedData)
           );
 
+          addNotification("Shift updated locally", "green");
           this.madeChanges = true;
-          this.draggedPerson = null; // Clear the reference after dropping
+          this.draggedPerson = null;
         }
       }
     },
-
-    getLatestCommit() {
-      const latestCommit = localStorage.getItem("latestCommit");
-      if (latestCommit) {
-        this.latestCommit = JSON.parse(latestCommit);
-      }
+    saveLocalDataToFile() {
+      const blob = new Blob([JSON.stringify(this.localData, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "shift-data.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      addNotification("Data saved as file", "green");
     },
 
     generateMonthDays() {
@@ -207,24 +224,115 @@ export default {
     showPasswordPrompt() {
       this.showPasswordModal = true;
     },
-    authorize() {
-      const hashedPassword = "1c45523173392cf237e95f937fe72b92"; // Example hash for "password"
-      const enteredPasswordHash = md5(this.password); // Assuming md5 is a function to hash the password
+    async authorize() {
+      const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
+      const githubToken = import.meta.env.VITE_TOKEN;
+      const repoOwner = import.meta.env.VITE_REPO_OWNER;
+      const repoName = import.meta.env.VITE_REPO_NAME;
+      const branch = import.meta.env.VITE_BRANCH;
+      const filePath = import.meta.env.VITE_FILE_PATH;
+      const enteredPasswordHash = MD5(this.password).toString();
 
       if (enteredPasswordHash === hashedPassword) {
-        // Submit the changes
-        console.log("Changes submitted");
+        addNotification("Authorized", "green");
         this.madeChanges = false;
+
+        // Prepare data for committing
+        const fileContent = btoa(JSON.stringify(this.localData, null, 2));
+
+        try {
+          // Fetch file SHA if it exists
+          const shaResponse = await fetch(
+            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+            {
+              headers: { Authorization: `token ${githubToken}` },
+            }
+          );
+          const shaData = await shaResponse.json();
+          const fileSha = shaData.sha || null;
+
+          // Commit the updated data
+          const response = await fetch(
+            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `token ${githubToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                message: "Update shift data",
+                content: fileContent,
+                sha: fileSha,
+                branch,
+              }),
+            }
+          );
+
+          if (response.ok) {
+            addNotification("Data committed to GitHub", "green");
+          } else {
+            throw new Error("GitHub commit failed");
+          }
+        } catch (error) {
+          console.error("GitHub Commit Error:", error);
+          addNotification("Failed to commit to GitHub", "red");
+        }
       } else {
-        alert("Incorrect password");
+        addNotification("Incorrect Password", "red");
       }
+
       this.showPasswordModal = false;
       this.password = "";
     },
+    async fetchGitHubData() {
+      const githubToken = import.meta.env.VITE_TOKEN;
+      const repoOwner = import.meta.env.VITE_REPO_OWNER;
+      const repoName = import.meta.env.VITE_REPO_NAME;
+      const filePath = import.meta.env.VITE_FILE_PATH;
+
+      try {
+        const response = await fetch(
+          `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+          {
+            headers: { Authorization: `token ${githubToken}` },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data from GitHub");
+        }
+
+        const fileData = await response.json();
+        const content = JSON.parse(atob(fileData.content)); // Decode Base64 content
+        return content;
+      } catch (error) {
+        console.error("Error fetching GitHub data:", error);
+        addNotification("Failed to fetch data from GitHub", "red");
+        return null;
+      }
+    },
+    async checkDataSync() {
+      const remoteData = await this.fetchGitHubData();
+
+      if (!remoteData) {
+        return; // Exit if fetching failed
+      }
+
+      if (JSON.stringify(remoteData) === JSON.stringify(this.localData)) {
+        addNotification("Data is in sync with GitHub", "green");
+      } else {
+        addNotification("Local data is out of sync with GitHub", "red");
+        console.log("Remote Data:", remoteData);
+        console.log("Local Data:", this.localData);
+      }
+    },
+
     cancel() {
       this.showPasswordModal = false;
       this.password = "";
     },
+
     loadFromLocalStorage() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
@@ -244,7 +352,10 @@ export default {
               day.nightShift2 = parsedStates.nightShift2;
             }
           } catch (error) {
-            console.warn("Failed to load from localStorage:", error);
+            addNotification(
+              "Failed to load Collection from your browser" + error,
+              "red"
+            );
           }
         }
       }
@@ -253,6 +364,8 @@ export default {
   async mounted() {
     this.generateMonthDays();
     this.loadFromLocalStorage();
+    this.checkDataSync();
+    setInterval(this.checkDataSync, 60000); // Check sync every 60 seconds
   },
 };
 </script>
@@ -307,7 +420,7 @@ export default {
   padding: 10px;
 }
 .current-month {
-  background-color: #e1f5fe; /* Highlight color for current month */
+  background-color: #e1f5fe;
 }
 /* Calendar styles */
 .days-header {
