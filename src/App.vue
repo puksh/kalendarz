@@ -5,6 +5,7 @@
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
       <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
+      <NotificationMessage />
     </main>
   </div>
 </template>
@@ -25,6 +26,9 @@ export default {
     ),
     SettingsComponent: defineAsyncComponent(() =>
       import("./components/SettingsComponent.vue")
+    ),
+    NotificationMessage: defineAsyncComponent(() =>
+      import("./components/NotificationMessage.vue")
     ),
   },
   data() {
