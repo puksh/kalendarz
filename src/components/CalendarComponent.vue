@@ -110,6 +110,7 @@
 <script>
 import { people } from "@/data/people.js";
 import { daysOfWeek } from "@/data/daysOfWeek.js";
+import { md5 } from "crypto-js";
 
 export default {
   name: "CalendarComponent",
@@ -183,15 +184,6 @@ export default {
       }
     },
 
-    updateSchedule() {
-      let buttonUpdateSchedule = document.getElementById(
-        "buttonUpdateSchedule"
-      );
-
-      //TODO: Add logic to update schedule
-
-      buttonUpdateSchedule.classList.add("hidden");
-    },
     generateMonthDays() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
@@ -216,7 +208,10 @@ export default {
       this.showPasswordModal = true;
     },
     authorize() {
-      if (this.password === "yourPassword") {
+      const hashedPassword = "1c45523173392cf237e95f937fe72b92"; // Example hash for "password"
+      const enteredPasswordHash = md5(this.password); // Assuming md5 is a function to hash the password
+
+      if (enteredPasswordHash === hashedPassword) {
         // Submit the changes
         console.log("Changes submitted");
         this.madeChanges = false;
@@ -408,7 +403,7 @@ export default {
 /* Button styles */
 .submit-button {
   position: fixed;
-  bottom: 20px;
+  bottom: 100px;
   right: 20px;
   background-color: #3b1e54;
   color: #fff;
