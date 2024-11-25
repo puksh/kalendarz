@@ -1,0 +1,11 @@
+{
+  "Fri Nov 01 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": null,
+    "nightShift2": {
+      "id": 1,
+      "name": "Milena"
+    }
+  }
+}
