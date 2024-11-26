@@ -7,5 +7,17 @@
       "id": 1,
       "name": "Milena"
     }
+  },
+  "Sun Nov 03 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": {
+      "id": 3,
+      "name": "Aleksandra"
+    },
+    "nightShift2": {
+      "id": 5,
+      "name": "Joanna"
+    }
   }
 }
