@@ -16,9 +16,6 @@
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
-    <div class="calendar-header">
-      <h2>{{ monthYear }}</h2>
-    </div>
     <section class="calendar">
       <div class="calendar-grid">
         <div
@@ -48,7 +45,7 @@
                   @drop="handleDrop(day.date, 'day1')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift1">
-                    {{ day.dayShift1.name }}
+                    {{ getPersonName(day.dayShift1) }}
                   </div>
                   <div class="empty-slot day" v-else>D</div>
                 </div>
@@ -58,7 +55,7 @@
                   @drop="handleDrop(day.date, 'day2')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift2">
-                    {{ day.dayShift2.name }}
+                    {{ getPersonName(day.dayShift2) }}
                   </div>
                   <div class="empty-slot day" v-else>D</div>
                 </div>
@@ -68,7 +65,7 @@
                   @drop="handleDrop(day.date, 'night1')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift1">
-                    {{ day.nightShift1.name }}
+                    {{ getPersonName(day.nightShift1) }}
                   </div>
                   <div class="empty-slot night" v-else>N</div>
                 </div>
@@ -78,7 +75,7 @@
                   @drop="handleDrop(day.date, 'night2')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift2">
-                    {{ day.nightShift2.name }}
+                    {{ getPersonName(day.nightShift2) }}
                   </div>
                   <div class="empty-slot night" v-else>N</div>
                 </div>
@@ -89,6 +86,9 @@
       </div>
     </section>
   </div>
+  <button @click="changeMonth(-1)">Previous Month</button>
+  <span>{{ monthYear }}</span>
+  <button @click="changeMonth(1)">Next Month</button>
 
   <section>
     <!-- People List Section -->
@@ -117,6 +117,8 @@ export default {
   name: "CalendarComponent",
   data() {
     return {
+      selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
+      selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
       daysOfWeek, // Assign imported daysOfWeek list to component data
@@ -131,10 +133,13 @@ export default {
   },
   computed: {
     monthYear() {
-      return this.currentDate.toLocaleString("default", {
-        month: "long",
-        year: "numeric",
-      });
+      return new Date(this.selectedYear, this.selectedMonth).toLocaleString(
+        "default",
+        {
+          month: "long",
+          year: "numeric",
+        }
+      );
     },
   },
   methods: {
@@ -149,16 +154,16 @@ export default {
         if (day) {
           switch (shiftType) {
             case "day1":
-              day.dayShift1 = this.draggedPerson;
+              day.dayShift1 = this.draggedPerson.id; // Save ID
               break;
             case "day2":
-              day.dayShift2 = this.draggedPerson;
+              day.dayShift2 = this.draggedPerson.id; // Save ID
               break;
             case "night1":
-              day.nightShift1 = this.draggedPerson;
+              day.nightShift1 = this.draggedPerson.id; // Save ID
               break;
             case "night2":
-              day.nightShift2 = this.draggedPerson;
+              day.nightShift2 = this.draggedPerson.id; // Save ID
               break;
           }
 
@@ -181,9 +186,14 @@ export default {
         }
       }
     },
+    async getPersonName(shiftId) {
+      const person = people.find((person) => person.id === shiftId);
+      //console.log(person);
+      return person ? person.name : ""; //Show blank if no shift is detected
+    },
     generateMonthDays() {
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth();
+      const year = this.selectedYear;
+      const month = this.selectedMonth;
       const lastDay = new Date(year, month + 1, 0);
       const daysInMonth = lastDay.getDate();
 
@@ -200,6 +210,22 @@ export default {
           isCurrentMonth: true,
         });
       }
+    },
+    changeMonth(newMonth) {
+      if (this.madeChanges) {
+        const confirmSwitch = confirm(
+          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded."
+        );
+        if (!confirmSwitch) {
+          return; // Cancel the month change
+        }
+      }
+
+      // Update the selected month and year
+      this.selectedMonth = this.selectedMonth + newMonth;
+      this.generateMonthDays(); // Regenerate the days for the new month
+      this.loadFromLocalStorage(); // Load the data for the new month
+      this.checkDataSync(); // Check if data is in sync with GitHub
     },
     showPasswordPrompt() {
       this.showPasswordModal = true;
@@ -321,7 +347,7 @@ export default {
         addNotification("Local data synced with GitHub", "blue");
         this.madeChanges = false; // Reset the change flag
       } else {
-        addNotification("Data is already up-to-date", "green");
+        console.log("Data is already up-to-date");
       }
     },
     async encodeLargeData(data) {
@@ -370,14 +396,15 @@ export default {
               (day) => day.date.toDateString() === date.toDateString()
             );
             if (day) {
-              day.dayShift1 = parsedStates.dayShift1;
-              day.dayShift2 = parsedStates.dayShift2;
-              day.nightShift1 = parsedStates.nightShift1;
-              day.nightShift2 = parsedStates.nightShift2;
+              // Get the names corresponding to the IDs
+              day.dayShift1 = this.getPersonName(parsedStates.dayShift1);
+              day.dayShift2 = this.getPersonName(parsedStates.dayShift2);
+              day.nightShift1 = this.getPersonName(parsedStates.nightShift1);
+              day.nightShift2 = this.getPersonName(parsedStates.nightShift2);
             }
           } catch (error) {
             addNotification(
-              "Failed to load Collection from your browser" + error,
+              "Failed to load Collection from your browser: " + error,
               "red"
             );
           }
