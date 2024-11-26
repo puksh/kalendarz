@@ -7,5 +7,65 @@
       "id": 1,
       "name": "Milena"
     }
+  },
+  "Sun Nov 03 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": {
+      "id": 3,
+      "name": "Aleksandra"
+    },
+    "nightShift2": {
+      "id": 5,
+      "name": "Joanna"
+    }
+  },
+  "Tue Nov 05 2024": {
+    "dayShift1": {
+      "id": 7,
+      "name": "Marcin"
+    },
+    "dayShift2": {
+      "id": 1,
+      "name": "Milena"
+    },
+    "nightShift1": {
+      "id": 2,
+      "name": "Mikołaj"
+    },
+    "nightShift2": {
+      "id": 3,
+      "name": "Aleksandra"
+    }
+  },
+  "Sat Nov 02 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": {
+      "id": 4,
+      "name": "Łukasz"
+    },
+    "nightShift2": null
+  },
+  "Mon Nov 04 2024": {
+    "dayShift1": null,
+    "dayShift2": {
+      "id": 6,
+      "name": "Natalia"
+    },
+    "nightShift1": null,
+    "nightShift2": null
+  },
+  "Wed Nov 06 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": {
+      "id": 3,
+      "name": "Aleksandra"
+    },
+    "nightShift2": {
+      "id": 3,
+      "name": "Aleksandra"
+    }
   }
 }
