@@ -218,45 +218,48 @@ export default {
         this.madeChanges = false;
 
         // Prepare data for committing
-        const fileContent = btoa(JSON.stringify(this.localData, null, 2));
+        const encodedContent = await this.encodeLargeData(this.localData);
+        if (encodedContent) {
+          try {
+            // Fetch file SHA if it exists
+            const shaResponse = await fetch(
+              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+              {
+                headers: { Authorization: `token ${githubToken}` },
+              }
+            );
+            const shaData = await shaResponse.json();
+            const fileSha = shaData.sha || null; // If no file exists, sha will be null
 
-        try {
-          // Fetch file SHA if it exists
-          const shaResponse = await fetch(
-            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-            {
-              headers: { Authorization: `token ${githubToken}` },
+            // Commit the updated data
+            const response = await fetch(
+              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+              {
+                method: "PUT",
+                headers: {
+                  Authorization: `token ${githubToken}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  message: "Update shift data",
+                  content: encodedContent,
+                  sha: fileSha,
+                  branch,
+                }),
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to commit data to GitHub");
             }
-          );
-          const shaData = await shaResponse.json();
-          const fileSha = shaData.sha || null;
-
-          // Commit the updated data
-          const response = await fetch(
-            `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `token ${githubToken}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                message: "Update shift data",
-                content: fileContent,
-                sha: fileSha,
-                branch,
-              }),
-            }
-          );
-
-          if (response.ok) {
-            addNotification("Data committed to GitHub", "green");
-          } else {
-            throw new Error("GitHub commit failed");
+            addNotification("Data successfully committed to GitHub", "green");
+          } catch (error) {
+            console.error("Error during GitHub commit:", error);
+            addNotification(
+              error.message || "Failed to commit data to GitHub",
+              "red"
+            );
           }
-        } catch (error) {
-          console.error("GitHub Commit Error:", error);
-          addNotification("Failed to commit to GitHub", "red");
         }
       } else {
         addNotification("Incorrect Password", "red");
@@ -306,19 +309,49 @@ export default {
       }
 
       if (JSON.stringify(remoteData) !== JSON.stringify(this.localData)) {
-        // Update localData and save to localStorage
-        this.localData = remoteData;
+        // Clear localStorage and update with remoteData
+        localStorage.clear(); // Remove previous data
+        this.localData = {}; // Clear localData to reset UI
+
         for (const [date, shifts] of Object.entries(remoteData)) {
-          localStorage.setItem(date, JSON.stringify(shifts));
+          this.localData[date] = shifts; // Update reactive localData
+          localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
 
-        addNotification("Local data synced", "blue");
+        addNotification("Local data synced with GitHub", "blue");
         this.madeChanges = false; // Reset the change flag
       } else {
-        addNotification("Data is up-to-date", "green");
+        addNotification("Data is already up-to-date", "green");
       }
     },
+    async encodeLargeData(data) {
+      try {
+        // Convert data to a JSON string
+        const jsonString = JSON.stringify(data, null, 2);
 
+        // Create a Blob from the JSON string
+        const blob = new Blob([jsonString], { type: "application/json" });
+
+        // Use FileReader to convert Blob to base64
+        const reader = new FileReader();
+
+        return new Promise((resolve, reject) => {
+          reader.onloadend = () => {
+            // Resolve the base64 encoded string
+            resolve(reader.result.split(",")[1]); // Remove the "data:..." prefix
+          };
+
+          reader.onerror = () => reject(new Error("Failed to read the Blob"));
+
+          // Read the Blob as data URL (base64)
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error("Error encoding large data:", error);
+        addNotification("Error encoding data", "red");
+        return null;
+      }
+    },
     cancel() {
       this.showPasswordModal = false;
       this.password = "";
