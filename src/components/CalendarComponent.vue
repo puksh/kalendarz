@@ -45,7 +45,7 @@
                   @drop="handleDrop(day.date, 'day1')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift1">
-                    {{ getPersonName(day.dayShift1) }}
+                    {{ day.dayShift1Name }}
                   </div>
                   <div class="empty-slot day" v-else>D</div>
                 </div>
@@ -55,7 +55,7 @@
                   @drop="handleDrop(day.date, 'day2')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift2">
-                    {{ getPersonName(day.dayShift2) }}
+                    {{ day.dayShift2Name }}
                   </div>
                   <div class="empty-slot day" v-else>D</div>
                 </div>
@@ -65,7 +65,7 @@
                   @drop="handleDrop(day.date, 'night1')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift1">
-                    {{ getPersonName(day.nightShift1) }}
+                    {{ day.nightShift1Name }}
                   </div>
                   <div class="empty-slot night" v-else>N</div>
                 </div>
@@ -75,7 +75,7 @@
                   @drop="handleDrop(day.date, 'night2')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift2">
-                    {{ getPersonName(day.nightShift2) }}
+                    {{ day.nightShift2Name }}
                   </div>
                   <div class="empty-slot night" v-else>N</div>
                 </div>
@@ -108,7 +108,6 @@
 </template>
 
 <script>
-import { people } from "@/data/people.js";
 import { daysOfWeek } from "@/data/daysOfWeek.js";
 import { MD5 } from "crypto-js";
 import { addNotification } from "./NotificationMessage.vue";
@@ -121,10 +120,18 @@ export default {
       selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
-      daysOfWeek, // Assign imported daysOfWeek list to component data
-      currentDate: new Date(), // Current date
+      daysOfWeek,
+      currentDate: new Date(),
       draggedPerson: null,
-      people, // Assign imported people list to component data
+      people: [
+        { id: 1, name: "Milena" },
+        { id: 2, name: "Mikołaj" },
+        { id: 3, name: "Aleksandra" },
+        { id: 4, name: "Łukasz" },
+        { id: 5, name: "Joanna" },
+        { id: 6, name: "Natalia" },
+        { id: 7, name: "Marcin" },
+      ],
       madeChanges: false,
       showPasswordModal: false,
       password: "",
@@ -155,15 +162,19 @@ export default {
           switch (shiftType) {
             case "day1":
               day.dayShift1 = this.draggedPerson.id; // Save ID
+              day.dayShift1Name = this.draggedPerson.name; // Set name
               break;
             case "day2":
               day.dayShift2 = this.draggedPerson.id; // Save ID
+              day.dayShift2Name = this.draggedPerson.name; // Set name
               break;
             case "night1":
               day.nightShift1 = this.draggedPerson.id; // Save ID
+              day.nightShift1Name = this.draggedPerson.name; // Set name
               break;
             case "night2":
               day.nightShift2 = this.draggedPerson.id; // Save ID
+              day.nightShift2Name = this.draggedPerson.name; // Set name
               break;
           }
 
@@ -186,27 +197,27 @@ export default {
         }
       }
     },
-    async getPersonName(shiftId) {
-      const person = people.find((person) => person.id === shiftId);
-      //console.log(person);
-      return person ? person.name : ""; //Show blank if no shift is detected
+    resolvePersonName(id) {
+      const person = this.people.find((person) => person.id === id);
+      return person ? person.name : "Not assigned";
     },
     generateMonthDays() {
       const year = this.selectedYear;
       const month = this.selectedMonth;
-      const lastDay = new Date(year, month + 1, 0);
-      const daysInMonth = lastDay.getDate();
+      const lastDay = new Date(year, month + 1, 0).getDate();
 
       this.monthDays = [];
-
-      // Add the current month's days
-      for (let i = 1; i <= daysInMonth; i++) {
+      for (let i = 1; i <= lastDay; i++) {
         this.monthDays.push({
           date: new Date(year, month, i),
           dayShift1: null,
           dayShift2: null,
           nightShift1: null,
           nightShift2: null,
+          dayShift1Name: "Not assigned",
+          dayShift2Name: "Not assigned",
+          nightShift1Name: "Not assigned",
+          nightShift2Name: "Not assigned",
           isCurrentMonth: true,
         });
       }
@@ -386,27 +397,32 @@ export default {
     loadFromLocalStorage() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
+
       for (let i = 1; i <= 31; i++) {
-        const date = new Date(year, month, i);
-        const savedStates = localStorage.getItem(date.toDateString());
+        const date = new Date(year, month, i).toDateString();
+        const savedStates = localStorage.getItem(date);
+
         if (savedStates) {
           try {
             const parsedStates = JSON.parse(savedStates);
             const day = this.monthDays.find(
-              (day) => day.date.toDateString() === date.toDateString()
+              (day) => day.date.toDateString() === date
             );
+
             if (day) {
-              // Get the names corresponding to the IDs
-              day.dayShift1 = this.getPersonName(parsedStates.dayShift1);
-              day.dayShift2 = this.getPersonName(parsedStates.dayShift2);
-              day.nightShift1 = this.getPersonName(parsedStates.nightShift1);
-              day.nightShift2 = this.getPersonName(parsedStates.nightShift2);
+              day.dayShift1 = parsedStates.dayShift1;
+              day.dayShift2 = parsedStates.dayShift2;
+              day.nightShift1 = parsedStates.nightShift1;
+              day.nightShift2 = parsedStates.nightShift2;
+
+              // Resolve names
+              day.dayShift1Name = this.resolvePersonName(day.dayShift1);
+              day.dayShift2Name = this.resolvePersonName(day.dayShift2);
+              day.nightShift1Name = this.resolvePersonName(day.nightShift1);
+              day.nightShift2Name = this.resolvePersonName(day.nightShift2);
             }
           } catch (error) {
-            addNotification(
-              "Failed to load Collection from your browser: " + error,
-              "red"
-            );
+            addNotification("Failed to load local data: " + error, "red");
           }
         }
       }
@@ -416,7 +432,6 @@ export default {
     this.generateMonthDays();
     this.loadFromLocalStorage();
     this.checkDataSync();
-    setInterval(this.checkDataSync, 60000); // Check sync every 60 seconds
   },
 };
 </script>
