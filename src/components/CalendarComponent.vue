@@ -6,13 +6,6 @@
   >
     Submit
   </button>
-  <button
-    :disabled="!outdatedChanges"
-    @click="showPasswordPrompt"
-    class="submit-button"
-  >
-    Submit
-  </button>
   <section v-if="showPasswordModal" class="modal">
     <div class="modal-content">
       <p>Enter Password:</p>
@@ -188,19 +181,6 @@ export default {
         }
       }
     },
-    saveLocalDataToFile() {
-      const blob = new Blob([JSON.stringify(this.localData, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "shift-data.json";
-      link.click();
-      URL.revokeObjectURL(url);
-      addNotification("Data saved as file", "green");
-    },
-
     generateMonthDays() {
       const year = this.currentDate.getFullYear();
       const month = this.currentDate.getMonth();
@@ -300,7 +280,12 @@ export default {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch data from GitHub");
+          if (response.status === 404) {
+            addNotification("File not found on GitHub", "yellow");
+          }
+          throw new Error(
+            `Failed to fetch data from GitHub: ${response.status}`
+          );
         }
 
         const fileData = await response.json();
@@ -312,6 +297,7 @@ export default {
         return null;
       }
     },
+
     async checkDataSync() {
       const remoteData = await this.fetchGitHubData();
 
@@ -319,12 +305,17 @@ export default {
         return; // Exit if fetching failed
       }
 
-      if (JSON.stringify(remoteData) === JSON.stringify(this.localData)) {
-        addNotification("Data is in sync with GitHub", "green");
+      if (JSON.stringify(remoteData) !== JSON.stringify(this.localData)) {
+        // Update localData and save to localStorage
+        this.localData = remoteData;
+        for (const [date, shifts] of Object.entries(remoteData)) {
+          localStorage.setItem(date, JSON.stringify(shifts));
+        }
+
+        addNotification("Local data synced", "blue");
+        this.madeChanges = false; // Reset the change flag
       } else {
-        addNotification("Local data is out of sync with GitHub", "red");
-        console.log("Remote Data:", remoteData);
-        console.log("Local Data:", this.localData);
+        addNotification("Data is up-to-date", "green");
       }
     },
 
