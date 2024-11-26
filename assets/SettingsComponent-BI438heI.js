@@ -1,1 +1,0 @@
-import{_ as e,o,c as s,a as n}from"./index-Dw1AAwqp.js";const a={name:"SettingsComponent",methods:{}},r={class:"about"};function c(p,t,i,_,d,m){return o(),s("div",r,t[0]||(t[0]=[n("h1",null,"Settings",-1)]))}const f=e(a,[["render",c]]);export{f as default};
