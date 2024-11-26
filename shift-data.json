@@ -1,71 +1,38 @@
 {
-  "Fri Nov 01 2024": {
-    "dayShift1": null,
-    "dayShift2": null,
-    "nightShift1": null,
-    "nightShift2": {
-      "id": 1,
-      "name": "Milena"
-    }
+  "Mon Nov 04 2024": {
+    "dayShift1": 2,
+    "dayShift2": 6,
+    "nightShift1": 4,
+    "nightShift2": 5
   },
   "Sun Nov 03 2024": {
     "dayShift1": null,
-    "dayShift2": null,
-    "nightShift1": {
-      "id": 3,
-      "name": "Aleksandra"
-    },
-    "nightShift2": {
-      "id": 5,
-      "name": "Joanna"
-    }
+    "dayShift2": 7,
+    "nightShift1": 1,
+    "nightShift2": 2
   },
   "Tue Nov 05 2024": {
-    "dayShift1": {
-      "id": 7,
-      "name": "Marcin"
-    },
-    "dayShift2": {
-      "id": 1,
-      "name": "Milena"
-    },
-    "nightShift1": {
-      "id": 2,
-      "name": "Mikołaj"
-    },
-    "nightShift2": {
-      "id": 3,
-      "name": "Aleksandra"
-    }
-  },
-  "Sat Nov 02 2024": {
-    "dayShift1": null,
-    "dayShift2": null,
-    "nightShift1": {
-      "id": 4,
-      "name": "Łukasz"
-    },
-    "nightShift2": null
-  },
-  "Mon Nov 04 2024": {
-    "dayShift1": null,
-    "dayShift2": {
-      "id": 6,
-      "name": "Natalia"
-    },
-    "nightShift1": null,
-    "nightShift2": null
+    "dayShift1": 6,
+    "dayShift2": 1,
+    "nightShift1": 2,
+    "nightShift2": 4
   },
   "Wed Nov 06 2024": {
+    "dayShift1": 1,
+    "dayShift2": 2,
+    "nightShift1": 4,
+    "nightShift2": 7
+  },
+  "Thu Nov 07 2024": {
+    "dayShift1": 2,
+    "dayShift2": 2,
+    "nightShift1": 3,
+    "nightShift2": 6
+  },
+  "Thu Oct 03 2024": {
     "dayShift1": null,
     "dayShift2": null,
-    "nightShift1": {
-      "id": 3,
-      "name": "Aleksandra"
-    },
-    "nightShift2": {
-      "id": 3,
-      "name": "Aleksandra"
-    }
+    "nightShift1": 2,
+    "nightShift2": null
   }
 }
