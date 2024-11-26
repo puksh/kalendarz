@@ -28,5 +28,11 @@
     "dayShift2": 2,
     "nightShift1": 3,
     "nightShift2": 6
+  },
+  "Thu Oct 03 2024": {
+    "dayShift1": null,
+    "dayShift2": null,
+    "nightShift1": 2,
+    "nightShift2": null
   }
 }
