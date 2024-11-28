@@ -236,18 +236,12 @@ export default {
       this.selectedMonth = this.selectedMonth + newMonth;
       this.generateMonthDays(); // Regenerate the days for the new month
       this.loadFromLocalStorage(); // Load the data for the new month
-      this.checkDataSync(); // Check if data is in sync with GitHub
     },
     showPasswordPrompt() {
       this.showPasswordModal = true;
     },
     async authorize() {
       const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
-      const githubToken = import.meta.env.VITE_TOKEN;
-      const repoOwner = import.meta.env.VITE_REPO_OWNER;
-      const repoName = import.meta.env.VITE_REPO_NAME;
-      const branch = import.meta.env.VITE_BRANCH;
-      const filePath = import.meta.env.VITE_FILE_PATH;
       const enteredPasswordHash = MD5(this.password).toString();
 
       if (enteredPasswordHash === hashedPassword) {
@@ -255,48 +249,29 @@ export default {
         this.madeChanges = false;
 
         // Prepare data for committing
-        const encodedContent = await this.encodeLargeData(this.localData);
-        if (encodedContent) {
-          try {
-            // Fetch file SHA if it exists
-            const shaResponse = await fetch(
-              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-              {
-                headers: { Authorization: `token ${githubToken}` },
-              }
-            );
-            const shaData = await shaResponse.json();
-            const fileSha = shaData.sha || null; // If no file exists, sha will be null
-
-            // Commit the updated data
-            const response = await fetch(
-              `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
-              {
-                method: "PUT",
-                headers: {
-                  Authorization: `token ${githubToken}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  message: "Update shift data",
-                  content: encodedContent,
-                  sha: fileSha,
-                  branch,
-                }),
-              }
-            );
-
-            if (!response.ok) {
-              throw new Error("Failed to commit data to GitHub");
+        const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
+        try {
+          const response = await fetch(
+            "https://my-worker.6o4avjb7.workers.dev/?key=shiftData",
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ key: "shiftData", value: encodedContent }),
             }
-            addNotification("Data successfully committed to GitHub", "green");
-          } catch (error) {
-            console.error("Error during GitHub commit:", error);
-            addNotification(
-              error.message || "Failed to commit data to GitHub",
-              "red"
-            );
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to update data in KV");
           }
+          addNotification("Data successfully updated in KV store", "green");
+        } catch (error) {
+          console.error("Error updating KV data:", error);
+          addNotification(
+            error.message || "Failed to update data in KV",
+            "red"
+          );
         }
       } else {
         addNotification("Incorrect Password", "red");
@@ -305,41 +280,36 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
     },
-    async fetchGitHubData() {
-      const githubToken = import.meta.env.VITE_TOKEN;
-      const repoOwner = import.meta.env.VITE_REPO_OWNER;
-      const repoName = import.meta.env.VITE_REPO_NAME;
-      const filePath = import.meta.env.VITE_FILE_PATH;
-
+    async fetchKVData() {
       try {
         const response = await fetch(
-          `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+          "https://my-worker.6o4avjb7.workers.dev/?key=shiftData",
           {
-            headers: { Authorization: `token ${githubToken}` },
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json", // Ensure the content type is set correctly
+            },
           }
         );
 
         if (!response.ok) {
           if (response.status === 404) {
-            addNotification("File not found on GitHub", "yellow");
+            addNotification("Data not found in KV store", "yellow");
           }
-          throw new Error(
-            `Failed to fetch data from GitHub: ${response.status}`
-          );
+          throw new Error(`Failed to fetch data from KV: ${response.status}`);
         }
 
-        const fileData = await response.json();
-        const content = JSON.parse(atob(fileData.content)); // Decode Base64 content
-        return content;
+        const data = await response.json();
+        return data;
       } catch (error) {
-        console.error("Error fetching GitHub data:", error);
-        addNotification("Failed to fetch data from GitHub", "red");
+        console.error("Error fetching KV data:", error);
+        addNotification("Failed to fetch data from KV", "red");
         return null;
       }
     },
 
     async checkDataSync() {
-      const remoteData = await this.fetchGitHubData();
+      const remoteData = await this.fetchKVData();
 
       if (!remoteData) {
         return; // Exit if fetching failed
@@ -355,7 +325,7 @@ export default {
           localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
 
-        addNotification("Local data synced with GitHub", "blue");
+        addNotification("Local data synced with KV store", "blue");
         this.madeChanges = false; // Reset the change flag
       } else {
         console.log("Data is already up-to-date");
