@@ -29,3 +29,7 @@ coverage
 
 *.tsbuildinfo
 .env
+vueCalendar.code-workspace
+
+/server/key.pem
+/server/cert.pem
