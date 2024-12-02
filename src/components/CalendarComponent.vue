@@ -43,6 +43,7 @@
                   class="shift-slot"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'day1')"
+                  @click="handleClickResetShift(day, 'dayShift1')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift1">
                     {{ day.dayShift1Name }}
@@ -53,6 +54,7 @@
                   class="shift-slot"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'day2')"
+                  @click="handleClickResetShift(day, 'dayShift2')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift2">
                     {{ day.dayShift2Name }}
@@ -63,6 +65,7 @@
                   class="shift-slot"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night1')"
+                  @click="handleClickResetShift(day, 'nightShift1')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift1">
                     {{ day.nightShift1Name }}
@@ -73,6 +76,7 @@
                   class="shift-slot"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night2')"
+                  @click="handleClickResetShift(day, 'nightShift2')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift2">
                     {{ day.nightShift2Name }}
@@ -197,6 +201,31 @@ export default {
         }
       }
     },
+    handleClickResetShift(day, shift) {
+      // Check if the shift is assigned
+      if (day[shift]) {
+        // Set the shift to empty
+        day[shift] = null;
+        day[shift + "Name"] = null; // Clear the name field as well (e.g., nightShift2Name)
+
+        // Save the updated day object in localStorage and in-memory data
+        const updatedData = {
+          dayShift1: day.dayShift1,
+          dayShift2: day.dayShift2,
+          nightShift1: day.nightShift1,
+          nightShift2: day.nightShift2,
+        };
+
+        this.localData[day.date.toDateString()] = updatedData;
+        localStorage.setItem(
+          day.date.toDateString(),
+          JSON.stringify(updatedData)
+        );
+
+        addNotification("Shift cleared locally", "green");
+        this.madeChanges = true; // Track changes
+      }
+    },
     resolvePersonName(id) {
       const person = this.people.find((person) => person.id === id);
       return person ? person.name : "Not assigned";
@@ -230,6 +259,7 @@ export default {
         if (!confirmSwitch) {
           return; // Cancel the month change
         }
+        this.checkShiftDataSync();
       }
 
       // Update the selected month and year
@@ -246,7 +276,6 @@ export default {
 
       if (enteredPasswordHash === hashedPassword) {
         addNotification("Authorized", "green");
-        this.madeChanges = false;
 
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
@@ -262,6 +291,7 @@ export default {
             throw new Error("Failed to update data on the server");
           }
           addNotification("Data successfully updated on the server", "green");
+          this.madeChanges = false;
         } catch (error) {
           console.error("Error updating server data:", error);
           addNotification(
@@ -528,6 +558,7 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  cursor: pointer;
 }
 .assigned-person.night {
   padding: 5px;
@@ -538,6 +569,7 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  cursor: pointer;
 }
 .shift-label {
   background-color: #e0e0e0;
