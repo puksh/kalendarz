@@ -318,14 +318,13 @@ export default {
       if (JSON.stringify(remoteData) !== JSON.stringify(this.localData)) {
         // Clear localStorage and update with remoteData
         localStorage.clear(); // Remove previous data
+        this.loadFromLocalStorage();
         this.localData = {}; // Clear localData to reset UI
 
         for (const [date, shifts] of Object.entries(remoteData)) {
           this.localData[date] = shifts; // Update reactive localData
           localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
-
-        this.loadFromLocalStorage();
 
         addNotification("Local data synced with the server", "blue");
         this.madeChanges = false; // Reset the change flag
