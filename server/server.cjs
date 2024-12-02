@@ -12,19 +12,30 @@ const app = express({
     //cert_file_name: path.join(__dirname, "server/cert.pem"),
   },
 });
-app.use(cors());
+
+// Enable CORS
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
 // Middleware to parse JSON requests
 app.use(express.json());
 
 // Route to retrieve data from the JSON file
 app.get("/", (req, res) => {
   const key = req.query.key;
+  console.log(key);
   if (!key) {
     return res.status(400).send("Missing key");
   }
 
   const filePath = path.join(__dirname, "shiftData.json");
 
+  console.log(filePath);
   // Check if the file exists
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("Data file not found");
@@ -32,13 +43,9 @@ app.get("/", (req, res) => {
 
   // Read and parse the JSON data
   const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  console.log(data);
 
-  // Check if the key exists in the data (date in this case)
-  if (!(key in data)) {
-    return res.status(404).send("Key not found");
-  }
-
-  res.status(200).json(data[key]);
+  res.status(200).json(data);
 });
 
 // Route to update data in the JSON file
