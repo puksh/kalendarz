@@ -40,7 +40,7 @@
               >
                 <div class="day-date">{{ day.date.getDate() }}</div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.dayShift1, 'synced-changed': syncedChanges[day.date.toDateString()]?.dayShift1,"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'day1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
@@ -51,7 +51,7 @@
                   <div class="empty-slot day" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.dayShift2, 'synced-changed': syncedChanges[day.date.toDateString()]?.dayShift2,"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'day2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
@@ -62,7 +62,7 @@
                   <div class="empty-slot day" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.nightShift1, 'synced-changed': syncedChanges[day.date.toDateString()]?.nightShift1,"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
@@ -73,7 +73,7 @@
                   <div class="empty-slot night" v-else>N</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.nightShift2, 'synced-changed': syncedChanges[day.date.toDateString()]?.nightShift2,"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
@@ -90,9 +90,9 @@
       </div>
     </section>
   </div>
-  <button @click="changeMonth(-1)">Previous Month</button>
-  <span>{{ monthYear }}</span>
-  <button @click="changeMonth(1)">Next Month</button>
+  <button class="buttonMonthChange" @click="changeMonth(-1)">⇐</button>
+  <span> {{ monthYear }} </span>
+  <button class="buttonMonthChange" @click="changeMonth(1)">⇒</button>
 
   <section>
     <!-- People List Section -->
@@ -140,12 +140,13 @@ export default {
       showPasswordModal: false,
       password: "",
       githubToken: import.meta.env.VITE_TOKEN,
+      locale: "pl",
     };
   },
   computed: {
     monthYear() {
       return new Date(this.selectedYear, this.selectedMonth).toLocaleString(
-        "default",
+        this.locale,
         {
           month: "long",
           year: "numeric",
@@ -195,7 +196,7 @@ export default {
             JSON.stringify(updatedData)
           );
 
-          addNotification("Shift updated locally", "green");
+          //addNotification("Shift updated locally", "green");
           this.madeChanges = true;
           this.draggedPerson = null;
         }
@@ -222,7 +223,7 @@ export default {
           JSON.stringify(updatedData)
         );
 
-        addNotification("Shift cleared locally", "green");
+        //addNotification("Shift cleared locally", "green");
         this.madeChanges = true; // Track changes
       }
     },
@@ -275,7 +276,7 @@ export default {
       const enteredPasswordHash = MD5(this.password).toString();
 
       if (enteredPasswordHash === hashedPassword) {
-        addNotification("Authorized", "green");
+        //addNotification("Authorized", "green");
 
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
@@ -290,7 +291,7 @@ export default {
           if (!response.ok) {
             throw new Error("Failed to update data on the server");
           }
-          addNotification("Data successfully updated on the server", "green");
+          //addNotification("Data successfully updated on the server", "green");
           this.madeChanges = false;
         } catch (error) {
           console.error("Error updating server data:", error);
@@ -300,7 +301,7 @@ export default {
           );
         }
       } else {
-        addNotification("Incorrect Password", "red");
+        addNotification("Złe hasło", "red");
       }
 
       this.showPasswordModal = false;
@@ -319,7 +320,7 @@ export default {
           }
         );
 
-        console.log(response);
+        //console.log(response);
         if (!response.ok) {
           if (response.status === 404) {
             addNotification("Data not found on server", "red");
@@ -356,7 +357,7 @@ export default {
           localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
 
-        addNotification("Local data synced with the server", "blue");
+        addNotification("Wykryto nowe zmiany", "blue");
         this.madeChanges = false; // Reset the change flag
       } else {
         console.log("Data is already up-to-date");
@@ -626,5 +627,24 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+}
+.buttonMonthChange {
+  background-color: #3b1e54;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 24px;
+  transition: background-color 0.3s ease;
+  margin: 8px 8px 0 8px;
+  padding-bottom: 5px;
+  line-height: 16px;
+}
+.user-changed {
+  background-color: yellow; /* Highlight user-made changes */
+}
+
+.synced-changed {
+  background-color: greenyellow; /* Highlight server-synced changes */
 }
 </style>
