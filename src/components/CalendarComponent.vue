@@ -251,25 +251,22 @@ export default {
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
         try {
-          const response = await fetch(
-            "https://my-worker.6o4avjb7.workers.dev/?key=shiftData",
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ key: "shiftData", value: encodedContent }),
-            }
-          );
+          const response = await fetch("http://localhost:3000/", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ key: "shiftData", value: encodedContent }),
+          });
 
           if (!response.ok) {
-            throw new Error("Failed to update data in KV");
+            throw new Error("Failed to update data on the server");
           }
-          addNotification("Data successfully updated in KV store", "green");
+          addNotification("Data successfully updated on the server", "green");
         } catch (error) {
-          console.error("Error updating KV data:", error);
+          console.error("Error updating server data:", error);
           addNotification(
-            error.message || "Failed to update data in KV",
+            error.message || "Failed to update data on the server",
             "red"
           );
         }
@@ -280,30 +277,30 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
     },
+
     async fetchKVData() {
       try {
-        const response = await fetch(
-          "https://my-worker.6o4avjb7.workers.dev/?key=shiftData",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json", // Ensure the content type is set correctly
-            },
-          }
-        );
+        const response = await fetch("http://localhost:3000/?key=shiftData", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           if (response.status === 404) {
-            addNotification("Data not found in KV store", "yellow");
+            addNotification("Data not found on server", "yellow");
           }
-          throw new Error(`Failed to fetch data from KV: ${response.status}`);
+          throw new Error(
+            `Failed to fetch data from server: ${response.status}`
+          );
         }
 
         const data = await response.json();
         return data;
       } catch (error) {
-        console.error("Error fetching KV data:", error);
-        addNotification("Failed to fetch data from KV", "red");
+        console.error("Error fetching data from server:", error);
+        addNotification("Failed to fetch data from server", "red");
         return null;
       }
     },
@@ -325,12 +322,13 @@ export default {
           localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
 
-        addNotification("Local data synced with KV store", "blue");
+        addNotification("Local data synced with the server", "blue");
         this.madeChanges = false; // Reset the change flag
       } else {
         console.log("Data is already up-to-date");
       }
     },
+
     async encodeLargeData(data) {
       try {
         // Convert data to a JSON string
