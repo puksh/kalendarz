@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 
+const port = 3000;
+
 // Initialize app with HTTPS options
 const app = express({
   uwsOptions: {
@@ -14,61 +16,55 @@ app.use(cors());
 // Middleware to parse JSON requests
 app.use(express.json());
 
-// Define the JSON file path
-const filePath = path.join(__dirname, "shiftData.json");
-
-// Utility function to read the file
-const readDataFile = () => {
-  if (!fs.existsSync(filePath)) return {};
-  return JSON.parse(fs.readFileSync(filePath, "utf-8"));
-};
-
-// Utility function to write to the file
-const writeDataFile = (data) => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-};
-
 // Route to retrieve data from the JSON file
 app.get("/", (req, res) => {
   const key = req.query.key;
-  const data = readDataFile();
-
-  if (key) {
-    if (!(key in data)) {
-      return res.status(404).send("Key not found");
-    }
-    return res.status(200).json(data[key]);
+  if (!key) {
+    return res.status(400).send("Missing key");
   }
 
-  res.status(200).json(data); // Return the entire file if no key is provided
+  const filePath = path.join(__dirname, "shiftData.json");
+
+  // Check if the file exists
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("Data file not found");
+  }
+
+  // Read and parse the JSON data
+  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  // Check if the key exists in the data (date in this case)
+  if (!(key in data)) {
+    return res.status(404).send("Key not found");
+  }
+
+  res.status(200).json(data[key]);
 });
 
-// Route to update or add data for a specific key
+// Route to update data in the JSON file
 app.put("/", (req, res) => {
   const { key, value } = req.body;
   if (!key || value === undefined) {
     return res.status(400).send("Missing key or value");
   }
 
-  const data = readDataFile();
-  data[key] = value;
+  const filePath = path.join(__dirname, "shiftData.json");
+  let data = {};
 
-  writeDataFile(data);
-  res.status(200).send("Data updated successfully");
-});
-
-// Route to replace the entire file
-app.post("/", (req, res) => {
-  const newData = req.body;
-  if (typeof newData !== "object" || Array.isArray(newData)) {
-    return res.status(400).send("Invalid data format");
+  // Check if the file exists, if it does, read and parse the data
+  if (fs.existsSync(filePath)) {
+    data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
 
-  writeDataFile(newData);
-  res.status(200).send("File replaced successfully");
+  // Update or add the new key-value pair
+  data[key] = value;
+
+  // Write the updated data back to the file
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+  res.status(200).send("Data stored successfully");
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
