@@ -28,14 +28,14 @@ app.use(express.json());
 // Route to retrieve data from the JSON file
 app.get("/", (req, res) => {
   const key = req.query.key;
-  console.log(key);
+  //console.log(key);
   if (!key) {
     return res.status(400).send("Missing key");
   }
 
   const filePath = path.join(__dirname, "shiftData.json");
 
-  console.log(filePath);
+  //console.log(filePath);
   // Check if the file exists
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("Data file not found");
@@ -43,7 +43,7 @@ app.get("/", (req, res) => {
 
   // Read and parse the JSON data
   const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  console.log(data);
+  //console.log(data);
 
   res.status(200).json(data);
 });
@@ -56,19 +56,29 @@ app.put("/", (req, res) => {
   }
 
   const filePath = path.join(__dirname, "shiftData.json");
-  let data = {};
 
-  // Check if the file exists, if it does, read and parse the data
-  if (fs.existsSync(filePath)) {
-    data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  try {
+    // Decode the base64-encoded string to JSON
+    const decodedData = Buffer.from(value, "base64").toString("utf-8");
+    const jsonData = JSON.parse(decodedData); // Parse the decoded JSON string
+
+    // Load existing data or initialize as empty object
+    let data = {};
+    if (fs.existsSync(filePath)) {
+      data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    }
+
+    // Update the data with the new value
+    data[key] = jsonData;
+
+    // Write the updated data back to the file
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+
+    res.status(200).send("Data stored successfully");
+  } catch (error) {
+    console.error("Error decoding or saving data:", error);
+    res.status(500).send("Failed to store data");
   }
-
-  // Update or add the new key-value pair
-  data[key] = value;
-
-  // Write the updated data back to the file
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-  res.status(200).send("Data stored successfully");
 });
 
 // Start the server
