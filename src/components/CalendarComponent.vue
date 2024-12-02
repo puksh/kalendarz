@@ -258,7 +258,6 @@ export default {
             },
             body: JSON.stringify({ key: "shiftData", value: encodedContent }),
           });
-
           if (!response.ok) {
             throw new Error("Failed to update data on the server");
           }
@@ -278,18 +277,22 @@ export default {
       this.password = "";
     },
 
-    async fetchKVData() {
+    async fetchServerShiftData() {
       try {
-        const response = await fetch("http://localhost:3000/?key=shiftData", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3000/?key=shiftData.json",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
+        console.log(response);
         if (!response.ok) {
           if (response.status === 404) {
-            addNotification("Data not found on server", "yellow");
+            addNotification("Data not found on server", "red");
           }
           throw new Error(
             `Failed to fetch data from server: ${response.status}`
@@ -305,8 +308,8 @@ export default {
       }
     },
 
-    async checkDataSync() {
-      const remoteData = await this.fetchKVData();
+    async checkShiftDataSync() {
+      const remoteData = await this.fetchServerShiftData();
 
       if (!remoteData) {
         return; // Exit if fetching failed
@@ -321,6 +324,8 @@ export default {
           this.localData[date] = shifts; // Update reactive localData
           localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
         }
+
+        this.loadFromLocalStorage();
 
         addNotification("Local data synced with the server", "blue");
         this.madeChanges = false; // Reset the change flag
@@ -363,8 +368,8 @@ export default {
     },
 
     loadFromLocalStorage() {
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth();
+      const year = this.selectedYear;
+      const month = this.selectedMonth;
 
       for (let i = 1; i <= 31; i++) {
         const date = new Date(year, month, i).toDateString();
@@ -399,7 +404,7 @@ export default {
   async mounted() {
     this.generateMonthDays();
     this.loadFromLocalStorage();
-    this.checkDataSync();
+    this.checkShiftDataSync();
   },
 };
 </script>
