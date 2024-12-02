@@ -56,29 +56,29 @@ app.put("/", (req, res) => {
   }
 
   const filePath = path.join(__dirname, "shiftData.json");
+  let data = {};
 
-  try {
-    // Decode the base64-encoded string to JSON
-    const decodedData = Buffer.from(value, "base64").toString("utf-8");
-    const jsonData = JSON.parse(decodedData); // Parse the decoded JSON string
-
-    // Load existing data or initialize as empty object
-    let data = {};
-    if (fs.existsSync(filePath)) {
-      data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    }
-
-    // Update the data with the new value
-    data[key] = jsonData;
-
-    // Write the updated data back to the file
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-
-    res.status(200).send("Data stored successfully");
-  } catch (error) {
-    console.error("Error decoding or saving data:", error);
-    res.status(500).send("Failed to store data");
+  if (fs.existsSync(filePath)) {
+    data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   }
+
+  // If the key is 'shiftData', update the data directly
+  if (key === "shiftData") {
+    try {
+      const decodedValue = atob(value); // Decode the base64 value
+      const parsedValue = JSON.parse(decodedValue); // Parse the JSON content
+      data = { ...data, ...parsedValue }; // Merge with existing data
+    } catch (err) {
+      return res.status(400).send("Invalid data format");
+    }
+  } else {
+    // Handle other keys if necessary
+    data[key] = value;
+  }
+
+  // Write the updated data back to the file
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+  res.status(200).send("Data stored successfully");
 });
 
 // Start the server
