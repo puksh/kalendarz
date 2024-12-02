@@ -31,5 +31,6 @@ coverage
 .env
 vueCalendar.code-workspace
 
-/server/key.pem
-/server/cert.pem
+server/key.pem
+server/cert.pem
+server/shiftData.json
