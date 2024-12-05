@@ -394,47 +394,50 @@ export default {
         return; // Exit if fetching fails
       }
 
-      console.log("Remote data fetched:", remoteData);
+      //console.log("Remote data fetched:", remoteData);
 
       const containedSyncedChanges = {}; // Reset synced changes
 
       for (const [date, remoteShifts] of Object.entries(remoteData)) {
         // Retrieve local shifts directly from localStorage
         const savedStates = localStorage.getItem(date);
-        const localShifts = savedStates ? JSON.parse(savedStates) : {};
+        const localShifts = savedStates ? JSON.parse(savedStates) : null;
 
         const differences = {};
 
-        console.log(`Comparing shifts for date: ${date}`);
-        console.log("Local shifts from localStorage:", localShifts);
-        console.log("Remote shifts:", remoteShifts);
+        //console.log(`Comparing shifts for date: ${date}`);
+        //console.log("Local shifts from localStorage:", localShifts);
+        //console.log("Remote shifts:", remoteShifts);
 
-        // Compare each shift type between localStorage and remote data
-        for (const [shiftType, remoteValue] of Object.entries(remoteShifts)) {
-          const localValue = localShifts[shiftType] || null;
-          if (localValue !== remoteValue) {
-            differences[shiftType] = {
-              from: localValue || "Empty",
-              to: remoteValue || "Empty",
-            };
-            console.log(
-              `Difference found for ${shiftType}: local (${localValue}) -> remote (${remoteValue})`
-            );
-          }
-        }
-
-        // If there are differences, track them
-        if (Object.keys(differences).length > 0) {
-          containedSyncedChanges[date] = differences;
-          console.log(`Differences for ${date}:`, differences);
+        if (!localShifts) {
+          // New shifts entirely - add to synced changes and localStorage
+          containedSyncedChanges[date] = { ...remoteShifts };
+          localStorage.setItem(date, JSON.stringify(remoteShifts));
+          //console.log(`New shifts added for ${date}:`, remoteShifts);
         } else {
-          console.log(`No differences for ${date}.`);
-        }
+          // Compare existing shifts
+          for (const [shiftType, remoteValue] of Object.entries(remoteShifts)) {
+            const localValue = localShifts[shiftType] || null;
+            if (localValue !== remoteValue) {
+              differences[shiftType] = {
+                from: localValue || "Empty",
+                to: remoteValue || "Empty",
+              };
+            }
+          }
 
-        // Update local storage with the latest remote data
-        localStorage.setItem(date, JSON.stringify(remoteShifts));
+          // If differences are found, track them
+          if (Object.keys(differences).length > 0) {
+            containedSyncedChanges[date] = differences;
+            //console.log(`Differences for ${date}:`, differences);
+          }
+
+          // Update local storage with the latest remote data
+          localStorage.setItem(date, JSON.stringify(remoteShifts));
+        }
       }
 
+      this.generateMonthDays(); // Initialize local data first
       // Update syncedChanges and save to sessionStorage
       this.syncedChanges = containedSyncedChanges;
       console.log("Updated syncedChanges:", this.syncedChanges);
@@ -536,7 +539,6 @@ export default {
   },
 
   async mounted() {
-    this.generateMonthDays(); // Initialize local data first
     await this.checkShiftDataSync(); // Then sync with remote data
   },
 };
