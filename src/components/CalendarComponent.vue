@@ -40,7 +40,13 @@
               >
                 <div class="day-date">{{ day.date.getDate() }}</div>
                 <div
-                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.dayShift1, 'synced-changed': syncedChanges[day.date.toDateString()]?.dayShift1,"
+                  class="shift-slot"
+                  :class="{
+                    'user-changed':
+                      changedShifts[day.date.toDateString()]?.dayShift1,
+                    'synced-changed':
+                      syncedChanges[day.date.toDateString()]?.dayShift1,
+                  }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'day1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
@@ -51,8 +57,13 @@
                   <div class="empty-slot day" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.dayShift2, 'synced-changed': syncedChanges[day.date.toDateString()]?.dayShift2,"
-                  @dragover.prevent
+                  class="shift-slot"
+                  :class="{
+                    'user-changed':
+                      changedShifts[day.date.toDateString()]?.dayShift2,
+                    'synced-changed':
+                      syncedChanges[day.date.toDateString()]?.dayShift2,
+                  }"
                   @drop="handleDrop(day.date, 'day2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
                 >
@@ -62,7 +73,13 @@
                   <div class="empty-slot day" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.nightShift1, 'synced-changed': syncedChanges[day.date.toDateString()]?.nightShift1,"
+                  class="shift-slot"
+                  :class="{
+                    'user-changed':
+                      changedShifts[day.date.toDateString()]?.nightShift1,
+                    'synced-changed':
+                      syncedChanges[day.date.toDateString()]?.nightShift1,
+                  }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
@@ -73,7 +90,13 @@
                   <div class="empty-slot night" v-else>N</div>
                 </div>
                 <div
-                  class="shift-slot 'user-changed': changedShifts[day.date.toDateString()]?.nightShift2, 'synced-changed': syncedChanges[day.date.toDateString()]?.nightShift2,"
+                  class="shift-slot"
+                  :class="{
+                    'user-changed':
+                      changedShifts[day.date.toDateString()]?.nightShift2,
+                    'synced-changed':
+                      syncedChanges[day.date.toDateString()]?.nightShift2,
+                  }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'night2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
@@ -124,6 +147,8 @@ export default {
       selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
+      changedShifts: {}, // User-modified shifts
+      syncedChanges: {}, // Server-synced changes
       daysOfWeek,
       currentDate: new Date(),
       draggedPerson: null,
@@ -164,6 +189,10 @@ export default {
           (day) => day.date.toDateString() === date.toDateString()
         );
         if (day) {
+          // Save the previous value before updating
+          const previousValue = day[shiftType];
+
+          // Update the shift
           switch (shiftType) {
             case "day1":
               day.dayShift1 = this.draggedPerson.id; // Save ID
@@ -183,28 +212,34 @@ export default {
               break;
           }
 
-          // Save the updated day object in localStorage and in-memory data
-          const updatedData = {
-            dayShift1: day.dayShift1,
-            dayShift2: day.dayShift2,
-            nightShift1: day.nightShift1,
-            nightShift2: day.nightShift2,
+          // Track changes made by the user in changedShifts
+          if (!this.changedShifts[date.toDateString()]) {
+            this.changedShifts[date.toDateString()] = {};
+          }
+          this.changedShifts[date.toDateString()][shiftType] = {
+            from: previousValue,
+            to: this.draggedPerson.id,
           };
-          this.localData[date.toDateString()] = updatedData;
-          localStorage.setItem(
-            date.toDateString(),
-            JSON.stringify(updatedData)
+
+          // Save changedShifts to sessionStorage
+          sessionStorage.setItem(
+            "changedShifts",
+            JSON.stringify(this.changedShifts)
           );
 
-          //addNotification("Shift updated locally", "green");
+          // Notify change and reset dragged person
           this.madeChanges = true;
           this.draggedPerson = null;
         }
       }
     },
+
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift]) {
+        // Save the previous value before resetting
+        const previousValue = day[shift];
+
         // Set the shift to empty
         day[shift] = null;
         day[shift + "Name"] = null; // Clear the name field as well (e.g., nightShift2Name)
@@ -223,7 +258,16 @@ export default {
           JSON.stringify(updatedData)
         );
 
-        //addNotification("Shift cleared locally", "green");
+        // Track the reset in changedShifts
+        if (!this.changedShifts[day.date.toDateString()]) {
+          this.changedShifts[day.date.toDateString()] = {};
+        }
+        this.changedShifts[day.date.toDateString()][shift] = {
+          from: previousValue,
+          to: null,
+        };
+
+        // Notify the change and mark changes made
         this.madeChanges = true; // Track changes
       }
     },
@@ -251,6 +295,8 @@ export default {
           isCurrentMonth: true,
         });
       }
+
+      this.loadFromLocalStorage();
     },
     changeMonth(newMonth) {
       if (this.madeChanges) {
@@ -260,13 +306,12 @@ export default {
         if (!confirmSwitch) {
           return; // Cancel the month change
         }
-        this.checkShiftDataSync();
+        this.changedShifts = {};
       }
 
       // Update the selected month and year
       this.selectedMonth = this.selectedMonth + newMonth;
       this.generateMonthDays(); // Regenerate the days for the new month
-      this.loadFromLocalStorage(); // Load the data for the new month
     },
     showPasswordPrompt() {
       this.showPasswordModal = true;
@@ -309,6 +354,7 @@ export default {
     },
 
     async fetchServerShiftData() {
+      this.syncedChanges = {};
       try {
         const response = await fetch(
           "http://localhost:3000/?key=shiftData.json",
@@ -340,30 +386,71 @@ export default {
     },
 
     async checkShiftDataSync() {
+      this.resetSyncedChangesSessionStorage();
       const remoteData = await this.fetchServerShiftData();
 
       if (!remoteData) {
-        return; // Exit if fetching failed
+        console.log("No remote data fetched.");
+        return; // Exit if fetching fails
       }
 
-      if (JSON.stringify(remoteData) !== JSON.stringify(this.localData)) {
-        // Clear localStorage and update with remoteData
-        localStorage.clear(); // Remove previous data
-        this.loadFromLocalStorage();
-        this.localData = {}; // Clear localData to reset UI
+      console.log("Remote data fetched:", remoteData);
 
-        for (const [date, shifts] of Object.entries(remoteData)) {
-          this.localData[date] = shifts; // Update reactive localData
-          localStorage.setItem(date, JSON.stringify(shifts)); // Sync localStorage
+      const containedSyncedChanges = {}; // Reset synced changes
+
+      for (const [date, remoteShifts] of Object.entries(remoteData)) {
+        // Retrieve local shifts directly from localStorage
+        const savedStates = localStorage.getItem(date);
+        const localShifts = savedStates ? JSON.parse(savedStates) : {};
+
+        const differences = {};
+
+        console.log(`Comparing shifts for date: ${date}`);
+        console.log("Local shifts from localStorage:", localShifts);
+        console.log("Remote shifts:", remoteShifts);
+
+        // Compare each shift type between localStorage and remote data
+        for (const [shiftType, remoteValue] of Object.entries(remoteShifts)) {
+          const localValue = localShifts[shiftType] || null;
+          if (localValue !== remoteValue) {
+            differences[shiftType] = {
+              from: localValue || "Empty",
+              to: remoteValue || "Empty",
+            };
+            console.log(
+              `Difference found for ${shiftType}: local (${localValue}) -> remote (${remoteValue})`
+            );
+          }
         }
 
-        addNotification("Wykryto nowe zmiany", "blue");
-        this.madeChanges = false; // Reset the change flag
-      } else {
-        console.log("Data is already up-to-date");
-      }
-    },
+        // If there are differences, track them
+        if (Object.keys(differences).length > 0) {
+          containedSyncedChanges[date] = differences;
+          console.log(`Differences for ${date}:`, differences);
+        } else {
+          console.log(`No differences for ${date}.`);
+        }
 
+        // Update local storage with the latest remote data
+        localStorage.setItem(date, JSON.stringify(remoteShifts));
+      }
+
+      // Update syncedChanges and save to sessionStorage
+      this.syncedChanges = containedSyncedChanges;
+      console.log("Updated syncedChanges:", this.syncedChanges);
+
+      sessionStorage.setItem(
+        "syncedChanges",
+        JSON.stringify(this.syncedChanges)
+      );
+
+      // Clear synced changes after 5 seconds
+      setTimeout(() => {
+        console.log("Clearing syncedChanges.");
+        this.syncedChanges = {};
+        sessionStorage.removeItem("syncedChanges");
+      }, 5000);
+    },
     async encodeLargeData(data) {
       try {
         // Convert data to a JSON string
@@ -403,8 +490,11 @@ export default {
 
       for (let i = 1; i <= 31; i++) {
         const date = new Date(year, month, i).toDateString();
-        const savedStates = localStorage.getItem(date);
 
+        // Skip if the date is in syncedChanges
+        if (this.syncedChanges[date]) continue;
+
+        const savedStates = localStorage.getItem(date);
         if (savedStates) {
           try {
             const parsedStates = JSON.parse(savedStates);
@@ -430,11 +520,24 @@ export default {
         }
       }
     },
+    resetSyncedChangesSessionStorage() {
+      // Load synced changes from sessionStorage
+      const savedSyncedChanges = sessionStorage.getItem("syncedChanges");
+      if (savedSyncedChanges) {
+        this.syncedChanges = JSON.parse(savedSyncedChanges);
+
+        // Clear the syncedChanges after 5 seconds
+        setTimeout(() => {
+          this.syncedChanges = {};
+          sessionStorage.removeItem("syncedChanges");
+        }, 5000);
+      }
+    },
   },
+
   async mounted() {
-    this.generateMonthDays();
-    this.loadFromLocalStorage();
-    this.checkShiftDataSync();
+    this.generateMonthDays(); // Initialize local data first
+    await this.checkShiftDataSync(); // Then sync with remote data
   },
 };
 </script>
@@ -552,7 +655,7 @@ export default {
 /* Assigned person styles */
 .assigned-person.day {
   padding: 5px;
-  background-color: #3dc2ff;
+  background-color: transparent;
   font-weight: bolder;
   height: 30px;
   display: flex;
@@ -563,7 +666,7 @@ export default {
 }
 .assigned-person.night {
   padding: 5px;
-  background-color: #83d8ff;
+  background-color: transparent;
   font-weight: bolder;
   height: 30px;
   display: flex;
@@ -641,10 +744,10 @@ export default {
   line-height: 16px;
 }
 .user-changed {
-  background-color: yellow; /* Highlight user-made changes */
+  background-color: yellow !important; /* Highlight user-made changes */
 }
 
 .synced-changed {
-  background-color: greenyellow; /* Highlight server-synced changes */
+  background-color: greenyellow !important; /* Highlight server-synced changes */
 }
 </style>
