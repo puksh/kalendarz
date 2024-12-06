@@ -1,3 +1,47 @@
+:root {
+  /* Color Variables */
+  --color-background: #e1f5fe;
+  --color-primary: #83d8ff;
+  --color-text: #fff;
+  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-border: #ddd;
+  --color-empty-slot: #494949;
+  --color-day: #aaddf5;
+  --color-night: #83d8ff;
+  --color-modal-bg: rgba(0, 0, 0, 0.5);
+  --color-modal-content-bg: #fff;
+  --color-button-bg: #3b1e54;
+  --color-button-hover-bg: #6f4592;
+  --color-button-disabled-bg: #ccc;
+  --color-label-bg: #e0e0e0;
+  --color-user-changed: yellow;
+  --color-synced-changed: greenyellow;
+  --color-text-light: #fff;
+
+  /* Font Sizes */
+  --font-size-small: 0.8em;
+  --font-size-medium: 20px;
+  --font-size-large: 24px;
+  /* Spacing */
+  --spacing-small: 4px;
+  --spacing-medium: 8px;
+  --spacing-large: 10px;
+
+  /* Border Radius */
+  --border-radius: 25px;
+  --border-radius-small: 4px;
+  --border-radius-large: 8px;
+
+  /* Dimensions */
+  --width-people-bar: 200px;
+  --height-people-bar: 430px;
+  --width-day-cell: 120px;
+  --height-empty-slot: 30px;
+
+  /* Shadow */
+  --shadow-drop: 0px 3px 6px var(--color-shadow);
+  --shadow-modal: 0 2px 4px var(--color-shadow);
+}
 * {
   text-rendering: optimizeSpeed;
   image-rendering: crisp-edges;

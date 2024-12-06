@@ -550,31 +550,33 @@ export default {
   height: auto;
   max-width: 1600px;
 }
-/* Peaople Bar styles */
+
+/* People Bar styles */
 .people-list {
-  margin-top: 20px;
-  width: 200px;
+  margin-top: var(--spacing-large);
+  width: var(--width-people-bar);
   position: fixed;
-  padding: 10px;
-  height: 430px;
+  padding: var(--spacing-large);
+  height: var(--height-people-bar);
 }
 .people-list h3 {
-  color: #fff;
-  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+  color: var(--color-text);
+  filter: drop-shadow(var(--shadow-drop));
 }
 .person-item {
   padding: 0.3rem;
-  color: #fff;
-  background-color: #83d8ff;
-  border-radius: 25px;
-  margin-bottom: 8px;
+  color: var(--color-text);
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-medium);
   cursor: grab;
   text-align: center;
-  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(var(--shadow-drop));
 }
-.person-item {
+.person-item.grabbing {
   cursor: grabbing;
 }
+
 /* Calendar styles */
 .calendar {
   flex: 1;
@@ -586,16 +588,17 @@ export default {
   text-align: center;
   position: fixed;
   top: 0;
-  left: 250px;
-  color: #fff;
-  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+  left: calc(var(--width-people-bar) + var(--spacing-large));
+  color: var(--color-text);
+  filter: drop-shadow(var(--shadow-drop));
   margin: 0;
-  padding: 10px;
+  padding: var(--spacing-large);
 }
 .current-month {
-  background-color: #e1f5fe;
+  background-color: var(--color-background);
 }
-/* Calendar styles */
+
+/* Days Header styles */
 .days-header {
   display: flex;
   margin-top: 40px;
@@ -605,6 +608,8 @@ export default {
   text-align: center;
   font-weight: bold;
 }
+
+/* Calendar Grid styles */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(31, 1fr);
@@ -620,14 +625,14 @@ export default {
 }
 .day-cell {
   flex: 1;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   position: relative;
   flex-direction: column;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  width: 120px;
+  padding: var(--spacing-small);
+  width: var(--width-day-cell);
 }
 .day-date {
   font-weight: bold;
@@ -641,78 +646,69 @@ export default {
 }
 .shift-slot {
   border: 1px solid #ccc;
-  margin-top: 4px;
+  margin-top: var(--spacing-small);
 }
 .empty-slot {
-  color: #494949;
-  font-size: 0.8em;
-  padding: 5px;
-  height: 30px;
+  color: var(--color-empty-slot);
+  font-size: var(--font-size-small);
+  padding: var(--spacing-small);
+  height: var(--height-empty-slot);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--font-size-medium);
 }
-/* Assigned person styles */
-.assigned-person.day {
-  padding: 5px;
-  background-color: transparent;
-  font-weight: bolder;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  cursor: pointer;
-}
+/* Assigned Person Styles */
+.assigned-person.day,
 .assigned-person.night {
-  padding: 5px;
+  padding: var(--spacing-small);
   background-color: transparent;
   font-weight: bolder;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: var(--font-size-medium);
   cursor: pointer;
-}
-.shift-label {
-  background-color: #e0e0e0;
-  padding: 5px;
-}
-/* Shift types colors */
-.day {
-  background-color: #aaddf5;
-}
-.night {
-  background-color: #83d8ff;
 }
 
-/* Button styles */
+.shift-label {
+  background-color: var(--color-label-bg);
+  padding: var(--spacing-small);
+}
+
+/* Shift Types Colors */
+.day {
+  background-color: var(--color-day);
+}
+.night {
+  background-color: var(--color-night);
+}
+
+/* Button Styles */
 .submit-button {
   position: fixed;
   bottom: 100px;
   right: 20px;
-  background-color: #3b1e54;
-  color: #fff;
+  background-color: var(--color-button-bg);
+  color: var(--color-text-light);
   border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
+  border-radius: var(--border-radius-small);
+  padding: var(--spacing-medium) var(--spacing-large);
   cursor: pointer;
-  font-size: 24px;
+  font-size: var(--font-size-large);
   transition: background-color 0.3s ease;
-  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(var(--shadow-drop));
 }
 .submit-button:hover {
-  background-color: #6f4592;
+  background-color: var(--color-button-hover-bg);
 }
-/*disabled style*/
 .submit-button:disabled {
-  background-color: #ccc;
+  background-color: var(--color-button-disabled-bg);
   cursor: not-allowed;
 }
 
-/* Modal styles */
+/* Modal Styles */
 .modal {
   position: fixed;
   z-index: 10;
@@ -720,35 +716,43 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-modal-bg);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-modal-content-bg);
+  padding: var(--spacing-large);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-modal);
   text-align: center;
 }
+
+/* Month Change Button */
 .buttonMonthChange {
-  background-color: #3b1e54;
-  color: #fff;
+  background-color: var(--color-button-bg);
+  color: var(--color-text-light);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius-small);
   cursor: pointer;
-  font-size: 24px;
+  font-size: var(--font-size-large);
   transition: background-color 0.3s ease;
-  margin: 8px 8px 0 8px;
-  padding-bottom: 5px;
+  margin: var(--spacing-medium) var(--spacing-medium) 0 var(--spacing-medium);
+  padding-bottom: var(--spacing-small);
   line-height: 16px;
 }
+
+/* Changes Highlight */
 .user-changed {
-  background-color: yellow !important; /* Highlight user-made changes */
+  background-color: var(
+    --color-user-changed
+  ) !important; /* Highlight user-made changes */
 }
 
 .synced-changed {
-  background-color: greenyellow !important; /* Highlight server-synced changes */
+  background-color: var(
+    --color-synced-changed
+  ) !important; /* Highlight server-synced changes */
 }
 </style>
