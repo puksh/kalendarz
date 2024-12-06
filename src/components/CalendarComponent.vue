@@ -48,7 +48,7 @@
                       syncedChanges[day.date.toDateString()]?.dayShift1,
                   }"
                   @dragover.prevent
-                  @drop="handleDrop(day.date, 'day1')"
+                  @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift1">
@@ -64,7 +64,7 @@
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift2,
                   }"
-                  @drop="handleDrop(day.date, 'day2')"
+                  @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
                 >
                   <div class="assigned-person day" v-if="day.dayShift2">
@@ -81,7 +81,7 @@
                       syncedChanges[day.date.toDateString()]?.nightShift1,
                   }"
                   @dragover.prevent
-                  @drop="handleDrop(day.date, 'night1')"
+                  @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift1">
@@ -98,7 +98,7 @@
                       syncedChanges[day.date.toDateString()]?.nightShift2,
                   }"
                   @dragover.prevent
-                  @drop="handleDrop(day.date, 'night2')"
+                  @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
                 >
                   <div class="assigned-person night" v-if="day.nightShift2">
@@ -188,29 +188,28 @@ export default {
         const day = this.monthDays.find(
           (day) => day.date.toDateString() === date.toDateString()
         );
+
         if (day) {
           // Save the previous value before updating
           const previousValue = day[shiftType];
 
-          // Update the shift
-          switch (shiftType) {
-            case "day1":
-              day.dayShift1 = this.draggedPerson.id; // Save ID
-              day.dayShift1Name = this.draggedPerson.name; // Set name
-              break;
-            case "day2":
-              day.dayShift2 = this.draggedPerson.id; // Save ID
-              day.dayShift2Name = this.draggedPerson.name; // Set name
-              break;
-            case "night1":
-              day.nightShift1 = this.draggedPerson.id; // Save ID
-              day.nightShift1Name = this.draggedPerson.name; // Set name
-              break;
-            case "night2":
-              day.nightShift2 = this.draggedPerson.id; // Save ID
-              day.nightShift2Name = this.draggedPerson.name; // Set name
-              break;
-          }
+          // Update the shift dynamically
+          day[shiftType] = this.draggedPerson.id; // Save ID
+          day[`${shiftType}Name`] = this.draggedPerson.name; // Save name
+
+          // Update localData and localStorage
+          const updatedData = {
+            dayShift1: day.dayShift1,
+            dayShift2: day.dayShift2,
+            nightShift1: day.nightShift1,
+            nightShift2: day.nightShift2,
+          };
+
+          this.localData[date.toDateString()] = updatedData;
+          localStorage.setItem(
+            date.toDateString(),
+            JSON.stringify(updatedData)
+          );
 
           // Track changes made by the user in changedShifts
           if (!this.changedShifts[date.toDateString()]) {
@@ -233,7 +232,6 @@ export default {
         }
       }
     },
-
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift]) {
@@ -351,6 +349,7 @@ export default {
 
       this.showPasswordModal = false;
       this.password = "";
+      this.changedShifts = {};
     },
 
     async fetchServerShiftData() {
