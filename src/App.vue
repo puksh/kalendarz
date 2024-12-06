@@ -56,9 +56,8 @@ body::-webkit-scrollbar {
 }
 .main-content {
   padding: 20px;
-  max-width: 1600px;
+  max-width: 100%;
   text-align: center;
-  overflow-x: visible !important;
   overflow-y: hidden;
 }
 </style>
