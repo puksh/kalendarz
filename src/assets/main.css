@@ -48,7 +48,6 @@
 }
 body {
   background: #d4bee4;
-  min-height: 100vh;
   transition: color 0.5s, background-color 0.5s;
   line-height: 1.6;
   font-family: "IBMPlexMono", monospace;
@@ -56,4 +55,35 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+:root {
+  --scrollbar-width: 10px;
+  --scrollbar-thumb-bg: #3b1e54;
+  --scrollbar-thumb-hover-bg: #562b7a;
+  --scrollbar-track-bg: #eeeeee;
+  --scrollbar-thumb-radius: 5px;
+}
+
+/* Applies to all scrollable elements */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width); /* Set the width of the vertical scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-bg); /* Scrollbar thumb color */
+  border-radius: var(--scrollbar-thumb-radius); /* Rounded edges */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-bg); /* Thumb color on hover */
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track-bg); /* Scrollbar track color */
+}
+
+.scrollable-container {
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox-specific setting for thin scrollbar */
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox colors */
 }

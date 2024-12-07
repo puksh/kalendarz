@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <SideBarComponent @navigate="handleNavigation" />
-    <main class="main-content">
+    <main class="main-content scrollable-container">
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
       <SettingsComponent v-if="currentPage === 'SettingsComponent'" />

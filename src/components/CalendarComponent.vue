@@ -14,6 +14,11 @@
       <button @click="cancel">Cancel</button>
     </div>
   </section>
+  <section class="monthChange">
+    <button class="buttonMonthChange" @click="changeMonth(-1)">&#8249</button>
+    <span> {{ monthYear }} </span>
+    <button class="buttonMonthChange" @click="changeMonth(1)">&#8250</button>
+  </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
     <section class="calendar">
@@ -113,9 +118,6 @@
       </div>
     </section>
   </div>
-  <button class="buttonMonthChange" @click="changeMonth(-1)">⇐</button>
-  <span> {{ monthYear }} </span>
-  <button class="buttonMonthChange" @click="changeMonth(1)">⇒</button>
 
   <section>
     <!-- People List Section -->
@@ -598,6 +600,28 @@ export default {
   background-color: var(--color-background);
 }
 
+/* Month Change top bar */
+.monthChange {
+  position: fixed;
+  top: 0; /* Fixed to the top */
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: var(--color-primary);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+.buttonMonthChange {
+  color: var(--color-text-dark);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: xx-large;
+  transition: background-color 0.3s ease;
+  padding-bottom: var(--spacing-small);
+  line-height: 16px;
+}
 /* Days Header styles */
 .days-header {
   display: flex;
@@ -679,10 +703,10 @@ export default {
 
 /* Shift Types Colors */
 .day {
-  background-color: var(--color-day);
+  background-color: var(--color-day) !important;
 }
 .night {
-  background-color: var(--color-night);
+  background-color: var(--color-night) !important;
 }
 
 /* Button Styles */
@@ -727,20 +751,6 @@ export default {
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-modal);
   text-align: center;
-}
-
-/* Month Change Button */
-.buttonMonthChange {
-  background-color: var(--color-button-bg);
-  color: var(--color-text-light);
-  border: none;
-  border-radius: var(--border-radius-small);
-  cursor: pointer;
-  font-size: var(--font-size-large);
-  transition: background-color 0.3s ease;
-  margin: var(--spacing-medium) var(--spacing-medium) 0 var(--spacing-medium);
-  padding-bottom: var(--spacing-small);
-  line-height: 16px;
 }
 
 /* Changes Highlight */
