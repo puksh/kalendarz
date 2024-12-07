@@ -15,9 +15,9 @@
     </div>
   </section>
   <section class="monthChange">
-    <button class="buttonMonthChange" @click="changeMonth(-1)">&#8249</button>
+    <button class="buttonMonthChange" @click="changeMonth(-1)">&#8249;</button>
     <span> {{ monthYear }} </span>
-    <button class="buttonMonthChange" @click="changeMonth(1)">&#8250</button>
+    <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
@@ -186,70 +186,69 @@ export default {
       this.draggedPerson = person;
     },
     handleDrop(date, shiftType) {
-  if (this.draggedPerson) {
-    const day = this.monthDays.find(
-      (day) => day.date.toDateString() === date.toDateString()
-    );
-
-    if (day) {
-      const previousValue = day[shiftType];
-
-      // Temporarily update to test uniqueness
-      const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
-
-      if (
-        tempShifts.dayShift1 !== tempShifts.dayShift2 &&
-        tempShifts.nightShift1 !== tempShifts.nightShift2
-      ) {
-        day[shiftType] = this.draggedPerson.id;
-        day[`${shiftType}Name`] = this.draggedPerson.name;
-
-        const updatedData = {
-          dayShift1: day.dayShift1,
-          dayShift2: day.dayShift2,
-          nightShift1: day.nightShift1,
-          nightShift2: day.nightShift2,
-        };
-
-        this.localData[date.toDateString()] = updatedData;
-        localStorage.setItem(
-          date.toDateString(),
-          JSON.stringify(updatedData)
+      if (this.draggedPerson) {
+        const day = this.monthDays.find(
+          (day) => day.date.toDateString() === date.toDateString()
         );
 
-        if (!this.changedShifts[date.toDateString()]) {
-          this.changedShifts[date.toDateString()] = {};
+        if (day) {
+          const previousValue = day[shiftType];
+
+          // Temporarily update to test uniqueness
+          const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
+
+          if (
+            tempShifts.dayShift1 !== tempShifts.dayShift2 &&
+            tempShifts.nightShift1 !== tempShifts.nightShift2
+          ) {
+            day[shiftType] = this.draggedPerson.id;
+            day[`${shiftType}Name`] = this.draggedPerson.name;
+
+            const updatedData = {
+              dayShift1: day.dayShift1,
+              dayShift2: day.dayShift2,
+              nightShift1: day.nightShift1,
+              nightShift2: day.nightShift2,
+            };
+
+            this.localData[date.toDateString()] = updatedData;
+            localStorage.setItem(
+              date.toDateString(),
+              JSON.stringify(updatedData)
+            );
+
+            if (!this.changedShifts[date.toDateString()]) {
+              this.changedShifts[date.toDateString()] = {};
+            }
+            this.changedShifts[date.toDateString()][shiftType] = {
+              from: previousValue,
+              to: this.draggedPerson.id,
+            };
+
+            sessionStorage.setItem(
+              "changedShifts",
+              JSON.stringify(this.changedShifts)
+            );
+
+            this.madeChanges = true;
+          } else {
+            // Drop the action if the check fails
+            addNotification("Shifts must not overlap.", "red");
+          }
+
+          this.draggedPerson = null;
         }
-        this.changedShifts[date.toDateString()][shiftType] = {
-          from: previousValue,
-          to: this.draggedPerson.id,
-        };
-
-        sessionStorage.setItem(
-          "changedShifts",
-          JSON.stringify(this.changedShifts)
-        );
-
-        this.madeChanges = true;
-      } else {
-        // Drop the action if the check fails
-        addNotification("Shifts must not overlap.", "red");
       }
-
-      this.draggedPerson = null;
-    }
-  }
-}
-,
+    },
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
-      if (day[shift]) {
+      if (day[shift] !== null) {
         // Save the previous value before resetting
         const previousValue = day[shift];
 
         // Set the shift to empty
         day[shift] = null;
-        day[shift + "Name"] = null; // Clear the name field as well (e.g., nightShift2Name)
+        day[shift + "Name"] = null; // Clear the name field as well
 
         // Save the updated day object in localStorage and in-memory data
         const updatedData = {
@@ -265,17 +264,42 @@ export default {
           JSON.stringify(updatedData)
         );
 
-        // Track the reset in changedShifts
-        if (!this.changedShifts[day.date.toDateString()]) {
-          this.changedShifts[day.date.toDateString()] = {};
-        }
-        this.changedShifts[day.date.toDateString()][shift] = {
-          from: previousValue,
-          to: null,
-        };
+        // Check if this change matches a null-to-null situation in changedShifts
+        const changeExists =
+          this.changedShifts?.[day.date.toDateString()]?.[shift];
+        if (changeExists && changeExists.from === null) {
+          delete this.changedShifts[day.date.toDateString()][shift];
 
-        // Notify the change and mark changes made
-        this.madeChanges = true; // Track changes
+          // Clean up the date entry if no shifts remain
+          if (
+            Object.keys(this.changedShifts[day.date.toDateString()]).length ===
+            0
+          ) {
+            delete this.changedShifts[day.date.toDateString()];
+          }
+        } else {
+          // Otherwise, track the reset in changedShifts
+          if (!this.changedShifts[day.date.toDateString()]) {
+            this.changedShifts[day.date.toDateString()] = {};
+          }
+          this.changedShifts[day.date.toDateString()][shift] = {
+            from: previousValue,
+            to: null,
+          };
+        }
+
+        // Update sessionStorage
+        sessionStorage.setItem(
+          "changedShifts",
+          JSON.stringify(this.changedShifts)
+        );
+
+        // Check if changedShifts is empty and update madeChanges
+        if (Object.keys(this.changedShifts).length === 0) {
+          this.madeChanges = false;
+        } else {
+          this.madeChanges = true;
+        }
       }
     },
     resolvePersonName(id) {
