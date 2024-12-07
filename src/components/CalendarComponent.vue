@@ -51,6 +51,7 @@
                       changedShifts[day.date.toDateString()]?.dayShift1,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift1,
+                    ratownik: day.dayShift1Ratownik === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
@@ -68,6 +69,7 @@
                       changedShifts[day.date.toDateString()]?.dayShift2,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift2,
+                    ratownik: day.dayShift2Ratownik === true,
                   }"
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
@@ -84,6 +86,7 @@
                       changedShifts[day.date.toDateString()]?.nightShift1,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift1,
+                    ratownik: day.nightShift1Ratownik === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
@@ -101,6 +104,7 @@
                       changedShifts[day.date.toDateString()]?.nightShift2,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift2,
+                    ratownik: day.nightShift2Ratownik === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
@@ -127,6 +131,7 @@
         v-for="person in people"
         :key="person.id"
         class="person-item"
+        :style="{ borderColor: person.ratownik ? 'orange' : '' }"
         draggable="true"
         @dragstart="startDrag(person)"
       >
@@ -155,18 +160,20 @@ export default {
       currentDate: new Date(),
       draggedPerson: null,
       people: [
-        { id: 1, name: "Milena" },
-        { id: 2, name: "Mikołaj" },
-        { id: 3, name: "Aleksandra" },
-        { id: 4, name: "Łukasz" },
-        { id: 5, name: "Joanna" },
-        { id: 6, name: "Natalia" },
-        { id: 7, name: "Marcin" },
+        { id: 1, name: "Milena", ratownik: false },
+        { id: 2, name: "Mikołaj", ratownik: false },
+        { id: 3, name: "Aleksandra", ratownik: false },
+        { id: 4, name: "Łukasz", ratownik: true },
+        { id: 5, name: "Joanna", ratownik: true },
+        { id: 6, name: "Natalia", ratownik: true },
+        { id: 7, name: "Marcin", ratownik: true },
+        { id: 8, name: "Alina", ratownik: false },
+        { id: 9, name: "Ewelina", ratownik: false },
+        { id: 7, name: "Teresa", ratownik: false },
       ],
       madeChanges: false,
       showPasswordModal: false,
       password: "",
-      githubToken: import.meta.env.VITE_TOKEN,
       locale: "pl",
     };
   },
@@ -191,56 +198,67 @@ export default {
           (day) => day.date.toDateString() === date.toDateString()
         );
 
-        if (day) {
-          const previousValue = day[shiftType];
+        const previousValue = day[shiftType];
 
-          // Temporarily update to test uniqueness
-          const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
-          if (
-            (tempShifts.dayShift1 != null &&
-              tempShifts.dayShift2 != null &&
-              tempShifts.dayShift1 === tempShifts.dayShift2) ||
-            (tempShifts.nightShift1 != null &&
-              tempShifts.nightShift2 != null &&
-              tempShifts.nightShift1 === tempShifts.nightShift2)
-          ) {
-            addNotification("Ta sama osoba na obydwu zmianach.", "red");
-            return;
-          }
-          day[shiftType] = this.draggedPerson.id;
-          day[`${shiftType}Name`] = this.draggedPerson.name;
-
-          const updatedData = {
-            dayShift1: day.dayShift1,
-            dayShift2: day.dayShift2,
-            nightShift1: day.nightShift1,
-            nightShift2: day.nightShift2,
-          };
-
-          this.localData[date.toDateString()] = updatedData;
-          localStorage.setItem(
-            date.toDateString(),
-            JSON.stringify(updatedData)
-          );
-
-          if (!this.changedShifts[date.toDateString()]) {
-            this.changedShifts[date.toDateString()] = {};
-          }
-          this.changedShifts[date.toDateString()][shiftType] = {
-            from: previousValue,
-            to: this.draggedPerson.id,
-          };
-
-          sessionStorage.setItem(
-            "changedShifts",
-            JSON.stringify(this.changedShifts)
-          );
-
-          this.madeChanges = true;
-        } else {
-          // Drop the action if the check fails
-          addNotification("Shifts must not overlap.", "red");
+        // Temporarily update to test uniqueness
+        const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
+        if (
+          (tempShifts.dayShift1 != null &&
+            tempShifts.dayShift2 != null &&
+            tempShifts.dayShift1 === tempShifts.dayShift2) ||
+          (tempShifts.nightShift1 != null &&
+            tempShifts.nightShift2 != null &&
+            tempShifts.nightShift1 === tempShifts.nightShift2)
+        ) {
+          addNotification("Ta sama osoba na obydwu zmianach.", "red");
+          return;
         }
+        console.log(day.dayShift1Ratownik);
+        console.log(day.dayShift2Ratownik);
+        const isDraggedRatownik = this.draggedPerson.ratownik;
+
+        // Check if another ratownik is already assigned to the same shift type
+        const hasOtherRatownik =
+          (shiftType === "dayShift1" && day.dayShift2Ratownik) ||
+          (shiftType === "dayShift2" && day.dayShift1Ratownik) ||
+          (shiftType === "nightShift1" && day.nightShift2Ratownik) ||
+          (shiftType === "nightShift2" && day.nightShift1Ratownik);
+
+        if (isDraggedRatownik && hasOtherRatownik) {
+          addNotification(
+            "Nie można przypisać ratownika do tego samego rodzaju zmiany.",
+            "red"
+          );
+          return;
+        }
+
+        day[shiftType] = this.draggedPerson.id;
+        day[`${shiftType}Name`] = this.draggedPerson.name;
+
+        const updatedData = {
+          dayShift1: day.dayShift1,
+          dayShift2: day.dayShift2,
+          nightShift1: day.nightShift1,
+          nightShift2: day.nightShift2,
+        };
+
+        this.localData[date.toDateString()] = updatedData;
+        localStorage.setItem(date.toDateString(), JSON.stringify(updatedData));
+
+        if (!this.changedShifts[date.toDateString()]) {
+          this.changedShifts[date.toDateString()] = {};
+        }
+        this.changedShifts[date.toDateString()][shiftType] = {
+          from: previousValue,
+          to: this.draggedPerson.id,
+        };
+
+        sessionStorage.setItem(
+          "changedShifts",
+          JSON.stringify(this.changedShifts)
+        );
+
+        this.madeChanges = true;
 
         this.draggedPerson = null;
       }
@@ -309,8 +327,11 @@ export default {
     },
     resolvePersonName(id) {
       const person = this.people.find((person) => person.id === id);
-      return person ? person.name : "Not assigned";
+      return person
+        ? { name: person.name, isRatownik: person.ratownik }
+        : { name: "Not assigned", isRatownik: false };
     },
+
     generateMonthDays() {
       const year = this.selectedYear;
       const month = this.selectedMonth;
@@ -388,6 +409,7 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
       this.changedShifts = {};
+      addNotification("Zmiany zapisano :3 !", "green");
     },
 
     async fetchServerShiftData() {
@@ -548,11 +570,22 @@ export default {
               day.nightShift1 = parsedStates.nightShift1;
               day.nightShift2 = parsedStates.nightShift2;
 
-              // Resolve names
-              day.dayShift1Name = this.resolvePersonName(day.dayShift1);
-              day.dayShift2Name = this.resolvePersonName(day.dayShift2);
-              day.nightShift1Name = this.resolvePersonName(day.nightShift1);
-              day.nightShift2Name = this.resolvePersonName(day.nightShift2);
+              // Resolve names with ratownik data
+              const dayShift1Data = this.resolvePersonName(day.dayShift1);
+              day.dayShift1Name = dayShift1Data.name;
+              day.dayShift1Ratownik = dayShift1Data.isRatownik;
+
+              const dayShift2Data = this.resolvePersonName(day.dayShift2);
+              day.dayShift2Name = dayShift2Data.name;
+              day.dayShift2Ratownik = dayShift2Data.isRatownik;
+
+              const nightShift1Data = this.resolvePersonName(day.nightShift1);
+              day.nightShift1Name = nightShift1Data.name;
+              day.nightShift1Ratownik = nightShift1Data.isRatownik;
+
+              const nightShift2Data = this.resolvePersonName(day.nightShift2);
+              day.nightShift2Name = nightShift2Data.name;
+              day.nightShift2Ratownik = nightShift2Data.isRatownik;
             }
           } catch (error) {
             addNotification("Failed to load local data: " + error, "red");
@@ -560,6 +593,7 @@ export default {
         }
       }
     },
+
     resetSyncedChangesSessionStorage() {
       // Load synced changes from sessionStorage
       const savedSyncedChanges = sessionStorage.getItem("syncedChanges");
@@ -842,12 +876,79 @@ export default {
   justify-content: center;
   align-items: center;
 }
+/* Base modal container styles */
 .modal-content {
-  background-color: var(--color-modal-content-bg);
-  padding: var(--spacing-large);
-  border-radius: var(--border-radius-large);
-  box-shadow: var(--shadow-modal);
+  background-color: var(--color-modal-content-bg, rgba(255, 255, 255, 0.95));
+  padding: var(--spacing-large, 1.5rem);
+  border-radius: var(--border-radius-large, 12px);
+  box-shadow: var(--shadow-modal, 0 4px 10px rgba(0, 0, 0, 0.2));
   text-align: center;
+  max-width: 400px;
+  width: 90%;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Password Input */
+.modal-content input[type="password"] {
+  max-width: 400px;
+  padding: 0.8rem;
+  margin: 10px 0;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: var(--border-radius-small, 4px);
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.modal-content input[type="password"]:focus {
+  box-shadow: 0 0 5px var(--color-primary, #7e5bef);
+}
+
+/* Button styles */
+.modal-content button {
+  background-color: var(--color-button-bg, #7e5bef);
+  color: var(--color-text-light, #ffffff);
+  padding: 0.8rem 1.2rem;
+  margin: 5px;
+  border: none;
+  border-radius: var(--border-radius-small, 4px);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.modal-content button:hover {
+  background-color: var(--color-button-hover-bg, #9b7ebd);
+  transform: scale(1.05);
+}
+
+.modal-content button:active {
+  transform: scale(0.95);
+}
+
+/* Responsive Modal */
+@media (max-width: 500px) {
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .modal-content input[type="password"] {
+    font-size: 14px;
+  }
+
+  .modal-content button {
+    font-size: 14px;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Changes Highlight */
@@ -861,5 +962,9 @@ export default {
   background-color: var(
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
+}
+.ratownik {
+  color: orange !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 </style>
