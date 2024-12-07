@@ -196,48 +196,53 @@ export default {
 
           // Temporarily update to test uniqueness
           const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
-
           if (
-            tempShifts.dayShift1 !== tempShifts.dayShift2 &&
-            tempShifts.nightShift1 !== tempShifts.nightShift2
+            (tempShifts.dayShift1 != null &&
+              tempShifts.dayShift2 != null &&
+              tempShifts.dayShift1 === tempShifts.dayShift2) ||
+            (tempShifts.nightShift1 != null &&
+              tempShifts.nightShift2 != null &&
+              tempShifts.nightShift1 === tempShifts.nightShift2)
           ) {
-            day[shiftType] = this.draggedPerson.id;
-            day[`${shiftType}Name`] = this.draggedPerson.name;
-
-            const updatedData = {
-              dayShift1: day.dayShift1,
-              dayShift2: day.dayShift2,
-              nightShift1: day.nightShift1,
-              nightShift2: day.nightShift2,
-            };
-
-            this.localData[date.toDateString()] = updatedData;
-            localStorage.setItem(
-              date.toDateString(),
-              JSON.stringify(updatedData)
-            );
-
-            if (!this.changedShifts[date.toDateString()]) {
-              this.changedShifts[date.toDateString()] = {};
-            }
-            this.changedShifts[date.toDateString()][shiftType] = {
-              from: previousValue,
-              to: this.draggedPerson.id,
-            };
-
-            sessionStorage.setItem(
-              "changedShifts",
-              JSON.stringify(this.changedShifts)
-            );
-
-            this.madeChanges = true;
-          } else {
-            // Drop the action if the check fails
-            addNotification("Shifts must not overlap.", "red");
+            addNotification("Ta sama osoba na obydwu zmianach.", "red");
+            return;
           }
+          day[shiftType] = this.draggedPerson.id;
+          day[`${shiftType}Name`] = this.draggedPerson.name;
 
-          this.draggedPerson = null;
+          const updatedData = {
+            dayShift1: day.dayShift1,
+            dayShift2: day.dayShift2,
+            nightShift1: day.nightShift1,
+            nightShift2: day.nightShift2,
+          };
+
+          this.localData[date.toDateString()] = updatedData;
+          localStorage.setItem(
+            date.toDateString(),
+            JSON.stringify(updatedData)
+          );
+
+          if (!this.changedShifts[date.toDateString()]) {
+            this.changedShifts[date.toDateString()] = {};
+          }
+          this.changedShifts[date.toDateString()][shiftType] = {
+            from: previousValue,
+            to: this.draggedPerson.id,
+          };
+
+          sessionStorage.setItem(
+            "changedShifts",
+            JSON.stringify(this.changedShifts)
+          );
+
+          this.madeChanges = true;
+        } else {
+          // Drop the action if the check fails
+          addNotification("Shifts must not overlap.", "red");
         }
+
+        this.draggedPerson = null;
       }
     },
     handleClickResetShift(day, shift) {
