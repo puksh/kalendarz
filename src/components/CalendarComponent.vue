@@ -186,54 +186,61 @@ export default {
       this.draggedPerson = person;
     },
     handleDrop(date, shiftType) {
-      if (this.draggedPerson) {
-        const day = this.monthDays.find(
-          (day) => day.date.toDateString() === date.toDateString()
+  if (this.draggedPerson) {
+    const day = this.monthDays.find(
+      (day) => day.date.toDateString() === date.toDateString()
+    );
+
+    if (day) {
+      const previousValue = day[shiftType];
+
+      // Temporarily update to test uniqueness
+      const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
+
+      if (
+        tempShifts.dayShift1 !== tempShifts.dayShift2 &&
+        tempShifts.nightShift1 !== tempShifts.nightShift2
+      ) {
+        day[shiftType] = this.draggedPerson.id;
+        day[`${shiftType}Name`] = this.draggedPerson.name;
+
+        const updatedData = {
+          dayShift1: day.dayShift1,
+          dayShift2: day.dayShift2,
+          nightShift1: day.nightShift1,
+          nightShift2: day.nightShift2,
+        };
+
+        this.localData[date.toDateString()] = updatedData;
+        localStorage.setItem(
+          date.toDateString(),
+          JSON.stringify(updatedData)
         );
 
-        if (day) {
-          // Save the previous value before updating
-          const previousValue = day[shiftType];
-
-          // Update the shift dynamically
-          day[shiftType] = this.draggedPerson.id; // Save ID
-          day[`${shiftType}Name`] = this.draggedPerson.name; // Save name
-
-          // Update localData and localStorage
-          const updatedData = {
-            dayShift1: day.dayShift1,
-            dayShift2: day.dayShift2,
-            nightShift1: day.nightShift1,
-            nightShift2: day.nightShift2,
-          };
-
-          this.localData[date.toDateString()] = updatedData;
-          localStorage.setItem(
-            date.toDateString(),
-            JSON.stringify(updatedData)
-          );
-
-          // Track changes made by the user in changedShifts
-          if (!this.changedShifts[date.toDateString()]) {
-            this.changedShifts[date.toDateString()] = {};
-          }
-          this.changedShifts[date.toDateString()][shiftType] = {
-            from: previousValue,
-            to: this.draggedPerson.id,
-          };
-
-          // Save changedShifts to sessionStorage
-          sessionStorage.setItem(
-            "changedShifts",
-            JSON.stringify(this.changedShifts)
-          );
-
-          // Notify change and reset dragged person
-          this.madeChanges = true;
-          this.draggedPerson = null;
+        if (!this.changedShifts[date.toDateString()]) {
+          this.changedShifts[date.toDateString()] = {};
         }
+        this.changedShifts[date.toDateString()][shiftType] = {
+          from: previousValue,
+          to: this.draggedPerson.id,
+        };
+
+        sessionStorage.setItem(
+          "changedShifts",
+          JSON.stringify(this.changedShifts)
+        );
+
+        this.madeChanges = true;
+      } else {
+        // Drop the action if the check fails
+        addNotification("Shifts must not overlap.", "red");
       }
-    },
+
+      this.draggedPerson = null;
+    }
+  }
+}
+,
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift]) {
