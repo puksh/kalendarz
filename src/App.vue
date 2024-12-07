@@ -45,15 +45,6 @@ export default {
 </script>
 
 <style>
-* {
-  font-family: "IBMPlexMono", monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  image-rendering: pixelated;
-}
-body::-webkit-scrollbar {
-  display: none; /* Hide scrollbar on Chrome, Safari */
-}
 .main-content {
   padding: 20px;
   max-width: 100%;

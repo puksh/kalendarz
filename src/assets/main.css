@@ -6,8 +6,8 @@
 	--color-shadow: rgba(0, 0, 0, 0.4);
 	--color-border: #ddd;
 	--color-empty-slot: #494949;
-	--color-day: #aaddf5;
-	--color-night: #83d8ff;
+	--color-day: #66c6f3;
+	--color-night: #2581ac;
 	--color-modal-bg: rgba(0, 0, 0, 0.5);
 	--color-modal-content-bg: #fff;
 	--color-button-bg: #3b1e54;
@@ -20,7 +20,7 @@
 
 	/* Font Sizes */
 	--font-size-small: 0.8em;
-	--font-size-medium: 20px;
+	--font-size-medium: 16px;
 	--font-size-large: 24px;
 	/* Spacing */
 	--spacing-small: 4px;
@@ -41,40 +41,39 @@
 	--shadow-drop: 0px 3px 6px var(--color-shadow);
 	--shadow-modal: 0 2px 4px var(--color-shadow);
 
-	--glass-bg-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+	--glass-bg-color: rgba(173, 173, 173, 0.4); /* Semi-transparent background */
 	--glass-blur: 8px; /* Blur intensity */
-	--glass-border-color: rgba(255, 255, 255, 0.3); /* Border color */
+	--glass-border-color: rgba(455, 255, 255, 0.5); /* Border color */
 	--glass-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 
 	/* Drag */
 	--drag-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
 	--drag-scale: 1.05;
-}
-* {
-	text-rendering: optimizeSpeed;
-	image-rendering: crisp-edges;
-}
-body {
-	background-image: url("./assets/background.png");
-	background-size: cover;
-	background-color: var(--color-background);
-	background-attachment: fixed;
-	transition: color 0.5s, background-color 0.5s;
-	line-height: 1.6;
-	font-family: "IBMPlexMono", monospace;
-	font-size: 15px;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-:root {
+
+	/* Scrollbar */
+
 	--scrollbar-width: 10px;
-	--scrollbar-thumb-bg: rgba(59, 30, 84, 0.8);
+	--scrollbar-thumb-bg: var(--color-primary);
+	--scrollbar-thumb-bg-hover: var(--color-primary);
 	--scrollbar-thumb-hover-bg: rgba(86, 43, 122, 0.9);
 	--scrollbar-track-bg: rgba(238, 238, 238, 0.5);
 	--scrollbar-thumb-radius: 5px;
 }
-
+* {
+	font-family: "IBMPlexMono", monospace;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+body {
+	background-image: url("./assets/gwiazdki.gif");
+	background-color: var(--color-background);
+	background-attachment: fixed;
+	image-rendering: pixelated;
+	transition: color 0.5s, background-color 0.5s;
+	line-height: 1.6;
+	font-size: 15px;
+}
 /* Applies to all scrollable elements */
 ::-webkit-scrollbar {
 	width: var(--scrollbar-width); /* Set the width of the vertical scrollbar */

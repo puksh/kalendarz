@@ -640,7 +640,11 @@ export default {
   gap: var(--spacing-small);
   overflow-y: auto;
 }
-
+@media (max-width: 768px) {
+  .people-list {
+    width: 90%;
+  }
+}
 /* Header for people list */
 .people-list h3 {
   color: var(--color-text);
