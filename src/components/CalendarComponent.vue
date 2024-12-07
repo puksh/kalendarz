@@ -964,7 +964,6 @@ export default {
   ) !important; /* Highlight server-synced changes */
 }
 .ratownik {
-  color: orange !important;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  color: #ffffff !important;
 }
 </style>
