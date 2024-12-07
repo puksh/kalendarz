@@ -4,14 +4,14 @@
     @click="showPasswordPrompt"
     class="submit-button"
   >
-    Submit
+    Zapisz
   </button>
   <section v-if="showPasswordModal" class="modal">
     <div class="modal-content">
-      <p>Enter Password:</p>
+      <p>Wpisz hasło:</p>
       <input type="password" v-model="password" />
-      <button @click="authorize">Submit</button>
-      <button @click="cancel">Cancel</button>
+      <button @click="authorize">Zapisz</button>
+      <button @click="cancel">Anuluj</button>
     </div>
   </section>
   <section class="monthChange">
@@ -30,7 +30,7 @@
           @dragover.prevent
           @drop="handleDrop(day.date, 'day')"
         >
-          <div class="days-header">
+          <div>
             <div
               class="day-cell"
               :class="{ 'current-month': day.isCurrentMonth }"
@@ -119,10 +119,10 @@
     </section>
   </div>
 
-  <section>
+  <section class="people-list">
     <!-- People List Section -->
-    <div class="people-list">
-      <h3>Załoga</h3>
+    <h3>Zespół</h3>
+    <div class="person-list">
       <div
         v-for="person in people"
         :key="person.id"
@@ -586,28 +586,62 @@ export default {
 
 /* People Bar styles */
 .people-list {
-  margin-top: var(--spacing-large);
-  width: var(--width-people-bar);
   position: fixed;
+  top: var(--spacing-large);
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(30%); /* Center horizontally */
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
+  border-radius: 8px;
   padding: var(--spacing-large);
-  height: var(--height-people-bar);
+  gap: var(--spacing-small);
+  overflow-y: auto;
 }
+
+/* Header for people list */
 .people-list h3 {
   color: var(--color-text);
   filter: drop-shadow(var(--shadow-drop));
-}
-.person-item {
-  padding: 0.3rem;
-  color: var(--color-text);
-  background-color: var(--color-primary);
-  border-radius: var(--border-radius);
   margin-bottom: var(--spacing-medium);
-  cursor: grab;
-  text-align: center;
-  filter: drop-shadow(var(--shadow-drop));
 }
+.person-list {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-small);
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+/* Individual draggable people items */
+.person-item {
+  padding: 1ch;
+  color: var(--color-text);
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  border-radius: var(--border-radius);
+  text-align: center;
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.person-item:hover {
+  transform: scale(1.1);
+}
+
+.person-item.dragging {
+  cursor: grabbing;
+  transform: scale(1.1);
+}
+
 .person-item.grabbing {
   cursor: grabbing;
+  transform: scale(1.1);
 }
 
 /* Calendar styles */
@@ -634,15 +668,21 @@ export default {
 /* Month Change top bar */
 .monthChange {
   position: fixed;
-  top: 0; /* Fixed to the top */
+  top: 0;
   left: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  padding: 1ch 0;
   align-items: center;
   width: 100%;
-  background-color: var(--color-primary);
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
+  z-index: 1000;
 }
+
 .buttonMonthChange {
   color: var(--color-text-dark);
   background: transparent;
@@ -666,11 +706,19 @@ export default {
 
 /* Calendar Grid styles */
 .calendar-grid {
+  margin-top: 3ch;
   display: grid;
   grid-template-columns: repeat(31, 1fr);
   flex: 1;
   overflow-x: visible;
   scrollbar-width: auto;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
+  border-radius: 8px;
+  padding: var(--spacing-small);
 }
 
 /* Day (24h cycle) styles */
@@ -678,9 +726,10 @@ export default {
   display: flex;
   flex-direction: column;
 }
+
 .day-cell {
   flex: 1;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border-color);
   position: relative;
   flex-direction: column;
   display: flex;
@@ -688,7 +737,13 @@ export default {
   justify-content: center;
   padding: var(--spacing-small);
   width: var(--width-day-cell);
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-box-shadow);
+  border-radius: 4px;
 }
+
 .day-date {
   font-weight: bold;
 }
@@ -745,22 +800,28 @@ export default {
   position: fixed;
   bottom: 100px;
   right: 20px;
-  background-color: var(--color-button-bg);
-  color: var(--color-text-light);
-  border: none;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
   border-radius: var(--border-radius-small);
   padding: var(--spacing-medium) var(--spacing-large);
   cursor: pointer;
   font-size: var(--font-size-large);
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
   filter: drop-shadow(var(--shadow-drop));
+  box-shadow: var(--glass-box-shadow);
 }
-.submit-button:hover {
-  background-color: var(--color-button-hover-bg);
+
+.submit-button:hover:not(:disabled) {
+  background-color: rgba(200, 200, 255, 0.3);
+  transform: scale(1.1);
 }
+
 .submit-button:disabled {
   background-color: var(--color-button-disabled-bg);
   cursor: not-allowed;
+  filter: none;
 }
 
 /* Modal Styles */

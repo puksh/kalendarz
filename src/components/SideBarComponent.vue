@@ -1,13 +1,13 @@
 <template>
   <aside class="sidebar">
     <button @click="navigateTo('CalendarComponent')" class="sidebar-button">
-      Calendar
+      Harmonogram
     </button>
     <button @click="navigateTo('AboutComponent')" class="sidebar-button">
-      About
+      Info
     </button>
     <button @click="navigateTo('SettingsComponent')" class="sidebar-button">
-      Settings
+      Ustawienia
     </button>
   </aside>
 </template>
@@ -29,42 +29,50 @@ export default {
   left: 0;
   bottom: 0;
   width: 100%;
-  background-color: #3b1e54;
-  padding: 10px;
   display: flex;
-  flex-direction: row;
   justify-content: space-around;
-  z-index: 10; /* Ensures it stays on top of other content */
+  align-items: center;
+  padding: 10px;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
+  border-radius: 8px;
+  z-index: 10;
 }
 
+/* Sidebar buttons with glass effects */
 .sidebar-button {
-  background-color: #eeeeee;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
   color: #333;
+  width: 25%;
   height: 39px;
-  border-color: #3b1e54;
-  border-width: 1px;
-  flex: 1 1 33.33%; /* Make all buttons one-third of the width */
-  font-size: 14px;
-  padding: 0px;
-  margin: 0 auto;
-  cursor: pointer;
   border-radius: 8px;
+  font-size: 14px;
+  padding: 0;
+  margin: 0 5px;
+  cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
 }
+
 .sidebar-button:hover {
-  background-color: #9b7ebd;
+  background-color: rgba(155, 126, 189, 0.6);
   color: #222;
-  border-color: #9b7ebd;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  transform: scale(1.05) ease;
+  border-color: rgba(155, 126, 189, 0.6);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
 }
 
 .sidebar-button:active {
-  background-color: #562b7a;
+  background-color: rgba(86, 43, 122, 0.7);
   color: #111;
-  border-color: #562b7a;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-  transform: scale(0.95) ease;
+  border-color: rgba(86, 43, 122, 0.7);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  transform: scale(0.95);
 }
 </style>
