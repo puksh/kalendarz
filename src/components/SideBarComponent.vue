@@ -24,75 +24,47 @@ export default {
 </script>
 
 <style scoped>
-:root {
-  /* Sidebar Variables */
-  --sidebar-bg-color: #3b1e54;
-  --sidebar-padding: 10px;
-  --sidebar-z-index: 10;
-
-  /* Button Variables */
-  --button-bg-color: #eeeeee;
-  --button-text-color: #333;
-  --button-hover-bg-color: #9b7ebd;
-  --button-hover-text-color: #222;
-  --button-hover-border-color: #9b7ebd;
-  --button-active-bg-color: #562b7a;
-  --button-active-text-color: #111;
-  --button-active-border-color: #562b7a;
-  --button-height: 39px;
-  --button-border-radius: 8px;
-  --button-font-size: 14px;
-  --button-font-weight: bold;
-  --button-transition: all 0.3s ease;
-
-  /* Box Shadows */
-  --box-shadow-hover: 0 0 5px rgba(0, 0, 0, 0.1);
-  --box-shadow-active: inset 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
 .sidebar {
   position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
-  background-color: var(--sidebar-bg-color);
-  padding: var(--sidebar-padding);
+  background-color: #3b1e54;
+  padding: 10px;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  z-index: var(
-    --sidebar-z-index
-  ); /* Ensures it stays on top of other content */
+  z-index: 10; /* Ensures it stays on top of other content */
 }
 
 .sidebar-button {
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  height: var(--button-height);
-  border: 1px solid var(--sidebar-bg-color);
+  background-color: #eeeeee;
+  color: #333;
+  height: 39px;
+  border-color: #3b1e54;
+  border-width: 1px;
   flex: 1 1 33.33%; /* Make all buttons one-third of the width */
-  font-size: var(--button-font-size);
-  padding: 0;
+  font-size: 14px;
+  padding: 0px;
   margin: 0 auto;
   cursor: pointer;
-  border-radius: var(--button-border-radius);
-  transition: var(--button-transition);
-  font-weight: var(--button-font-weight);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: bold;
 }
-
 .sidebar-button:hover {
-  background-color: var(--button-hover-bg-color);
-  color: var(--button-hover-text-color);
-  border-color: var(--button-hover-border-color);
-  box-shadow: var(--box-shadow-hover);
-  transform: scale(1.05);
+  background-color: #9b7ebd;
+  color: #222;
+  border-color: #9b7ebd;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05) ease;
 }
 
 .sidebar-button:active {
-  background-color: var(--button-active-bg-color);
-  color: var(--button-active-text-color);
-  border-color: var(--button-active-border-color);
-  box-shadow: var(--box-shadow-active);
-  transform: scale(0.95);
+  background-color: #562b7a;
+  color: #111;
+  border-color: #562b7a;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  transform: scale(0.95) ease;
 }
 </style>
