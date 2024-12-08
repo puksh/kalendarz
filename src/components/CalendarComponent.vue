@@ -19,9 +19,9 @@
     <span> {{ monthYear }} </span>
     <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
   </section>
-  <div class="calendar-container">
+  <div>
     <!-- Calendar Section -->
-    <section class="calendar">
+    <section class="calendar-container scrollable-container">
       <div class="calendar-grid">
         <div
           v-for="(day, index) in monthDays"
@@ -126,16 +126,33 @@
   <section class="people-list">
     <!-- People List Section -->
     <h3>Zespół</h3>
-    <div class="person-list">
-      <div
-        v-for="person in people"
-        :key="person.id"
-        class="person-item"
-        :style="{ borderColor: person.ratownik ? 'orange' : '' }"
-        draggable="true"
-        @dragstart="startDrag(person)"
-      >
-        {{ person.name }}
+    <div>
+      <!-- Ratowniks List -->
+      <h4>Ratownicy</h4>
+      <div class="person-lists">
+        <div
+          v-for="person in people.filter((p) => p.ratownik)"
+          :key="person.id"
+          class="person-item ratownik"
+          draggable="true"
+          @dragstart="startDrag(person)"
+        >
+          {{ person.name }}
+        </div>
+      </div>
+
+      <!-- Non-Ratowniks List -->
+      <h4>Inni Pracownicy</h4>
+      <div class="person-lists">
+        <div
+          v-for="person in people.filter((p) => !p.ratownik)"
+          :key="person.id"
+          class="person-item"
+          draggable="true"
+          @dragstart="startDrag(person)"
+        >
+          {{ person.name }}
+        </div>
       </div>
     </div>
   </section>
@@ -175,6 +192,7 @@ export default {
       showPasswordModal: false,
       password: "",
       locale: "pl",
+      filteredPersonId: null,
     };
   },
   computed: {
@@ -193,75 +211,84 @@ export default {
       this.draggedPerson = person;
     },
     handleDrop(date, shiftType) {
-      if (this.draggedPerson) {
-        const day = this.monthDays.find(
-          (day) => day.date.toDateString() === date.toDateString()
-        );
+      // Is user actually dragging a person
+      if (!this.draggedPerson) return;
+      const day = this.monthDays.find(
+        (day) => day.date.toDateString() === date.toDateString()
+      );
 
-        const previousValue = day[shiftType];
+      const previousValue = day[shiftType];
 
-        // Temporarily update to test uniqueness
-        const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
-        if (
-          (tempShifts.dayShift1 != null &&
-            tempShifts.dayShift2 != null &&
-            tempShifts.dayShift1 === tempShifts.dayShift2) ||
-          (tempShifts.nightShift1 != null &&
-            tempShifts.nightShift2 != null &&
-            tempShifts.nightShift1 === tempShifts.nightShift2)
-        ) {
-          addNotification("Ta sama osoba na obydwu zmianach.", "red");
-          return;
-        }
-        console.log(day.dayShift1Ratownik);
-        console.log(day.dayShift2Ratownik);
-        const isDraggedRatownik = this.draggedPerson.ratownik;
-
-        // Check if another ratownik is already assigned to the same shift type
-        const hasOtherRatownik =
-          (shiftType === "dayShift1" && day.dayShift2Ratownik) ||
-          (shiftType === "dayShift2" && day.dayShift1Ratownik) ||
-          (shiftType === "nightShift1" && day.nightShift2Ratownik) ||
-          (shiftType === "nightShift2" && day.nightShift1Ratownik);
-
-        if (isDraggedRatownik && hasOtherRatownik) {
-          addNotification(
-            "Nie można przypisać ratownika do tego samego rodzaju zmiany.",
-            "red"
-          );
-          return;
-        }
-
-        day[shiftType] = this.draggedPerson.id;
-        day[`${shiftType}Name`] = this.draggedPerson.name;
-
-        const updatedData = {
-          dayShift1: day.dayShift1,
-          dayShift2: day.dayShift2,
-          nightShift1: day.nightShift1,
-          nightShift2: day.nightShift2,
-        };
-
-        this.localData[date.toDateString()] = updatedData;
-        localStorage.setItem(date.toDateString(), JSON.stringify(updatedData));
-
-        if (!this.changedShifts[date.toDateString()]) {
-          this.changedShifts[date.toDateString()] = {};
-        }
-        this.changedShifts[date.toDateString()][shiftType] = {
-          from: previousValue,
-          to: this.draggedPerson.id,
-        };
-
-        sessionStorage.setItem(
-          "changedShifts",
-          JSON.stringify(this.changedShifts)
-        );
-
-        this.madeChanges = true;
-
-        this.draggedPerson = null;
+      // Temporarily update to test uniqueness
+      const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
+      if (
+        (tempShifts.dayShift1 != null &&
+          tempShifts.dayShift2 != null &&
+          tempShifts.dayShift1 === tempShifts.dayShift2) ||
+        (tempShifts.nightShift1 != null &&
+          tempShifts.nightShift2 != null &&
+          tempShifts.nightShift1 === tempShifts.nightShift2)
+      ) {
+        addNotification("Ta sama osoba na obydwu zmianach.", "red");
+        return;
       }
+
+      const isDraggedRatownik = this.draggedPerson.ratownik;
+
+      // Check if another ratownik is already assigned to the same shift type
+      let hasOtherRatownik = false;
+
+      switch (shiftType) {
+        case "dayShift1":
+          hasOtherRatownik = day.dayShift2Ratownik;
+          break;
+        case "dayShift2":
+          hasOtherRatownik = day.dayShift1Ratownik;
+          break;
+        case "nightShift1":
+          hasOtherRatownik = day.nightShift2Ratownik;
+          break;
+        case "nightShift2":
+          hasOtherRatownik = day.nightShift1Ratownik;
+          break;
+      }
+      if (isDraggedRatownik && hasOtherRatownik) {
+        addNotification(
+          "Nie można przypisać dwóch ratowniów na jedną zmianę.",
+          "red"
+        );
+        return;
+      }
+
+      day[shiftType] = this.draggedPerson.id;
+      day[`${shiftType}Name`] = this.draggedPerson.name;
+
+      const updatedData = {
+        dayShift1: day.dayShift1,
+        dayShift2: day.dayShift2,
+        nightShift1: day.nightShift1,
+        nightShift2: day.nightShift2,
+      };
+
+      this.localData[date.toDateString()] = updatedData;
+      localStorage.setItem(date.toDateString(), JSON.stringify(updatedData));
+
+      if (!this.changedShifts[date.toDateString()]) {
+        this.changedShifts[date.toDateString()] = {};
+      }
+      this.changedShifts[date.toDateString()][shiftType] = {
+        from: previousValue,
+        to: this.draggedPerson.id,
+      };
+
+      sessionStorage.setItem(
+        "changedShifts",
+        JSON.stringify(this.changedShifts)
+      );
+
+      this.madeChanges = true;
+
+      this.draggedPerson = null;
     },
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
@@ -616,59 +643,49 @@ export default {
 </script>
 
 <style scoped>
-.calendar-container {
-  display: flex;
-  height: 100vh;
-  height: auto;
-  max-width: 1600px;
-}
-
 /* People Bar styles */
 .people-list {
-  position: fixed;
-  top: var(--spacing-large);
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(30%); /* Center horizontally */
+  width: 40% 600px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   box-shadow: var(--glass-box-shadow);
   border-radius: 8px;
-  padding: var(--spacing-large);
+  align-self: center;
+  margin: 10px 0;
+}
+
+/* Header for people list */
+.people-list h3 {
+  color: var(--color-text);
+  filter: drop-shadow(var(--shadow-drop));
+}
+.person-lists {
+  width: 90%;
   gap: var(--spacing-small);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: var(--spacing-small) auto;
+  align-items: center;
+  flex-wrap: wrap;
 }
 @media (max-width: 768px) {
   .people-list {
     width: 90%;
   }
 }
-/* Header for people list */
-.people-list h3 {
-  color: var(--color-text);
-  filter: drop-shadow(var(--shadow-drop));
-  margin-bottom: var(--spacing-medium);
-}
-.person-list {
-  display: flex;
-  flex-direction: row;
-  gap: var(--spacing-small);
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-}
 /* Individual draggable people items */
 .person-item {
   padding: 1ch;
+  width: auto 30%;
   color: var(--color-text);
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   border-radius: var(--border-radius);
-  text-align: center;
   cursor: grab;
   transition: transform 0.2s ease;
 }
@@ -688,12 +705,22 @@ export default {
 }
 
 /* Calendar styles */
-.calendar {
+.calendar-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-x: visible;
+  position: relative;
 }
+/* Calendar Grid styles */
+.calendar-grid {
+  margin-top: 3ch;
+  display: grid;
+  grid-template-columns: repeat(31, 1fr);
+  border-radius: 8px;
+  position: relative;
+  min-width: 100%;
+}
+
 .calendar-header {
   text-align: center;
   position: fixed;
@@ -745,23 +772,6 @@ export default {
   flex: 1;
   text-align: center;
   font-weight: bold;
-}
-
-/* Calendar Grid styles */
-.calendar-grid {
-  margin-top: 3ch;
-  display: grid;
-  grid-template-columns: repeat(31, 1fr);
-  flex: 1;
-  overflow-x: visible;
-  scrollbar-width: auto;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  border-radius: 8px;
-  padding: var(--spacing-small);
 }
 
 /* Day (24h cycle) styles */

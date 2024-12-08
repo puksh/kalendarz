@@ -99,7 +99,7 @@ body {
 }
 
 .scrollable-container {
-	overflow-y: auto;
+	overflow-x: scroll;
 	scrollbar-width: thin; /* Firefox's scrollbar width setting */
 	scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox colors */
 }

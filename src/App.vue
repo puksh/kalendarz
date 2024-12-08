@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <SideBarComponent @navigate="handleNavigation" />
-    <main class="main-content scrollable-container">
+    <main class="main-content">
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
       <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
@@ -49,6 +49,8 @@ export default {
   padding: 20px;
   max-width: 100%;
   text-align: center;
-  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 </style>
