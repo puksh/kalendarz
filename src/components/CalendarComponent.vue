@@ -21,7 +21,11 @@
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
-    <section class="scrollable-container">
+    <section
+      class="scrollable-container"
+      @wheel.prevent="handleScroll"
+      ref="scrollContainer"
+    >
       <div class="calendar-grid">
         <div
           v-for="(day, index) in monthDays"
@@ -192,7 +196,7 @@ export default {
       showPasswordModal: false,
       password: "",
       locale: "pl",
-      filteredPersonId: null,
+      scrollContainer: null,
     };
   },
   computed: {
@@ -204,6 +208,15 @@ export default {
           year: "numeric",
         }
       );
+    },
+
+    watch: {
+      shifts: {
+        deep: true,
+        handler(newShifts) {
+          localStorage.setItem("shifts", JSON.stringify(newShifts));
+        },
+      },
     },
   },
   methods: {
@@ -262,6 +275,7 @@ export default {
 
       day[shiftType] = this.draggedPerson.id;
       day[`${shiftType}Name`] = this.draggedPerson.name;
+      day[`${shiftType}Ratownik`] = this.draggedPerson.ratownik;
 
       const updatedData = {
         dayShift1: day.dayShift1,
@@ -299,6 +313,7 @@ export default {
         // Set the shift to empty
         day[shift] = null;
         day[shift + "Name"] = null; // Clear the name field as well
+        day[shift + "Ratownik"] = null; //Clear Ratownik data
 
         // Save the updated day object in localStorage and in-memory data
         const updatedData = {
@@ -572,7 +587,6 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
     },
-
     loadFromLocalStorage() {
       const year = this.selectedYear;
       const month = this.selectedMonth;
@@ -620,7 +634,6 @@ export default {
         }
       }
     },
-
     resetSyncedChangesSessionStorage() {
       // Load synced changes from sessionStorage
       const savedSyncedChanges = sessionStorage.getItem("syncedChanges");
@@ -634,10 +647,16 @@ export default {
         }, 5000);
       }
     },
+    handleScroll(event) {
+      if (this.scrollContainer) {
+        this.scrollContainer.scrollLeft += event.deltaY; // Scroll horizontally
+      }
+    },
   },
 
   async mounted() {
     await this.checkShiftDataSync(); // Then sync with remote data
+    this.scrollContainer = this.$refs.scrollContainer;
   },
 };
 </script>
@@ -781,6 +800,7 @@ export default {
 .day-column {
   display: flex;
   flex-direction: column;
+  scroll-snap-align: center;
 }
 
 .day-cell {
@@ -983,5 +1003,8 @@ export default {
 .ratownik {
   color: var(--color-text-light);
   text-shadow: 1.5px 1.5px 0 #000;
+}
+.scrollable-container {
+  scroll-snap-type: x mandatory;
 }
 </style>
