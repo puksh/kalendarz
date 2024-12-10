@@ -48,7 +48,7 @@ export default {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
-  color: #333;
+  color: var(--color-text-dark);
   width: 25%;
   height: 39px;
   border-radius: 8px;
@@ -62,7 +62,7 @@ export default {
 
 .sidebar-button:hover {
   background-color: rgba(155, 126, 189, 0.6);
-  color: #222;
+  color: var(--color-text-dark);
   border-color: rgba(155, 126, 189, 0.6);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   transform: scale(1.1);

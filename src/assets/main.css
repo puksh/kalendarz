@@ -2,7 +2,8 @@
 	/* Color Variables */
 	--color-background: #356b85;
 	--color-primary: #83d8ff;
-	--color-text: #fff;
+	--color-text-light: #ffffff;
+	--color-text-dark: #222;
 	--color-shadow: rgba(0, 0, 0, 0.4);
 	--color-border: #ddd;
 	--color-empty-slot: #494949;
@@ -16,7 +17,6 @@
 	--color-label-bg: #e0e0e0;
 	--color-user-changed: yellow;
 	--color-synced-changed: greenyellow;
-	--color-text-light: #fff;
 
 	/* Font Sizes */
 	--font-size-small: 0.8em;
@@ -41,7 +41,7 @@
 	--shadow-drop: 0px 3px 6px var(--color-shadow);
 	--shadow-modal: 0 2px 4px var(--color-shadow);
 
-	--glass-bg-color: rgba(173, 173, 173, 0.4); /* Semi-transparent background */
+	--glass-bg-color: rgba(255, 255, 255, 0.35); /* Semi-transparent background */
 	--glass-blur: 8px; /* Blur intensity */
 	--glass-border-color: rgba(455, 255, 255, 0.5); /* Border color */
 	--glass-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */

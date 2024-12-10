@@ -19,9 +19,9 @@
     <span> {{ monthYear }} </span>
     <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
   </section>
-  <div>
+  <div class="calendar-container">
     <!-- Calendar Section -->
-    <section class="calendar-container scrollable-container">
+    <section class="scrollable-container">
       <div class="calendar-grid">
         <div
           v-for="(day, index) in monthDays"
@@ -658,7 +658,7 @@ export default {
 
 /* Header for people list */
 .people-list h3 {
-  color: var(--color-text);
+  color: var(--color-text-dark);
   filter: drop-shadow(var(--shadow-drop));
 }
 .person-lists {
@@ -680,13 +680,14 @@ export default {
 .person-item {
   padding: 1ch;
   width: auto 30%;
-  color: var(--color-text);
+  color: var(--color-text-dark);
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   border-radius: var(--border-radius);
   cursor: grab;
+  font-weight: bold;
   transition: transform 0.2s ease;
 }
 
@@ -712,13 +713,15 @@ export default {
   position: relative;
 }
 /* Calendar Grid styles */
+.calendar-container {
+  position: relative;
+}
 .calendar-grid {
   margin-top: 3ch;
   display: grid;
   grid-template-columns: repeat(31, 1fr);
   border-radius: 8px;
   position: relative;
-  min-width: 100%;
 }
 
 .calendar-header {
@@ -726,7 +729,7 @@ export default {
   position: fixed;
   top: 0;
   left: calc(var(--width-people-bar) + var(--spacing-large));
-  color: var(--color-text);
+  color: var(--color-text-light);
   filter: drop-shadow(var(--shadow-drop));
   margin: 0;
   padding: var(--spacing-large);
@@ -978,6 +981,7 @@ export default {
   ) !important; /* Highlight server-synced changes */
 }
 .ratownik {
-  color: #ffffff !important;
+  color: var(--color-text-light);
+  text-shadow: 1.5px 1.5px 0 #000;
 }
 </style>
