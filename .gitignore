@@ -34,3 +34,4 @@ vueCalendar.code-workspace
 server/key.pem
 server/cert.pem
 server/shiftData.json
+server/error.txt
