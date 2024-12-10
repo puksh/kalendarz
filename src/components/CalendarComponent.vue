@@ -51,11 +51,10 @@
                 <div
                   class="shift-slot"
                   :class="{
-                    'user-changed':
-                      changedShifts[day.date.toDateString()]?.dayShift1,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift1,
                     ratownik: day.dayShift1Ratownik === true,
+                    userChanged: day.dayShift1UserChanged === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
@@ -69,11 +68,10 @@
                 <div
                   class="shift-slot"
                   :class="{
-                    'user-changed':
-                      changedShifts[day.date.toDateString()]?.dayShift2,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift2,
                     ratownik: day.dayShift2Ratownik === true,
+                    userChanged: day.dayShift2UserChanged === true,
                   }"
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
@@ -86,11 +84,10 @@
                 <div
                   class="shift-slot"
                   :class="{
-                    'user-changed':
-                      changedShifts[day.date.toDateString()]?.nightShift1,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift1,
                     ratownik: day.nightShift1Ratownik === true,
+                    userChanged: day.nightShift1UserChanged === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
@@ -104,11 +101,10 @@
                 <div
                   class="shift-slot"
                   :class="{
-                    'user-changed':
-                      changedShifts[day.date.toDateString()]?.nightShift2,
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift2,
                     ratownik: day.nightShift2Ratownik === true,
+                    userChanged: day.nightShift2UserChanged === true,
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
@@ -276,6 +272,7 @@ export default {
       day[shiftType] = this.draggedPerson.id;
       day[`${shiftType}Name`] = this.draggedPerson.name;
       day[`${shiftType}Ratownik`] = this.draggedPerson.ratownik;
+      day[`${shiftType}UserChanged`] = true;
 
       const updatedData = {
         dayShift1: day.dayShift1,
@@ -287,19 +284,6 @@ export default {
       this.localData[date.toDateString()] = updatedData;
       localStorage.setItem(date.toDateString(), JSON.stringify(updatedData));
 
-      if (!this.changedShifts[date.toDateString()]) {
-        this.changedShifts[date.toDateString()] = {};
-      }
-      this.changedShifts[date.toDateString()][shiftType] = {
-        from: previousValue,
-        to: this.draggedPerson.id,
-      };
-
-      sessionStorage.setItem(
-        "changedShifts",
-        JSON.stringify(this.changedShifts)
-      );
-
       this.madeChanges = true;
 
       this.draggedPerson = null;
@@ -307,13 +291,11 @@ export default {
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift] !== null) {
-        // Save the previous value before resetting
-        const previousValue = day[shift];
-
-        // Set the shift to empty
-        day[shift] = null;
-        day[shift + "Name"] = null; // Clear the name field as well
+        // Set the shift to emptys
+        day[shift] = "Usunięto";
+        day[shift + "Name"] = "Usunięto";
         day[shift + "Ratownik"] = null; //Clear Ratownik data
+        day[shift + "UserChanged"] = true; //Clear Ratownik data
 
         // Save the updated day object in localStorage and in-memory data
         const updatedData = {
@@ -329,42 +311,7 @@ export default {
           JSON.stringify(updatedData)
         );
 
-        // Check if this change matches a null-to-null situation in changedShifts
-        const changeExists =
-          this.changedShifts?.[day.date.toDateString()]?.[shift];
-        if (changeExists && changeExists.from === null) {
-          delete this.changedShifts[day.date.toDateString()][shift];
-
-          // Clean up the date entry if no shifts remain
-          if (
-            Object.keys(this.changedShifts[day.date.toDateString()]).length ===
-            0
-          ) {
-            delete this.changedShifts[day.date.toDateString()];
-          }
-        } else {
-          // Otherwise, track the reset in changedShifts
-          if (!this.changedShifts[day.date.toDateString()]) {
-            this.changedShifts[day.date.toDateString()] = {};
-          }
-          this.changedShifts[day.date.toDateString()][shift] = {
-            from: previousValue,
-            to: null,
-          };
-        }
-
-        // Update sessionStorage
-        sessionStorage.setItem(
-          "changedShifts",
-          JSON.stringify(this.changedShifts)
-        );
-
-        // Check if changedShifts is empty and update madeChanges
-        if (Object.keys(this.changedShifts).length === 0) {
-          this.madeChanges = false;
-        } else {
-          this.madeChanges = true;
-        }
+        this.madeChanges = true;
       }
     },
     resolvePersonName(id) {
@@ -708,6 +655,7 @@ export default {
   cursor: grab;
   font-weight: bold;
   transition: transform 0.2s ease;
+  user-select: none;
 }
 
 .person-item:hover {
@@ -801,6 +749,9 @@ export default {
   display: flex;
   flex-direction: column;
   scroll-snap-align: center;
+  margin: 0 1px 0 0;
+  border: 0;
+  padding: 0;
 }
 
 .day-cell {
@@ -856,6 +807,7 @@ export default {
   justify-content: center;
   font-size: var(--font-size-medium);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .shift-label {
@@ -989,14 +941,12 @@ export default {
 }
 
 /* Changes Highlight */
-.user-changed {
-  background-color: var(
-    --color-user-changed
-  ) !important; /* Highlight user-made changes */
+.userChanged {
+  color: var(--color-user-changed) !important; /* Highlight user-made changes */
 }
 
 .synced-changed {
-  background-color: var(
+  color: var(
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
 }
