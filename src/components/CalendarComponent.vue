@@ -37,7 +37,11 @@
           <div>
             <div
               class="day-cell"
-              :class="{ 'current-month': day.isCurrentMonth }"
+              :class="{
+                'current-month': day.isCurrentMonth,
+                'nd-color': daysOfWeek[day.date.getDay()] === 'Nd',
+                'sob-color': daysOfWeek[day.date.getDay()] === 'Sob',
+              }"
             >
               <div class="day-header">
                 {{ daysOfWeek[day.date.getDay()] }}
@@ -599,6 +603,11 @@ export default {
         this.scrollContainer.scrollLeft += event.deltaY; // Scroll horizontally
       }
     },
+    getDayClass(dayIndex) {
+      if (daysOfWeek[dayIndex] === "Nd") return "nd-color";
+      if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
+      return "normal-color";
+    },
   },
 
   async mounted() {
@@ -764,7 +773,7 @@ export default {
   justify-content: center;
   padding: var(--spacing-small);
   width: var(--width-day-cell);
-  background: var(--glass-bg-color);
+  background-color: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-box-shadow);
@@ -956,5 +965,21 @@ export default {
 }
 .scrollable-container {
   scroll-snap-type: x mandatory;
+}
+.nd-color {
+  background-color: rgba(112, 5, 5, 0.35);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-box-shadow);
+}
+
+.sob-color {
+  background-color: rgba(10, 88, 10, 0.35);
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-box-shadow);
+}
+
+.normal-color {
 }
 </style>
