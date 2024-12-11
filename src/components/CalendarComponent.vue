@@ -16,7 +16,7 @@
   </section>
   <section class="monthChange">
     <button class="buttonMonthChange" @click="changeMonth(-1)">&#8249;</button>
-    <span> {{ monthYear }} </span>
+    <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
     <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
   </section>
   <div class="calendar-container">
@@ -129,7 +129,7 @@
 
   <section class="people-list">
     <!-- People List Section -->
-    <h3>Zespół</h3>
+    <h3 style="font-weight: bold">Zespół</h3>
     <div>
       <!-- Ratowniks List -->
       <h4>Ratowniczki/cy</h4>
@@ -235,15 +235,6 @@ export default {
         }
       );
     },
-
-    watch: {
-      shifts: {
-        deep: true,
-        handler(newShifts) {
-          localStorage.setItem("shifts", JSON.stringify(newShifts));
-        },
-      },
-    },
   },
   methods: {
     startDrag(person) {
@@ -322,7 +313,7 @@ export default {
       // Check if the shift is assigned
       if (day[shift] !== null) {
         // Set the shift to emptys
-        day[shift] = "Usunięto";
+        day[shift] = "null";
         day[shift + "Name"] = "Usunięto";
         day[shift + "Ratownik"] = null; //Clear Ratownik data
         day[shift + "UserChanged"] = true; //Clear Ratownik data
@@ -340,6 +331,7 @@ export default {
           day.date.toDateString(),
           JSON.stringify(updatedData)
         );
+        day[shift] = "Usunięto";
 
         this.madeChanges = true;
       }
@@ -643,8 +635,6 @@ export default {
           day.nightShift1 === personId ||
           day.nightShift2 === personId
         ) {
-          console.log("Counting shift for person:", personId);
-
           return count + 1;
         }
         return count;
@@ -679,11 +669,6 @@ export default {
   margin: 10px 0;
 }
 
-/* Header for people list */
-.people-list h3 {
-  color: var(--color-text-dark);
-  filter: drop-shadow(var(--shadow-drop));
-}
 .person-lists {
   width: 90%;
   gap: var(--spacing-small);
