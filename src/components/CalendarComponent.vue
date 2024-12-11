@@ -132,7 +132,7 @@
     <h3>Zespół</h3>
     <div>
       <!-- Ratowniks List -->
-      <h4>Ratownicy</h4>
+      <h4>Ratowniczki/cy</h4>
       <div class="person-lists">
         <div
           v-for="person in people.filter((p) => p.ratownik)"
@@ -146,7 +146,7 @@
       </div>
 
       <!-- Non-Ratowniks List -->
-      <h4>Inni Pracownicy</h4>
+      <h4>Pielęgniarki/rze</h4>
       <div class="person-lists">
         <div
           v-for="person in people.filter((p) => !p.ratownik)"
@@ -157,6 +157,32 @@
         >
           {{ person.name }}
         </div>
+      </div>
+    </div>
+  </section>
+  <section class="shift-counts-window">
+    <h3>Ilość zmian</h3>
+    <div style="display: flex; flex-direction: row">
+      <div style="display: flex; flex-direction: column">
+        <h4>Ratowniczki/cy</h4>
+        <ul class="shift-counts">
+          <li
+            v-for="person in people.filter((p) => p.ratownik)"
+            :key="person.id"
+          >
+            {{ person.name }}:
+            <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
+          </li>
+        </ul>
+      </div>
+      <div style="display: flex; flex-direction: column">
+        <h4>Pielęgniarki/rze</h4>
+        <ul class="shift-counts">
+          <li v-for="person in people.filter((p) => !p.ratownik)">
+            {{ person.name }}:
+            <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
+          </li>
+        </ul>
       </div>
     </div>
   </section>
@@ -584,6 +610,7 @@ export default {
           }
         }
       }
+      this.calculateAllShiftCounts();
     },
     resetSyncedChangesSessionStorage() {
       // Load synced changes from sessionStorage
@@ -607,6 +634,27 @@ export default {
       if (daysOfWeek[dayIndex] === "Nd") return "nd-color";
       if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
       return "normal-color";
+    },
+    countShiftsForPerson(personId) {
+      return this.monthDays.reduce((count, day) => {
+        if (
+          day.dayShift1 === personId ||
+          day.dayShift2 === personId ||
+          day.nightShift1 === personId ||
+          day.nightShift2 === personId
+        ) {
+          console.log("Counting shift for person:", personId);
+
+          return count + 1;
+        }
+        return count;
+      }, 0);
+    },
+
+    calculateAllShiftCounts() {
+      this.people.forEach((person) => {
+        person.shiftCount = this.countShiftsForPerson(person.id);
+      });
     },
   },
 
@@ -979,7 +1027,19 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-box-shadow);
 }
-
-.normal-color {
+.shift-counts {
+  gap: var(--spacing-small);
+  flex-wrap: wrap;
+}
+.shift-counts-window {
+  width: 40% 600px;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  box-shadow: var(--glass-box-shadow);
+  border-radius: 8px;
+  align-self: center;
+  padding: var(--spacing-medium);
 }
 </style>
