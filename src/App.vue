@@ -45,10 +45,6 @@ export default {
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-}
 .main-content {
   padding: 20px;
   max-width: 100%;

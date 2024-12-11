@@ -14,10 +14,21 @@
       <button @click="cancel">Anuluj</button>
     </div>
   </section>
-  <section class="monthChange">
-    <button class="buttonMonthChange" @click="changeMonth(-1)">&#8249;</button>
-    <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
-    <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
+  <section>
+    <section class="monthChange">
+      <button class="buttonMonthChange" @click="changeMonth(-1)">
+        &#8249;
+      </button>
+      <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
+      <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
+    </section>
+    <button class="top-right-buttons" @click="checkShiftDataSync()">
+      <img
+        :src="'/assets/icons/refresh.svg'"
+        style="width: 30px; height: 30px; cursor: pointer"
+        alt="Refresh"
+      />
+    </button>
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
@@ -313,7 +324,7 @@ export default {
       // Check if the shift is assigned
       if (day[shift] !== null) {
         // Set the shift to emptys
-        day[shift] = "null";
+        day[shift] = null;
         day[shift + "Name"] = "Usunięto";
         day[shift + "Ratownik"] = null; //Clear Ratownik data
         day[shift + "UserChanged"] = true; //Clear Ratownik data
@@ -340,7 +351,7 @@ export default {
       const person = this.people.find((person) => person.id === id);
       return person
         ? { name: person.name, isRatownik: person.ratownik }
-        : { name: "Not assigned", isRatownik: false };
+        : { name: undefined, isRatownik: false };
     },
 
     generateMonthDays() {
@@ -775,6 +786,23 @@ export default {
   padding-bottom: var(--spacing-small);
   line-height: 16px;
 }
+.top-right-buttons {
+  border: none;
+  position: fixed;
+  top: 0;
+  right: 4px;
+  z-index: 1000;
+  height: 40px;
+  width: 40px;
+  color: #000;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  border-radius: var(--border-radius-small);
+  filter: drop-shadow(var(--shadow-drop));
+  box-shadow: var(--glass-box-shadow);
+}
 /* Days Header styles */
 .days-header {
   display: flex;
@@ -875,12 +903,12 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   border-radius: var(--border-radius-small);
+  filter: drop-shadow(var(--shadow-drop));
+  box-shadow: var(--glass-box-shadow);
   padding: var(--spacing-medium) var(--spacing-large);
   cursor: pointer;
   font-size: var(--font-size-large);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  filter: drop-shadow(var(--shadow-drop));
-  box-shadow: var(--glass-box-shadow);
+  transition: all 0.3s ease;
 }
 
 .submit-button:hover:not(:disabled) {
@@ -892,6 +920,7 @@ export default {
   background-color: var(--color-button-disabled-bg);
   cursor: not-allowed;
   filter: none;
+  visibility: hidden !important;
 }
 
 /* Modal Styles */
