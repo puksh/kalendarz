@@ -1,12 +1,18 @@
 <template>
   <aside class="sidebar">
-    <button @click="navigateTo('CalendarComponent')" class="sidebar-button">
+    <button
+      @click="$emit('navigate', 'CalendarComponent')"
+      class="sidebar-button"
+    >
       Harmonogram
     </button>
-    <button @click="navigateTo('AboutComponent')" class="sidebar-button">
+    <button @click="$emit('navigate', 'AboutComponent')" class="sidebar-button">
       Info
     </button>
-    <button @click="navigateTo('SettingsComponent')" class="sidebar-button">
+    <button
+      @click="$emit('navigate', 'SettingsComponent')"
+      class="sidebar-button"
+    >
       Ustawienia
     </button>
   </aside>
@@ -15,11 +21,6 @@
 <script>
 export default {
   name: "SideBarComponent",
-  methods: {
-    navigateTo(section) {
-      this.$emit("navigate", section); // Emit navigation events to parent
-    },
-  },
 };
 </script>
 

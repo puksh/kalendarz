@@ -3,8 +3,14 @@
     <SideBarComponent @navigate="handleNavigation" />
     <main class="main-content">
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
+      <CalendarStaticComponent
+        v-if="currentPage === 'CalendarStaticComponent'"
+      />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
-      <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
+      <SettingsComponent
+        v-if="currentPage === 'SettingsComponent'"
+        @update-editing-mode="setEditingMode"
+      />
       <NotificationMessage />
     </main>
   </div>
@@ -17,6 +23,9 @@ export default {
   components: {
     CalendarComponent: defineAsyncComponent(() =>
       import("./components/CalendarComponent.vue")
+    ),
+    CalendarStaticComponent: defineAsyncComponent(() =>
+      import("./components/CalendarStaticComponent.vue")
     ),
     SideBarComponent: defineAsyncComponent(() =>
       import("./components/SideBarComponent.vue")
@@ -34,12 +43,31 @@ export default {
   data() {
     return {
       currentPage: "CalendarComponent",
+      isEditingMode: false, // default value
     };
   },
   methods: {
     handleNavigation(section) {
       this.currentPage = section;
     },
+    setEditingMode(isEditingMode) {
+      this.isEditingMode = isEditingMode;
+      if (
+        this.currentPage === "CalendarStaticComponent" ||
+        this.currentPage === "CalendarComponent"
+      ) {
+        // Update the current page based on editing mode
+        this.currentPage = isEditingMode
+          ? "CalendarComponent"
+          : "CalendarStaticComponent";
+      }
+    },
+  },
+  mounted() {
+    // Set the initial page based on editing mode
+    this.currentPage = this.isEditingMode
+      ? "CalendarComponent"
+      : "CalendarStaticComponent";
   },
 };
 </script>
