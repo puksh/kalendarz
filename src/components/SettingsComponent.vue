@@ -1,6 +1,13 @@
 <template>
-  <div class="about">
-    <h1>Settings</h1>
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    "
+  >
+    <h1>Ustawienia</h1>
     <label class="glass-toggle">
       <input
         type="checkbox"
@@ -30,6 +37,17 @@ export default {
 </script>
 
 <style scoped>
+h1 {
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  border-radius: var(--border-radius-small);
+  filter: drop-shadow(var(--shadow-drop));
+  box-shadow: var(--glass-box-shadow);
+  width: auto;
+  padding: var(--spacing-medium);
+}
 .glass-toggle {
   display: inline-flex;
   align-items: center;
