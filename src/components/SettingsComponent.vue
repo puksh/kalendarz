@@ -25,12 +25,13 @@ export default {
   name: "SettingsComponent",
   data() {
     return {
-      isEditingMode: false, // default value
+      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Load initial value from localStorage
     };
   },
   methods: {
     updateEditingMode() {
-      this.$emit("update-editing-mode", this.isEditingMode);
+      localStorage.setItem("isEditingMode", JSON.stringify(this.isEditingMode)); // Sync with localStorage
+      this.$emit("update-editing-mode", this.isEditingMode); // Notify parent of the change
     },
   },
 };
@@ -58,7 +59,10 @@ h1 {
 }
 
 .glass-toggle input {
-  display: none;
+  position: absolute;
+  opacity: 0; /* Keeps the input accessible but invisible */
+  width: 0;
+  height: 0;
 }
 
 .glass-toggle .toggle-slider {

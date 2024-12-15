@@ -22,9 +22,19 @@
       <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
       <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
     </section>
-    <button class="top-right-buttons" @click="checkShiftDataSync()">
+    <button
+      class="top-right-buttons buttonRefresh"
+      @click="checkShiftDataSync()"
+    >
       <img
         :src="'/assets/icons/refresh.svg'"
+        style="width: 30px; height: 30px; cursor: pointer"
+        alt="Refresh"
+      />
+    </button>
+    <button class="top-right-buttons buttonFilter" @click="filterCalendar()">
+      <img
+        :src="'/assets/icons/filter.svg'"
         style="width: 30px; height: 30px; cursor: pointer"
         alt="Refresh"
       />
@@ -142,7 +152,7 @@
     <!-- People List Section -->
     <h3 style="font-weight: bold">Zespół</h3>
     <div>
-      <!-- Ratowniks List -->
+      <!-- Ratownik List -->
       <h4>Ratowniczki/cy</h4>
       <div class="person-lists">
         <div
@@ -156,7 +166,7 @@
         </div>
       </div>
 
-      <!-- Non-Ratowniks List -->
+      <!-- Non-Ratownik List -->
       <h4>Pielęgniarki/rze</h4>
       <div class="person-lists">
         <div
@@ -171,6 +181,23 @@
       </div>
     </div>
   </section>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <h1
+      style="
+        background: var(--glass-bg-color);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border-color);
+        border-radius: var(--border-radius-small);
+        filter: drop-shadow(var(--shadow-drop));
+        box-shadow: var(--glass-box-shadow);
+        width: 600px;
+        padding: var(--spacing-medium);
+      "
+    >
+      Tryb edytowania <a style="color: green">Włączony</a>
+    </h1>
+  </div>
   <section class="shift-counts-window">
     <h3>Ilość zmian</h3>
     <div style="display: flex; flex-direction: row">
@@ -234,6 +261,7 @@ export default {
       password: "",
       locale: "pl",
       scrollContainer: null,
+      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Retrieve initial state
     };
   },
   computed: {
@@ -295,7 +323,7 @@ export default {
       }
       if (isDraggedRatownik && hasOtherRatownik) {
         addNotification(
-          "Nie można przypisać dwóch ratowniów na jedną zmianę.",
+          "Nie można przypisać dwóch ratowników na jedną zmianę.",
           "red"
         );
         return;
@@ -323,7 +351,7 @@ export default {
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift] !== null) {
-        // Set the shift to emptys
+        // Set the shift to empty
         day[shift] = null;
         day[shift + "Name"] = "Usunięto";
         day[shift + "Ratownik"] = null; //Clear Ratownik data
@@ -537,6 +565,9 @@ export default {
     },
     async encodeLargeData(data) {
       try {
+        // Remove the toggle value before encoding
+        localStorage.removeItem("isEditingMode");
+
         // Convert data to a JSON string
         const jsonString = JSON.stringify(data, null, 2);
 
@@ -546,7 +577,7 @@ export default {
         // Use FileReader to convert Blob to base64
         const reader = new FileReader();
 
-        return new Promise((resolve, reject) => {
+        const base64String = await new Promise((resolve, reject) => {
           reader.onloadend = () => {
             // Resolve the base64 encoded string
             resolve(reader.result.split(",")[1]); // Remove the "data:..." prefix
@@ -557,9 +588,16 @@ export default {
           // Read the Blob as data URL (base64)
           reader.readAsDataURL(blob);
         });
+
+        localStorage.setItem("isEditingMode", JSON.stringify(true));
+
+        return base64String;
       } catch (error) {
         console.error("Error encoding large data:", error);
-        addNotification("Error encoding data", "red");
+        this.addNotification("Error encoding data", "red");
+
+        localStorage.setItem("isEditingMode", JSON.stringify(true));
+
         return null;
       }
     },
@@ -630,7 +668,8 @@ export default {
     },
     handleScroll(event) {
       if (this.scrollContainer) {
-        this.scrollContainer.scrollLeft += event.deltaY; // Scroll horizontally
+        event.preventDefault(); // Prevent default vertical scrolling
+        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
       }
     },
     getDayClass(dayIndex) {
@@ -663,13 +702,18 @@ export default {
     await this.checkShiftDataSync(); // Then sync with remote data
     this.scrollContainer = this.$refs.scrollContainer;
   },
+  watch: {
+    isEditingMode(newValue) {
+      localStorage.setItem("isEditingMode", JSON.stringify(newValue)); // Save to localStorage
+    },
+  },
 };
 </script>
 
 <style scoped>
 /* People Bar styles */
 .people-list {
-  width: 40% 600px;
+  width: 600px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -681,7 +725,6 @@ export default {
 }
 
 .person-lists {
-  width: 90%;
   gap: var(--spacing-small);
   display: flex;
   flex-direction: row;
@@ -789,8 +832,6 @@ export default {
 .top-right-buttons {
   border: none;
   position: fixed;
-  top: 0;
-  right: 4px;
   z-index: 1000;
   height: 40px;
   width: 40px;
@@ -802,6 +843,14 @@ export default {
   border-radius: var(--border-radius-small);
   filter: drop-shadow(var(--shadow-drop));
   box-shadow: var(--glass-box-shadow);
+}
+.buttonRefresh {
+  top: 0;
+  right: 4px;
+}
+.buttonFilter {
+  top: 0;
+  right: 48px;
 }
 /* Days Header styles */
 .days-header {
@@ -1054,6 +1103,7 @@ export default {
   box-shadow: var(--glass-box-shadow);
   border-radius: 8px;
   align-self: center;
+  margin-bottom: 14px !important;
   padding: var(--spacing-medium);
 }
 </style>

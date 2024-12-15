@@ -3,10 +3,7 @@
     <button @click="$emit('navigate', 'AboutComponent')" class="sidebar-button">
       Info
     </button>
-    <button
-      @click="$emit('navigate', 'CalendarComponent')"
-      class="sidebar-button"
-    >
+    <button @click="navigateToCalendar" class="sidebar-button">
       Harmonogram
     </button>
     <button
@@ -21,6 +18,20 @@
 <script>
 export default {
   name: "SideBarComponent",
+  data() {
+    return {
+      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Load initial value from localStorage
+    };
+  },
+  methods: {
+    navigateToCalendar() {
+      this.isEditingMode = JSON.parse(localStorage.getItem("isEditingMode"));
+      const target = this.isEditingMode
+        ? "CalendarComponent"
+        : "CalendarStaticComponent";
+      this.$emit("navigate", target);
+    },
+  },
 };
 </script>
 
@@ -33,13 +44,13 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 10px;
+  padding: 4px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   box-shadow: var(--glass-box-shadow);
-  border-radius: 8px;
+  border-radius: 4px;
   z-index: 10;
 }
 
@@ -50,8 +61,8 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   color: var(--color-text-dark);
-  width: 25%;
-  height: 39px;
+  width: 33%;
+  height: 24px;
   border-radius: 8px;
   font-size: 14px;
   padding: 0;
@@ -66,7 +77,7 @@ export default {
   color: var(--color-text-dark);
   border-color: rgba(155, 126, 189, 0.6);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  transform: scale(1.1);
+  transform: scale(1.01);
 }
 
 .sidebar-button:active {

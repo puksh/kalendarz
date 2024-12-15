@@ -116,7 +116,7 @@
     <!-- People List Section -->
     <h3 style="font-weight: bold">Zespół</h3>
     <div>
-      <!-- Ratowniks List -->
+      <!-- Ratownik List -->
       <h4>Ratowniczki/cy</h4>
       <div class="person-lists">
         <div
@@ -128,7 +128,7 @@
         </div>
       </div>
 
-      <!-- Non-Ratowniks List -->
+      <!-- Non-Ratownik List -->
       <h4>Pielęgniarki/rze</h4>
       <div class="person-lists">
         <div

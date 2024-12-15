@@ -7,10 +7,7 @@
         v-if="currentPage === 'CalendarStaticComponent'"
       />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
-      <SettingsComponent
-        v-if="currentPage === 'SettingsComponent'"
-        @update-editing-mode="setEditingMode"
-      />
+      <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
       <NotificationMessage />
     </main>
   </div>
@@ -42,30 +39,17 @@ export default {
   },
   data() {
     return {
-      currentPage: "CalendarComponent",
-      isEditingMode: false, // default value
+      currentPage: "CalendarStaticComponent",
     };
   },
   methods: {
     handleNavigation(section) {
       this.currentPage = section;
     },
-    setEditingMode(isEditingMode) {
-      this.isEditingMode = isEditingMode;
-      if (
-        this.currentPage === "CalendarStaticComponent" ||
-        this.currentPage === "CalendarComponent"
-      ) {
-        // Update the current page based on editing mode
-        this.currentPage = isEditingMode
-          ? "CalendarComponent"
-          : "CalendarStaticComponent";
-      }
-    },
   },
   mounted() {
-    // Set the initial page based on editing mode
-    this.currentPage = this.isEditingMode
+    const isEditingMode = localStorage.getItem("isEditingMode");
+    this.currentPage = isEditingMode
       ? "CalendarComponent"
       : "CalendarStaticComponent";
   },
@@ -74,11 +58,12 @@ export default {
 
 <style scoped>
 .main-content {
-  padding: 20px;
+  padding-top: 20px;
   max-width: 100%;
   text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  margin-bottom: 28px !important;
 }
 </style>
