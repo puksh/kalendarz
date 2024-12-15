@@ -74,7 +74,7 @@
               >
                 <div class="day-date">{{ day.date.getDate() }}</div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot day"
                   :class="{
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift1,
@@ -85,13 +85,13 @@
                   @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
                 >
-                  <div class="assigned-person day" v-if="day.dayShift1">
+                  <div class="assigned-person" v-if="day.dayShift1">
                     {{ day.dayShift1Name }}
                   </div>
-                  <div class="empty-slot day" v-else>D</div>
+                  <div class="empty-slot" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot day"
                   :class="{
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift2,
@@ -101,13 +101,13 @@
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
                 >
-                  <div class="assigned-person day" v-if="day.dayShift2">
+                  <div class="assigned-person" v-if="day.dayShift2">
                     {{ day.dayShift2Name }}
                   </div>
-                  <div class="empty-slot day" v-else>D</div>
+                  <div class="empty-slot" v-else>D</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot night"
                   :class="{
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift1,
@@ -118,13 +118,13 @@
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
                 >
-                  <div class="assigned-person night" v-if="day.nightShift1">
+                  <div class="assigned-person" v-if="day.nightShift1">
                     {{ day.nightShift1Name }}
                   </div>
-                  <div class="empty-slot night" v-else>N</div>
+                  <div class="empty-slot" v-else>N</div>
                 </div>
                 <div
-                  class="shift-slot"
+                  class="shift-slot night"
                   :class="{
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift2,
@@ -135,10 +135,10 @@
                   @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
                 >
-                  <div class="assigned-person night" v-if="day.nightShift2">
+                  <div class="assigned-person" v-if="day.nightShift2">
                     {{ day.nightShift2Name }}
                   </div>
-                  <div class="empty-slot night" v-else>N</div>
+                  <div class="empty-slot" v-else>N</div>
                 </div>
               </div>
             </div>
@@ -903,6 +903,10 @@ export default {
 .shift-slot {
   border: 1px solid #ccc;
   margin-top: var(--spacing-small);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 .empty-slot {
   color: var(--color-empty-slot);
@@ -913,10 +917,10 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-medium);
+  width: 100%;
 }
 /* Assigned Person Styles */
-.assigned-person.day,
-.assigned-person.night {
+.assigned-person {
   padding: var(--spacing-small);
   background-color: transparent;
   font-weight: bolder;
@@ -927,6 +931,7 @@ export default {
   font-size: var(--font-size-medium);
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .shift-label {
@@ -934,6 +939,33 @@ export default {
   padding: var(--spacing-small);
 }
 
+/* Shift Types Colors */
+.day {
+  background-color: var(--color-day) !important;
+}
+.night {
+  background-color: var(--color-night) !important;
+}
+
+.synced-changed {
+  color: var(
+    --color-synced-changed
+  ) !important; /* Highlight server-synced changes */
+}
+.ratownik:after {
+  content: "★";
+  position: relative;
+  background-color: var(--color-ratownik);
+  color: white;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
 /* Shift Types Colors */
 .day {
   background-color: var(--color-day) !important;
@@ -1069,10 +1101,6 @@ export default {
   color: var(
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
-}
-.ratownik {
-  color: var(--color-text-light);
-  text-shadow: 1.5px 1.5px 0 #000;
 }
 .scrollable-container {
   scroll-snap-type: x mandatory;
