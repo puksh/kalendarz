@@ -48,7 +48,8 @@ export default {
     },
   },
   mounted() {
-    const isEditingMode = localStorage.getItem("isEditingMode");
+    const isEditingMode =
+      JSON.parse(localStorage.getItem("isEditingMode")) || false;
     this.currentPage = isEditingMode
       ? "CalendarComponent"
       : "CalendarStaticComponent";
