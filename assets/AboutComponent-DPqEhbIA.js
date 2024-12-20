@@ -1,1 +1,0 @@
-import{_ as t,o as e,c as s,a as n}from"./index-_AF16i4I.js";const a={name:"AboutComponent",methods:{}},r={class:"about"};function c(p,o,u,_,d,m){return e(),s("div",r,o[0]||(o[0]=[n("h1",null,"About",-1)]))}const f=t(a,[["render",c]]);export{f as default};
