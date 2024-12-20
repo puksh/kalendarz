@@ -209,7 +209,7 @@ export default {
         {
           month: "long",
           year: "numeric",
-        }
+        },
       );
     },
   },
@@ -247,7 +247,7 @@ export default {
     changeMonth(newMonth) {
       if (this.madeChanges) {
         const confirmSwitch = confirm(
-          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded."
+          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded.",
         );
         if (!confirmSwitch) {
           return; // Cancel the month change
@@ -262,15 +262,12 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch(
-          "http://localhost:3000/?key=shiftData.json",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch("/api/?key=shiftData.json", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         //console.log(response);
         if (!response.ok) {
@@ -278,7 +275,7 @@ export default {
             addNotification("Data not found on server", "red");
           }
           throw new Error(
-            `Failed to fetch data from server: ${response.status}`
+            `Failed to fetch data from server: ${response.status}`,
           );
         }
 
@@ -350,7 +347,7 @@ export default {
 
       sessionStorage.setItem(
         "syncedChanges",
-        JSON.stringify(this.syncedChanges)
+        JSON.stringify(this.syncedChanges),
       );
 
       // Clear synced changes after 5 seconds
@@ -375,7 +372,7 @@ export default {
           try {
             const parsedStates = JSON.parse(savedStates);
             const day = this.monthDays.find(
-              (day) => day.date.toDateString() === date
+              (day) => day.date.toDateString() === date,
             );
 
             if (day) {
@@ -687,19 +684,11 @@ export default {
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
 }
-.ratownik:after {
-  content: "★";
-  position: relative;
-  background-color: var(--color-ratownik);
-  color: white;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+.ratownik {
+  border: 2px solid var(--color-ratownik) !important;
+}
+.parent:has(.active) {
+  background-color: lightblue;
 }
 .scrollable-container {
   scroll-snap-type: x mandatory;

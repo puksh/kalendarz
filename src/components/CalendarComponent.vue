@@ -271,7 +271,7 @@ export default {
         {
           month: "long",
           year: "numeric",
-        }
+        },
       );
     },
   },
@@ -283,7 +283,7 @@ export default {
       // Is user actually dragging a person
       if (!this.draggedPerson) return;
       const day = this.monthDays.find(
-        (day) => day.date.toDateString() === date.toDateString()
+        (day) => day.date.toDateString() === date.toDateString(),
       );
 
       const previousValue = day[shiftType];
@@ -324,7 +324,7 @@ export default {
       if (isDraggedRatownik && hasOtherRatownik) {
         addNotification(
           "Nie można przypisać dwóch ratowników na jedną zmianę.",
-          "red"
+          "red",
         );
         return;
       }
@@ -368,7 +368,7 @@ export default {
         this.localData[day.date.toDateString()] = updatedData;
         localStorage.setItem(
           day.date.toDateString(),
-          JSON.stringify(updatedData)
+          JSON.stringify(updatedData),
         );
         day[shift] = "Usunięto";
 
@@ -408,7 +408,7 @@ export default {
     changeMonth(newMonth) {
       if (this.madeChanges) {
         const confirmSwitch = confirm(
-          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded."
+          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded.",
         );
         if (!confirmSwitch) {
           return; // Cancel the month change
@@ -433,7 +433,7 @@ export default {
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
         try {
-          const response = await fetch("http://localhost:3000/", {
+          const response = await fetch("/api/?key=shiftData.json", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -449,7 +449,7 @@ export default {
           console.error("Error updating server data:", error);
           addNotification(
             error.message || "Failed to update data on the server",
-            "red"
+            "red",
           );
         }
       } else {
@@ -465,15 +465,12 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch(
-          "http://localhost:3000/?key=shiftData.json",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch("/api/?key=shiftData.json", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         //console.log(response);
         if (!response.ok) {
@@ -481,7 +478,7 @@ export default {
             addNotification("Data not found on server", "red");
           }
           throw new Error(
-            `Failed to fetch data from server: ${response.status}`
+            `Failed to fetch data from server: ${response.status}`,
           );
         }
 
@@ -553,7 +550,7 @@ export default {
 
       sessionStorage.setItem(
         "syncedChanges",
-        JSON.stringify(this.syncedChanges)
+        JSON.stringify(this.syncedChanges),
       );
 
       // Clear synced changes after 5 seconds
@@ -620,7 +617,7 @@ export default {
           try {
             const parsedStates = JSON.parse(savedStates);
             const day = this.monthDays.find(
-              (day) => day.date.toDateString() === date
+              (day) => day.date.toDateString() === date,
             );
 
             if (day) {
@@ -1053,7 +1050,9 @@ export default {
   border: none;
   border-radius: var(--border-radius-small, 4px);
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .modal-content button:hover {
