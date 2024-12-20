@@ -433,7 +433,7 @@ export default {
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
         try {
-          const response = await fetch("/api/?key=shiftData.json", {
+          const response = await fetch("/?key=shiftData.json", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -465,7 +465,7 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch("/api/?key=shiftData.json", {
+        const response = await fetch("/?key=shiftData.json", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

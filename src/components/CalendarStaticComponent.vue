@@ -262,7 +262,7 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch("/api/?key=shiftData.json", {
+        const response = await fetch("/?key=shiftData.json", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
