@@ -871,20 +871,12 @@ export default {
 }
 
 .day-cell {
-  flex: 1;
   border: 1px solid var(--glass-border-color);
-  position: relative;
-  flex-direction: column;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: var(--spacing-small);
   width: var(--width-day-cell);
   background-color: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--glass-box-shadow);
-  border-radius: 4px;
 }
 
 .day-date {
@@ -904,6 +896,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 100%;
+  border: 2px solid var(--glass-border-color);
 }
 .empty-slot {
   color: var(--color-empty-slot);
@@ -915,6 +908,7 @@ export default {
   justify-content: center;
   font-size: var(--font-size-medium);
   width: 100%;
+  border: 2px solid var(--glass-border-color);
 }
 /* Assigned Person Styles */
 .assigned-person {
@@ -929,6 +923,7 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
+  border: 2px solid var(--glass-border-color);
 }
 
 .shift-label {
@@ -949,19 +944,8 @@ export default {
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
 }
-.ratownik:after {
-  content: "★";
-  position: relative;
-  background-color: var(--color-ratownik);
-  color: white;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+.ratownik {
+  border: 2px solid var(--color-ratownik) !important;
 }
 /* Shift Types Colors */
 .day {
