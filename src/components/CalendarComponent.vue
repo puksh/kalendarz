@@ -435,7 +435,7 @@ export default {
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/?key=shiftData.json`,
+            "https://vuecalendar.kot.li/?key=shiftData.json",
             {
               method: "PUT",
               headers: {
@@ -470,7 +470,7 @@ export default {
       this.syncedChanges = {};
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/?key=shiftData.json`,
+          "https://vuecalendar.kot.li/?key=shiftData.json",
           {
             method: "GET",
             headers: {
