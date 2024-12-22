@@ -252,7 +252,7 @@ export default {
         { id: 2, name: "Mikołaj", ratownik: false },
         { id: 3, name: "Aleksandra", ratownik: false },
         { id: 4, name: "Łukasz", ratownik: true },
-        { id: 5, name: "Joanna", ratownik: true },
+        { id: 5, name: "Joanna", ratownik: false },
         { id: 6, name: "Natalia", ratownik: true },
         { id: 7, name: "Marcin", ratownik: true },
         { id: 8, name: "Alina", ratownik: false },
