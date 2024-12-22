@@ -456,6 +456,7 @@ export default {
             "red",
           );
         }
+        addNotification("Zmiany zapisano :3 !", "green");
       } else {
         addNotification("Złe hasło", "red");
       }
@@ -463,7 +464,6 @@ export default {
       this.showPasswordModal = false;
       this.password = "";
       this.changedShifts = {};
-      addNotification("Zmiany zapisano :3 !", "green");
     },
 
     async fetchServerShiftData() {
