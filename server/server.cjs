@@ -16,10 +16,10 @@ const app = express({
 // Enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://kal.kot.li",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
-  })
+  }),
 );
 
 // Middleware to parse JSON requests

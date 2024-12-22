@@ -264,12 +264,15 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch("/?key=shiftData.json", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          "${import.meta.env.VITE_API_URL}/?key=shiftData.json",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         //console.log(response);
         if (!response.ok) {

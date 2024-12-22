@@ -434,13 +434,16 @@ export default {
         // Prepare data for committing
         const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
         try {
-          const response = await fetch("/?key=shiftData.json", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
+          const response = await fetch(
+            "${import.meta.env.VITE_API_URL}/?key=shiftData.json",
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ key: "shiftData", value: encodedContent }),
             },
-            body: JSON.stringify({ key: "shiftData", value: encodedContent }),
-          });
+          );
           if (!response.ok) {
             throw new Error("Failed to update data on the server");
           }
@@ -466,12 +469,15 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch("/?key=shiftData.json", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          "${import.meta.env.VITE_API_URL}/?key=shiftData.json",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         //console.log(response);
         if (!response.ok) {
