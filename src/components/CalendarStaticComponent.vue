@@ -265,7 +265,7 @@ export default {
       this.syncedChanges = {};
       try {
         const response = await fetch(
-          "${import.meta.env.VITE_API_URL}/?key=shiftData.json",
+          `${import.meta.env.VITE_API_URL}/?key=shiftData.json`,
           {
             method: "GET",
             headers: {
