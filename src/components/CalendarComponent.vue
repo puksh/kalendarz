@@ -216,7 +216,10 @@
       <div style="display: flex; flex-direction: column">
         <h4>Pielęgniarki/rze</h4>
         <ul class="shift-counts">
-          <li v-for="person in people.filter((p) => !p.ratownik)">
+          <li
+            v-for="person in people.filter((p) => !p.ratownik)"
+            v-bind:key="person.id"
+          >
             {{ person.name }}:
             <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
           </li>
@@ -285,8 +288,6 @@ export default {
       const day = this.monthDays.find(
         (day) => day.date.toDateString() === date.toDateString(),
       );
-
-      const previousValue = day[shiftType];
 
       // Temporarily update to test uniqueness
       const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };

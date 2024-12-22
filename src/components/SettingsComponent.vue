@@ -74,7 +74,9 @@ h1 {
   border-radius: 15px;
   box-shadow: var(--glass-box-shadow);
   position: relative;
-  transition: background 0.3s, transform 0.3s;
+  transition:
+    background 0.3s,
+    transform 0.3s;
 }
 
 .glass-toggle .toggle-slider::before {

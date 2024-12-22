@@ -25,7 +25,7 @@ export const addNotification = (message, type = "blue", duration = 3000) => {
 };
 export const removeNotification = (id) => {
   const index = notifications.findIndex(
-    (notification) => notification.id === id
+    (notification) => notification.id === id,
   );
   if (index !== -1) notifications.splice(index, 1);
 };
@@ -57,7 +57,9 @@ export default {
   min-width: auto;
   text-align: center;
   animation: fadeInOut 3s forwards;
-  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 19px 38px rgba(0, 0, 0, 0.3),
+    0 15px 12px rgba(0, 0, 0, 0.2);
 }
 .notification button {
   background: transparent;

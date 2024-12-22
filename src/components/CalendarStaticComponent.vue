@@ -159,7 +159,10 @@
       <div style="display: flex; flex-direction: column">
         <h4>Pielęgniarki/rze</h4>
         <ul class="shift-counts">
-          <li v-for="person in people.filter((p) => !p.ratownik)">
+          <li
+            v-for="person in people.filter((p) => !p.ratownik)"
+            v-bind:key="person.id"
+          >
             {{ person.name }}:
             <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
           </li>
@@ -171,7 +174,6 @@
 
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
-import { MD5 } from "crypto-js";
 import { addNotification } from "./NotificationMessage.vue";
 
 export default {
