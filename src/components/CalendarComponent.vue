@@ -32,6 +32,7 @@
         alt="Refresh"
       />
     </button>
+    <!--
     <button class="top-right-buttons buttonFilter" @click="filterCalendar()">
       <img
         :src="'/assets/icons/filter.svg'"
@@ -39,6 +40,7 @@
         alt="Refresh"
       />
     </button>
+    -->
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
