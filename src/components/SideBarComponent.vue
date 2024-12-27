@@ -64,8 +64,8 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   color: var(--color-text-dark);
-  width: 33%;
-  height: 24px;
+  width: 49%;
+  height: 32px;
   border-radius: 8px;
   font-size: 14px;
   padding: 0;
