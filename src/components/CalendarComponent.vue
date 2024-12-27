@@ -888,7 +888,7 @@ export default {
 
 .day-cell {
   border: 1px solid var(--glass-border-color);
-  padding: var(--spacing-small);
+  padding: 1ch 1ch 1ch 0.5ch;
   width: var(--width-day-cell);
   background-color: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
