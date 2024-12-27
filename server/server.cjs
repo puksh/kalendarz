@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 
-const port = 3000;
+const port = 443;
 
 // Initialize app with HTTPS options
 const app = express({
