@@ -1,0 +1,1 @@
+import{_ as o,o as t,c as n,a as s}from"./index-BGUQuMRx.js";const a={name:"AboutComponent",methods:{}},c={style:{display:"flex","flex-direction":"column",gap:"20px","align-items":"center"}};function r(p,e,d,l,i,_){return t(),n("div",c,e[0]||(e[0]=[s("h1",null,"Info",-1)]))}const f=o(a,[["render",r],["__scopeId","data-v-a3990374"]]);export{f as default};
