@@ -684,17 +684,24 @@ export default {
       return "normal-color";
     },
     countShiftsForPerson(personId) {
-      return this.monthDays.reduce((count, day) => {
-        if (
-          day.dayShift1 === personId ||
-          day.dayShift2 === personId ||
-          day.nightShift1 === personId ||
-          day.nightShift2 === personId
-        ) {
-          return count + 1;
+      if (!personId) return 0;
+      let tempCount = 0;
+
+      for (let i = 0; i < this.monthDays.length; i++) {
+        if (this.monthDays[i].dayShift1 === personId) {
+          tempCount += 1;
         }
-        return count;
-      }, 0);
+        if (this.monthDays[i].dayShift2 === personId) {
+          tempCount += 1;
+        }
+        if (this.monthDays[i].nightShift1 === personId) {
+          tempCount += 1;
+        }
+        if (this.monthDays[i].nightShift2 === personId) {
+          tempCount += 1;
+        }
+      }
+      return tempCount;
     },
 
     calculateAllShiftCounts() {
