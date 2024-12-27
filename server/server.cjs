@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const express = require("ultimate-express");
 const fs = require("fs");
 const path = require("path");
@@ -69,7 +70,7 @@ app.put("/", (req, res) => {
       const parsedValue = JSON.parse(decodedValue); // Parse the JSON content
       data = { ...data, ...parsedValue }; // Merge with existing data
     } catch (err) {
-      return res.status(400).send("Invalid data format");
+      return res.status(400).send("Invalid data format:" + err);
     }
   } else {
     // Handle other keys if necessary
