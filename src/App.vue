@@ -18,23 +18,23 @@ import { defineAsyncComponent } from "vue";
 export default {
   name: "VueCalendar",
   components: {
-    CalendarComponent: defineAsyncComponent(() =>
-      import("./components/CalendarComponent.vue")
+    CalendarComponent: defineAsyncComponent(
+      () => import("./components/CalendarComponent.vue"),
     ),
-    CalendarStaticComponent: defineAsyncComponent(() =>
-      import("./components/CalendarStaticComponent.vue")
+    CalendarStaticComponent: defineAsyncComponent(
+      () => import("./components/CalendarStaticComponent.vue"),
     ),
-    SideBarComponent: defineAsyncComponent(() =>
-      import("./components/SideBarComponent.vue")
+    SideBarComponent: defineAsyncComponent(
+      () => import("./components/SideBarComponent.vue"),
     ),
-    AboutComponent: defineAsyncComponent(() =>
-      import("./components/AboutComponent.vue")
+    AboutComponent: defineAsyncComponent(
+      () => import("./components/AboutComponent.vue"),
     ),
-    SettingsComponent: defineAsyncComponent(() =>
-      import("./components/SettingsComponent.vue")
+    SettingsComponent: defineAsyncComponent(
+      () => import("./components/SettingsComponent.vue"),
     ),
-    NotificationMessage: defineAsyncComponent(() =>
-      import("./components/NotificationMessage.vue")
+    NotificationMessage: defineAsyncComponent(
+      () => import("./components/NotificationMessage.vue"),
     ),
   },
   data() {
