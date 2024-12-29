@@ -105,3 +105,6 @@ body {
 	scrollbar-width: thin; /* Firefox's scrollbar width setting */
 	scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox colors */
 }
+.ratownik {
+	border: 2px solid var(--color-ratownik) !important;
+}

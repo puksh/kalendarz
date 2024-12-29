@@ -149,40 +149,7 @@
       </div>
     </section>
   </div>
-
-  <section class="people-list">
-    <!-- People List Section -->
-    <h3 style="font-weight: bold">Zespół</h3>
-    <div>
-      <!-- Ratownik List -->
-      <h4>Ratowniczki/cy</h4>
-      <div class="person-lists">
-        <div
-          v-for="person in people.filter((p) => p.ratownik)"
-          :key="person.id"
-          class="person-item ratownik"
-          draggable="true"
-          @dragstart="startDrag(person)"
-        >
-          {{ person.name }}
-        </div>
-      </div>
-
-      <!-- Non-Ratownik List -->
-      <h4>Pielęgniarki/rze</h4>
-      <div class="person-lists">
-        <div
-          v-for="person in people.filter((p) => !p.ratownik)"
-          :key="person.id"
-          class="person-item"
-          draggable="true"
-          @dragstart="startDrag(person)"
-        >
-          {{ person.name }}
-        </div>
-      </div>
-    </div>
-  </section>
+  <PeopleListWindow :people="people" />
   <div style="display: flex; flex-direction: column; align-items: center">
     <h1
       style="
@@ -208,10 +175,11 @@ import { daysOfWeek } from "@/data/daysOfWeek.js";
 import { MD5 } from "crypto-js";
 import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
+import PeopleListWindow from "./PeopleListWindow.vue";
 
 export default {
   name: "CalendarComponent",
-  components: { ShiftCountWindow },
+  components: { ShiftCountWindow, PeopleListWindow },
   data() {
     return {
       selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
@@ -222,7 +190,6 @@ export default {
       syncedChanges: {}, // Server-synced changes
       daysOfWeek,
       currentDate: new Date(),
-      draggedPerson: null,
       people: [
         { id: 1, name: "Milena", ratownik: false },
         { id: 2, name: "Mikołaj", ratownik: false },
@@ -255,18 +222,16 @@ export default {
     },
   },
   methods: {
-    startDrag(person) {
-      this.draggedPerson = person;
-    },
     handleDrop(date, shiftType) {
+      const draggedPerson = JSON.parse(localStorage.getItem("draggedPerson"));
       // Is user actually dragging a person
-      if (!this.draggedPerson) return;
+      if (!draggedPerson) return;
       const day = this.monthDays.find(
         (day) => day.date.toDateString() === date.toDateString(),
       );
 
       // Temporarily update to test uniqueness
-      const tempShifts = { ...day, [shiftType]: this.draggedPerson.id };
+      const tempShifts = { ...day, [shiftType]: draggedPerson.id };
       if (
         (tempShifts.dayShift1 != null &&
           tempShifts.dayShift2 != null &&
@@ -279,7 +244,7 @@ export default {
         return;
       }
 
-      const isDraggedRatownik = this.draggedPerson.ratownik;
+      const isDraggedRatownik = draggedPerson.ratownik;
 
       // Check if another ratownik is already assigned to the same shift type
       let hasOtherRatownik = false;
@@ -306,9 +271,9 @@ export default {
         return;
       }
 
-      day[shiftType] = this.draggedPerson.id;
-      day[`${shiftType}Name`] = this.draggedPerson.name;
-      day[`${shiftType}Ratownik`] = this.draggedPerson.ratownik;
+      day[shiftType] = draggedPerson.id;
+      day[`${shiftType}Name`] = draggedPerson.name;
+      day[`${shiftType}Ratownik`] = draggedPerson.ratownik;
       day[`${shiftType}UserChanged`] = true;
 
       const updatedData = {
@@ -323,7 +288,7 @@ export default {
 
       this.madeChanges = true;
 
-      this.draggedPerson = null;
+      localStorage.removeItem("draggedPerson");
     },
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
@@ -698,63 +663,6 @@ export default {
 </script>
 
 <style scoped>
-/* People Bar styles */
-.people-list {
-  width: 600px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  border-radius: 8px;
-  align-self: center;
-  margin: 10px 0;
-}
-
-.person-lists {
-  gap: var(--spacing-small);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin: var(--spacing-small) auto;
-  align-items: center;
-  flex-wrap: wrap;
-}
-@media (max-width: 768px) {
-  .people-list {
-    width: 90%;
-  }
-}
-/* Individual draggable people items */
-.person-item {
-  padding: 1ch;
-  width: auto 30%;
-  color: var(--color-text-dark);
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius);
-  cursor: grab;
-  font-weight: bold;
-  transition: transform 0.2s ease;
-  user-select: none;
-}
-
-.person-item:hover {
-  transform: scale(1.1);
-}
-
-.person-item.dragging {
-  cursor: grabbing;
-  transform: scale(1.1);
-}
-
-.person-item.grabbing {
-  cursor: grabbing;
-  transform: scale(1.1);
-}
-
 /* Calendar styles */
 .calendar-container {
   flex: 1;

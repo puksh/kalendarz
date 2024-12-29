@@ -114,35 +114,7 @@
     </section>
   </div>
 
-  <section class="people-list">
-    <!-- People List Section -->
-    <h3 style="font-weight: bold">Zespół</h3>
-    <div>
-      <!-- Ratownik List -->
-      <h4>Ratowniczki/cy</h4>
-      <div class="person-lists">
-        <div
-          v-for="person in people.filter((p) => p.ratownik)"
-          :key="person.id"
-          class="person-item ratownik"
-        >
-          {{ person.name }}
-        </div>
-      </div>
-
-      <!-- Non-Ratownik List -->
-      <h4>Pielęgniarki/rze</h4>
-      <div class="person-lists">
-        <div
-          v-for="person in people.filter((p) => !p.ratownik)"
-          :key="person.id"
-          class="person-item"
-        >
-          {{ person.name }}
-        </div>
-      </div>
-    </div>
-  </section>
+  <PeopleListWindow :people="people" />
   <ShiftCountWindow :people="people" :monthDays="monthDays" />
 </template>
 
@@ -150,10 +122,11 @@
 import { daysOfWeek } from "@/data/daysOfWeek.js";
 import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
+import PeopleListWindow from "./PeopleListWindow.vue";
 
 export default {
   name: "CalendarComponent",
-  components: { ShiftCountWindow },
+  components: { ShiftCountWindow, PeopleListWindow },
   data() {
     return {
       selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
@@ -446,48 +419,6 @@ export default {
 </script>
 
 <style scoped>
-/* People Bar styles */
-.people-list {
-  width: 600px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  border-radius: 8px;
-  align-self: center;
-  margin: 10px 0;
-}
-
-.person-lists {
-  gap: var(--spacing-small);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin: var(--spacing-small) auto;
-  align-items: center;
-  flex-wrap: wrap;
-}
-@media (max-width: 768px) {
-  .people-list {
-    width: 90%;
-  }
-}
-/* Individual draggable people items */
-.person-item {
-  padding: 1ch;
-  width: auto 30%;
-  color: var(--color-text-dark);
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius);
-  font-weight: bold;
-  transition: transform 0.2s ease;
-  user-select: none;
-}
-
 /* Calendar styles */
 .calendar-container {
   flex: 1;
@@ -666,9 +597,6 @@ export default {
   color: var(
     --color-synced-changed
   ) !important; /* Highlight server-synced changes */
-}
-.ratownik {
-  border: 2px solid var(--color-ratownik) !important;
 }
 .parent:has(.active) {
   background-color: lightblue;
