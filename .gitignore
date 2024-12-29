@@ -31,7 +31,6 @@ dist/
 
 # Server files
 #-----------------------------------
-server/key.pem
-server/cert.pem
+*.pem
 server/shiftData.json
 server/error.txt
