@@ -9,15 +9,15 @@ const port = 443;
 // Initialize app with HTTPS options
 const app = express({
   uwsOptions: {
-    //key_file_name: path.join(__dirname, "server/key.pem"),
-    //cert_file_name: path.join(__dirname, "server/cert.pem"),
+    key_file_name: path.join(__dirname, "vuecalendar.kot.li-key.pem"),
+    cert_file_name: path.join(__dirname, "vuecalendar.kot.li-crt.pem"),
   },
 });
 
 // Enable CORS
 app.use(
   cors({
-    origin: "https://kal.kot.li",
+    origin: ["https://kal.kot.li", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   }),
