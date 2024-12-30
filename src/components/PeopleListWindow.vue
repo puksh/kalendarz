@@ -25,7 +25,7 @@
         <div
           v-for="person in people.filter((p) => !p.ratownik)"
           :key="person.id"
-          class="person-item"
+          class="person-item pielegniarka"
           :class="{ draggable: isEditingMode }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
@@ -66,7 +66,7 @@ export default {
 
 <style scoped>
 .people-list {
-  width: 600px;
+  width: max(33%, 651px);
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -75,16 +75,16 @@ export default {
   border-radius: 8px;
   align-self: center;
   margin: 10px 0;
+  line-height: 1ch;
 }
 
 .person-lists {
   gap: var(--spacing-small);
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin: var(--spacing-small) auto;
-  align-items: center;
+  display: inline-flex;
   flex-wrap: wrap;
+  justify-content: center;
+  text-wrap: wrap;
+  margin: var(--spacing-small) auto;
 }
 @media (max-width: 768px) {
   .people-list {
@@ -104,6 +104,7 @@ export default {
   font-weight: bold;
   transition: transform 0.2s ease;
   user-select: none;
+  line-height: 2ch;
 }
 .person-item:draggable {
   cursor: grab;

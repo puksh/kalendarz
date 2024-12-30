@@ -1,9 +1,9 @@
 <template>
   <section class="shift-counts-window">
-    <h3>Ilość zmian</h3>
+    <h3 style="margin: 8px">Ilość zmian</h3>
     <div style="display: flex; flex-direction: row">
       <div style="display: flex; flex-direction: column">
-        <h4>Ratowniczki/cy</h4>
+        <h4 style="margin: 8px">Ratowniczki/cy</h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => p.ratownik)"
@@ -15,7 +15,7 @@
         </ul>
       </div>
       <div style="display: flex; flex-direction: column">
-        <h4>Pielęgniarki/rze</h4>
+        <h4 style="margin: 8px">Pielęgniarki/rze</h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => !p.ratownik)"
@@ -48,8 +48,11 @@ export default {
 
 <style scoped>
 .shift-counts {
-  gap: var(--spacing-small);
   flex-wrap: wrap;
+  font-size: 16px;
+  line-height: 2.4ch;
+  margin: 0 0 10px 0;
+  list-style: none;
 }
 .shift-counts-window {
   width: max(18%, 310px);
@@ -63,6 +66,5 @@ export default {
   box-shadow: var(--glass-box-shadow);
   border-radius: 8px;
   align-self: center;
-  padding: var(--spacing-medium);
 }
 </style>

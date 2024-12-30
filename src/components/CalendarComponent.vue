@@ -81,6 +81,7 @@
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift1,
                     ratownik: day.dayShift1Ratownik === true,
+                    pielegniarka: day.dayShift1Ratownik === false,
                     userChanged: day.dayShift1UserChanged === true,
                   }"
                   @dragover.prevent
@@ -98,6 +99,7 @@
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.dayShift2,
                     ratownik: day.dayShift2Ratownik === true,
+                    pielegniarka: day.dayShift2Ratownik === false,
                     userChanged: day.dayShift2UserChanged === true,
                   }"
                   @drop="handleDrop(day.date, 'dayShift2')"
@@ -114,6 +116,7 @@
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift1,
                     ratownik: day.nightShift1Ratownik === true,
+                    pielegniarka: day.nightShift1Ratownik === false,
                     userChanged: day.nightShift1UserChanged === true,
                   }"
                   @dragover.prevent
@@ -131,6 +134,7 @@
                     'synced-changed':
                       syncedChanges[day.date.toDateString()]?.nightShift2,
                     ratownik: day.nightShift2Ratownik === true,
+                    pielegniarka: day.nightShift2Ratownik === false,
                     userChanged: day.nightShift2UserChanged === true,
                   }"
                   @dragover.prevent
@@ -159,6 +163,7 @@
         border: 1px solid var(--glass-border-color);
         border-radius: var(--border-radius-small);
         filter: drop-shadow(var(--shadow-drop));
+        color: var(--color-text-dark);
         box-shadow: var(--glass-box-shadow);
         width: 600px;
         padding: var(--spacing-medium);
@@ -186,7 +191,6 @@ export default {
       selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
-      changedShifts: {}, // User-modified shifts
       syncedChanges: {}, // Server-synced changes
       daysOfWeek,
       currentDate: new Date(),
@@ -355,7 +359,6 @@ export default {
         if (!confirmSwitch) {
           return; // Cancel the month change
         }
-        this.changedShifts = {};
       }
 
       // Update the selected month and year
@@ -404,7 +407,6 @@ export default {
 
       this.showPasswordModal = false;
       this.password = "";
-      this.changedShifts = {};
     },
 
     async fetchServerShiftData() {
@@ -663,180 +665,6 @@ export default {
 </script>
 
 <style scoped>
-/* Calendar styles */
-.calendar-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-/* Calendar Grid styles */
-.calendar-container {
-  position: relative;
-}
-.calendar-grid {
-  margin-top: 3ch;
-  display: grid;
-  grid-template-columns: repeat(31, 1fr);
-  border-radius: 8px;
-  position: relative;
-}
-
-.calendar-header {
-  text-align: center;
-  position: fixed;
-  top: 0;
-  left: calc(var(--width-people-bar) + var(--spacing-large));
-  color: var(--color-text-light);
-  filter: drop-shadow(var(--shadow-drop));
-  margin: 0;
-  padding: var(--spacing-large);
-}
-.current-month {
-  background-color: var(--color-background);
-}
-
-/* Month Change top bar */
-.monthChange {
-  position: fixed;
-  top: 0;
-  left: 0;
-  display: flex;
-  justify-content: center;
-  padding: 1ch 0;
-  align-items: center;
-  width: 100%;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-bottom: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  z-index: 1000;
-}
-
-.buttonMonthChange {
-  color: var(--color-text-dark);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: xx-large;
-  transition: background-color 0.3s ease;
-  padding-bottom: var(--spacing-small);
-  line-height: 16px;
-}
-.top-right-buttons {
-  border: none;
-  position: fixed;
-  z-index: 1000;
-  height: 40px;
-  width: 40px;
-  color: #000;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius-small);
-  filter: drop-shadow(var(--shadow-drop));
-  box-shadow: var(--glass-box-shadow);
-}
-.buttonRefresh {
-  top: 0;
-  right: 4px;
-}
-.buttonFilter {
-  top: 0;
-  right: 48px;
-}
-/* Days Header styles */
-.days-header {
-  display: flex;
-  margin-top: 40px;
-}
-.day-header {
-  flex: 1;
-  text-align: center;
-  font-weight: bold;
-}
-
-/* Day (24h cycle) styles */
-.day-column {
-  display: flex;
-  flex-direction: column;
-  scroll-snap-align: center;
-  margin: 0 1px 0 0;
-  border: 0;
-  padding: 0;
-}
-
-.day-cell {
-  border: 1px solid var(--glass-border-color);
-  padding: 1ch 1ch 1ch 0.5ch;
-  width: var(--width-day-cell);
-  background-color: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-}
-
-.day-date {
-  font-weight: bold;
-}
-
-/* Shifts styles */
-.shift {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-.shift-slot {
-  border: 1px solid #ccc;
-  margin-top: var(--spacing-small);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  border: 2px solid var(--glass-border-color);
-}
-.empty-slot {
-  color: var(--color-empty-slot);
-  font-size: var(--font-size-small);
-  padding: var(--spacing-small);
-  height: var(--height-empty-slot);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-medium);
-  width: 100%;
-  border: 2px solid var(--glass-border-color);
-}
-/* Assigned Person Styles */
-.assigned-person {
-  padding: var(--spacing-small);
-  background-color: transparent;
-  font-weight: bolder;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-medium);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-  border: 2px solid var(--glass-border-color);
-}
-
-.shift-label {
-  background-color: var(--color-label-bg);
-  padding: var(--spacing-small);
-}
-
-/* Shift Types Colors */
-.day {
-  background-color: var(--color-day) !important;
-}
-.night {
-  background-color: var(--color-night) !important;
-}
-
 /* Button Styles */
 .submit-button {
   position: fixed;
@@ -910,7 +738,7 @@ export default {
 /* Button styles */
 .modal-content button {
   background-color: var(--color-button-bg, #7e5bef);
-  color: var(--color-text-light, #ffffff);
+  color: var(--color-text-dark);
   padding: 0.8rem 1.2rem;
   margin: 5px;
   border: none;
@@ -961,26 +789,7 @@ export default {
 .userChanged {
   color: var(--color-user-changed) !important; /* Highlight user-made changes */
 }
-
-.synced-changed {
-  color: var(
-    --color-synced-changed
-  ) !important; /* Highlight server-synced changes */
-}
-.scrollable-container {
-  scroll-snap-type: x mandatory;
-}
-.nd-color {
-  background-color: rgba(112, 5, 5, 0.35);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--glass-box-shadow);
-}
-
-.sob-color {
-  background-color: rgba(10, 88, 10, 0.35);
-  backdrop-filter: blur(var(--glass-blur)) !important;
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--glass-box-shadow);
+.assigned-person {
+  cursor: pointer !important;
 }
 </style>
