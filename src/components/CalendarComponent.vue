@@ -837,22 +837,6 @@ export default {
   background-color: var(--color-night) !important;
 }
 
-.synced-changed {
-  color: var(
-    --color-synced-changed
-  ) !important; /* Highlight server-synced changes */
-}
-.ratownik {
-  border: 2px solid var(--color-ratownik) !important;
-}
-/* Shift Types Colors */
-.day {
-  background-color: var(--color-day) !important;
-}
-.night {
-  background-color: var(--color-night) !important;
-}
-
 /* Button Styles */
 .submit-button {
   position: fixed;
