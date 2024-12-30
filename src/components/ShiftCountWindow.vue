@@ -10,7 +10,7 @@
             :key="person.id"
           >
             {{ person.name }}:
-            <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
+            <strong>{{ person.shiftCount || 0 }}</strong>
           </li>
         </ul>
       </div>
@@ -22,7 +22,7 @@
             v-bind:key="person.id"
           >
             {{ person.name }}:
-            <strong>{{ person.shiftCount || 0 }}</strong> zmian/a
+            <strong>{{ person.shiftCount || 0 }}</strong>
           </li>
         </ul>
       </div>
@@ -52,7 +52,10 @@ export default {
   flex-wrap: wrap;
 }
 .shift-counts-window {
-  width: 40% 600px;
+  width: max(18%, 310px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
