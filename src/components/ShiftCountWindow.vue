@@ -55,7 +55,7 @@ export default {
   list-style: none;
 }
 .shift-counts-window {
-  width: max(18%, 310px);
+  width: max(350px);
   display: flex;
   flex-direction: column;
   align-items: center;
