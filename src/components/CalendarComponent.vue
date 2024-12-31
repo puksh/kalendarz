@@ -165,7 +165,6 @@
         filter: drop-shadow(var(--shadow-drop));
         color: var(--color-text-dark);
         box-shadow: var(--glass-box-shadow);
-        width: 600px;
         padding: var(--spacing-medium);
       "
     >
