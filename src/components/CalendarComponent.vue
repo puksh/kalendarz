@@ -164,6 +164,7 @@
         border-radius: var(--border-radius-small);
         filter: drop-shadow(var(--shadow-drop));
         color: var(--color-text-dark);
+        width: 450px;
         box-shadow: var(--glass-box-shadow);
         padding: var(--spacing-medium);
       "
