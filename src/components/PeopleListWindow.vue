@@ -14,6 +14,8 @@
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
+          @touchstart="isEditingMode ? startTouchDrag(person, $event) : null"
+          @touchend="handleTouchEnd"
         >
           {{ person.name }}
         </div>
@@ -30,6 +32,8 @@
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
+          @touchstart="isEditingMode ? startTouchDrag(person, $event) : null"
+          @touchend="handleTouchEnd"
         >
           {{ person.name }}
         </div>
@@ -50,15 +54,22 @@ export default {
   data() {
     return {
       isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false,
+      draggedPerson: null,
     };
   },
   methods: {
     startDrag(person) {
       localStorage.setItem("draggedPerson", JSON.stringify(person));
     },
-    handleDragEnd() {
-      // Always clear draggedPerson from localStorage after drag ends
-      localStorage.removeItem("draggedPerson");
+    startTouchDrag(person, event) {
+      this.draggedPerson = person;
+      localStorage.setItem("draggedPerson", JSON.stringify(person));
+      event.target.classList.add("dragging");
+      document.body.style.overflow = "hidden"; // Disable scrolling
+    },
+    handleTouchEnd(event) {
+      event.target.classList.remove("dragging");
+      document.body.style.overflow = ""; // Re-enable scrolling
     },
   },
 };
