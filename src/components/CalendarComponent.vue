@@ -87,6 +87,7 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
+                  @touchend="handleDrop(day.date, 'dayShift1')"
                 >
                   <div class="assigned-person" v-if="day.dayShift1">
                     {{ day.dayShift1Name }}
@@ -104,6 +105,7 @@
                   }"
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
+                  @touchend="handleDrop(day.date, 'dayShift2')"
                 >
                   <div class="assigned-person" v-if="day.dayShift2">
                     {{ day.dayShift2Name }}
@@ -122,6 +124,7 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
+                  @touchend="handleDrop(day.date, 'nightShift1')"
                 >
                   <div class="assigned-person" v-if="day.nightShift1">
                     {{ day.nightShift1Name }}
@@ -140,6 +143,7 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
+                  @touchend="handleDrop(day.date, 'nightShift2')"
                 >
                   <div class="assigned-person" v-if="day.nightShift2">
                     {{ day.nightShift2Name }}
@@ -164,7 +168,7 @@
         border-radius: var(--border-radius-small);
         filter: drop-shadow(var(--shadow-drop));
         color: var(--color-text-dark);
-        width: 450px;
+        font-size: 20px;
         box-shadow: var(--glass-box-shadow);
         padding: var(--spacing-medium);
       "
