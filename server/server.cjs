@@ -9,8 +9,8 @@ const port = 443;
 // Initialize app with HTTPS options
 const app = express({
   uwsOptions: {
-    key_file_name: path.join(__dirname, "vuecalendar.kot.li-key.pem"),
-    cert_file_name: path.join(__dirname, "vuecalendar.kot.li-crt.pem"),
+    key_file_name: path.join(__dirname, "mc.kot.li-key.pem"),
+    cert_file_name: path.join(__dirname, "mc.kot.li-crt.pem"),
   },
 });
 
