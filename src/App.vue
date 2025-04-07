@@ -6,6 +6,7 @@
       <CalendarStaticComponent
         v-if="currentPage === 'CalendarStaticComponent'"
       />
+      <ExcelComponent v-if="currentPage === 'ExcelComponent'" />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
       <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
       <NotificationMessage />
@@ -23,6 +24,9 @@ export default {
     ),
     CalendarStaticComponent: defineAsyncComponent(
       () => import("./components/CalendarStaticComponent.vue"),
+    ),
+    ExcelComponent: defineAsyncComponent(
+      () => import("./components/ExcelComponent.vue"),
     ),
     SideBarComponent: defineAsyncComponent(
       () => import("./components/SideBarComponent.vue"),

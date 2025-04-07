@@ -10,6 +10,12 @@
       Harmonogram
     </button>
     <button
+      @click="$emit('navigate', 'ExcelComponent')"
+      class="sidebar-button"
+    >
+      Tabela
+    </button>
+    <button
       @click="$emit('navigate', 'SettingsComponent')"
       class="sidebar-button"
     >
