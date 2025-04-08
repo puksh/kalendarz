@@ -3,12 +3,8 @@
     <SideBarComponent @navigate="handleNavigation" />
     <main class="main-content">
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
-      <CalendarStaticComponent
-        v-if="currentPage === 'CalendarStaticComponent'"
-      />
       <ExcelComponent v-if="currentPage === 'ExcelComponent'" />
       <AboutComponent v-if="currentPage === 'AboutComponent'" />
-      <SettingsComponent v-if="currentPage === 'SettingsComponent'" />
       <NotificationMessage />
     </main>
   </div>
@@ -22,9 +18,6 @@ export default {
     CalendarComponent: defineAsyncComponent(
       () => import("./components/CalendarComponent.vue"),
     ),
-    CalendarStaticComponent: defineAsyncComponent(
-      () => import("./components/CalendarStaticComponent.vue"),
-    ),
     ExcelComponent: defineAsyncComponent(
       () => import("./components/ExcelComponent.vue"),
     ),
@@ -34,16 +27,13 @@ export default {
     AboutComponent: defineAsyncComponent(
       () => import("./components/AboutComponent.vue"),
     ),
-    SettingsComponent: defineAsyncComponent(
-      () => import("./components/SettingsComponent.vue"),
-    ),
     NotificationMessage: defineAsyncComponent(
       () => import("./components/NotificationMessage.vue"),
     ),
   },
   data() {
     return {
-      currentPage: "CalendarStaticComponent",
+      currentPage: "CalendarComponent",
     };
   },
   methods: {
@@ -54,9 +44,6 @@ export default {
   mounted() {
     const isEditingMode =
       JSON.parse(localStorage.getItem("isEditingMode")) || false;
-    this.currentPage = isEditingMode
-      ? "CalendarComponent"
-      : "CalendarStaticComponent";
   },
 };
 </script>

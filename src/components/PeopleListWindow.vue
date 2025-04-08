@@ -50,10 +50,13 @@ export default {
       type: Array,
       required: true,
     },
+    isEditingMode: {
+      type: Boolean,
+      required: true, // Ensure the parent always provides this prop
+    },
   },
   data() {
     return {
-      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false,
       draggedPerson: null,
     };
   },
@@ -70,6 +73,9 @@ export default {
     handleTouchEnd(event) {
       event.target.classList.remove("dragging");
       document.body.style.overflow = ""; // Re-enable scrolling
+    },
+    handleDragEnd() {
+      localStorage.removeItem("draggedPerson");
     },
   },
 };

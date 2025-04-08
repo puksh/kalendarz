@@ -6,7 +6,9 @@
     >
       Info</button
     >-->
-    <button @click="navigateToCalendar" class="sidebar-button">
+    <button 
+      @click="$emit('navigate', 'CalendarComponent')"
+      class="sidebar-button">
       Harmonogram
     </button>
     <button
@@ -15,32 +17,12 @@
     >
       Tabela
     </button>
-    <button
-      @click="$emit('navigate', 'SettingsComponent')"
-      class="sidebar-button"
-    >
-      Ustawienia
-    </button>
   </aside>
 </template>
 
 <script>
 export default {
   name: "SideBarComponent",
-  data() {
-    return {
-      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Load initial value from localStorage
-    };
-  },
-  methods: {
-    navigateToCalendar() {
-      this.isEditingMode = JSON.parse(localStorage.getItem("isEditingMode"));
-      const target = this.isEditingMode
-        ? "CalendarComponent"
-        : "CalendarStaticComponent";
-      this.$emit("navigate", target);
-    },
-  },
 };
 </script>
 

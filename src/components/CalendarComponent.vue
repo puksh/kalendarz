@@ -41,6 +41,16 @@
       />
     </button>
     -->
+    
+    <label class="glass-toggle">
+      <input
+        type="checkbox"
+        v-model="isEditingMode"
+        @change="updateEditingMode"
+      />
+      <span class="toggle-slider"></span>
+      <span class="label-text">Tryb edytowania</span>
+    </label>
   </section>
   <div class="calendar-container">
     <!-- Calendar Section -->
@@ -84,6 +94,7 @@
                     pielegniarka: day.dayShift1Ratownik === false,
                     userChanged: day.dayShift1UserChanged === true,
                   }"
+                  :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
@@ -103,6 +114,7 @@
                     pielegniarka: day.dayShift2Ratownik === false,
                     userChanged: day.dayShift2UserChanged === true,
                   }"
+                  :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
                   @touchend="handleDrop(day.date, 'dayShift2')"
@@ -121,6 +133,7 @@
                     pielegniarka: day.nightShift1Ratownik === false,
                     userChanged: day.nightShift1UserChanged === true,
                   }"
+                  :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
@@ -140,6 +153,7 @@
                     pielegniarka: day.nightShift2Ratownik === false,
                     userChanged: day.nightShift2UserChanged === true,
                   }"
+                  :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
@@ -157,8 +171,8 @@
       </div>
     </section>
   </div>
-  <PeopleListWindow :people="people" />
-  <div style="display: flex; flex-direction: column; align-items: center">
+  <PeopleListWindow :people="people" :isEditingMode="isEditingMode"/>
+  <div v-if="isEditingMode" style="display: flex; flex-direction: column; align-items: center">
     <h1
       style="
         background: var(--glass-bg-color);
@@ -191,6 +205,7 @@ export default {
   components: { ShiftCountWindow, PeopleListWindow },
   data() {
     return {
+      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false,
       selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
       selectedYear: new Date().getFullYear(),
       monthDays: [],
@@ -371,6 +386,9 @@ export default {
     },
     showPasswordPrompt() {
       this.showPasswordModal = true;
+    },
+    updateEditingMode() {
+      localStorage.setItem("isEditingMode", JSON.stringify(this.isEditingMode)); // Sync with localStorage
     },
     async authorize() {
       const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
@@ -795,5 +813,66 @@ export default {
 }
 .assigned-person {
   cursor: pointer !important;
+}
+
+.glass-toggle {
+  display: inline-flex;
+  align-items: center;
+  position: fixed;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+	top: 8px;
+	right: 60px;
+  z-index: 1000;
+}
+
+.glass-toggle input {
+  position: absolute;
+  opacity: 0; /* Keeps the input accessible but invisible */
+  width: 0;
+  height: 0;
+}
+
+.glass-toggle .toggle-slider {
+  width: 50px;
+  height: 25px;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 2px solid var(--glass-border-color);
+  border-radius: 15px;
+  box-shadow: var(--glass-box-shadow);
+  position: relative;
+  transition:
+    background 0.3s,
+    transform 0.3s;
+}
+
+.glass-toggle .toggle-slider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: var(--shadow-drop);
+  transition: transform 0.3s;
+}
+
+.glass-toggle input:checked + .toggle-slider {
+  background: rgba(0, 128, 255, 0.4); /* A subtle blue glow when checked */
+}
+
+.glass-toggle input:checked + .toggle-slider::before {
+  transform: translateY(-50%) translateX(24px);
+}
+
+.glass-toggle .label-text {
+  font-size: 1rem;
+  color: white;
+  text-shadow: var(--shadow-modal);
 }
 </style>
