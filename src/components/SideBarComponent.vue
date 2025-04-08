@@ -1,11 +1,5 @@
 <template>
   <aside class="sidebar">
-    <!--<button
-      @click="$emit('navigate', 'AboutComponent')"
-      class="sidebar-button"
-    >
-      Info</button
-    >-->
     <button 
       @click="$emit('navigate', 'CalendarComponent')"
       class="sidebar-button">

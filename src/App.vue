@@ -4,7 +4,6 @@
     <main class="main-content">
       <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
       <ExcelComponent v-if="currentPage === 'ExcelComponent'" />
-      <AboutComponent v-if="currentPage === 'AboutComponent'" />
       <NotificationMessage />
     </main>
   </div>
@@ -23,9 +22,6 @@ export default {
     ),
     SideBarComponent: defineAsyncComponent(
       () => import("./components/SideBarComponent.vue"),
-    ),
-    AboutComponent: defineAsyncComponent(
-      () => import("./components/AboutComponent.vue"),
     ),
     NotificationMessage: defineAsyncComponent(
       () => import("./components/NotificationMessage.vue"),
