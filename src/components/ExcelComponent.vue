@@ -4,7 +4,7 @@
       <button class="buttonMonthChange" @click="changeMonth(-1)">
         &#8249;
       </button>
-      <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
+      <span style="font-weight: bold; width: 200px !important;"> {{ monthYear.toUpperCase() }} </span>
       <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
     </section>
     <button
@@ -17,13 +17,19 @@
         alt="Refresh"
       />
     </button>
-    <button @click="toggleEditingMode" class="edit-mode-button">
-      {{ isEditingMode ? "Wyłącz tryb edytowania" : "Włącz tryb edytowania" }}
-    </button>
+    <label class="glass-toggle">
+      <input
+        type="checkbox"
+        v-model="isEditingMode"
+        @change="updateEditingMode"
+      />
+      <span class="toggle-slider"></span>
+      <span class="label-text">Tryb edytowania</span>
+    </label>
     <table class="calendar-table">
       <thead>
         <tr>
-          <th>Nazwisko i imię</th>
+          <th></th>
           <th v-for="day in daysInMonth" :key="day">{{ day }}</th>
         </tr>
       </thead>
@@ -54,11 +60,34 @@
       </tbody>
     </table>
   </div>
+  <PeopleListWindow :people="people" :isEditingMode="false"/>
+  <div v-if="isEditingMode" style="display: flex; flex-direction: column; align-items: center">
+    <h1
+      style="
+        background: var(--glass-bg-color);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border-color);
+        border-radius: var(--border-radius-small);
+        filter: drop-shadow(var(--shadow-drop));
+        color: var(--color-text-dark);
+        font-size: 20px;
+        box-shadow: var(--glass-box-shadow);
+        padding: var(--spacing-medium);
+      "
+    >
+      Tryb edytowania <a style="color: green">Włączony</a>
+    </h1>
+  </div>
+  <ShiftCountWindow :people="people" :monthDays="monthDays" />
 </template>
 
 <script>
+import ShiftCountWindow from "./ShiftCountWindow.vue";
+import PeopleListWindow from "./PeopleListWindow.vue";
 export default {
   name: "SpreadsheetView",
+  components: { ShiftCountWindow, PeopleListWindow },
   props: {
     monthDays: Array,
     people: Array,
@@ -267,6 +296,9 @@ export default {
         }
       }
 
+      // Clear the editedShifts object to reset editing state
+      this.editedShifts = {};
+
       // Update the selected month and year
       this.selectedMonth = this.selectedMonth + newMonth;
       this.generateMonthDays(); // Regenerate the days for the new month
@@ -364,82 +396,119 @@ export default {
 </script>
 
 <style scoped>
-.spreadsheet-view {
-  padding: 20px;
-}
-
-.edit-mode-button {
-  margin: 10px 0px 10px 0px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.edit-mode-button:hover {
-  background-color: #0056b3;
-}
-
+/* General Table Styling */
 .calendar-table {
+  width: 100%;
+  margin-top: 20px;
   border-collapse: collapse;
   table-layout: fixed;
+  background: #2e2e2e; /* Dark background for the table */
+  border: 1px solid #444; /* Subtle border for the table */
+  border-radius: 8px; /* Rounded corners */
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
-  backdrop-filter: blur(10px); /* Glassy blur effect */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
 
 .calendar-table th,
 .calendar-table td {
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Semi-transparent borders */
+  border: 1px solid #444; /* Subtle grid lines */
   text-align: center;
-  color: #fff; /* White text for contrast */
+  padding: 8px;
+  font-size: 14px;
+  color: #e0e0e0; /* Muted light text for better readability */
 }
 
 .calendar-table th {
-  background: rgba(0, 0, 0, 0.4); /* Darker semi-transparent background for headers */
+  background: #3c3c3c; /* Slightly darker header background */
+  color: #ffffff; /* White text for headers */
   font-weight: bold;
-  font-size: 12px;
-  height: 28px !important;
-}
-
-.calendar-table th:first-child,
-.calendar-table td:first-child {
-  width: 134px !important;
-  text-align: center;
+  text-transform: uppercase;
 }
 
 .calendar-table td {
-  width: 38px !important;
-  height: 56px !important;
-  text-align: center;
-  font-size: x-large;
-  background: rgba(255, 255, 255, 0.1); /* Slightly lighter background for cells */
+  background: #2e2e2e; /* Dark background for cells */
+}
+
+.calendar-table tr:nth-child(even) td {
+  background: #3a3a3a; /* Alternating row colors */
 }
 
 .calendar-table td:hover {
-  background: rgba(255, 255, 255, 0.3); /* Highlight effect on hover */
-  cursor: pointer;
+  background: #585858; /* Highlighted background on hover */
 }
 
+.calendar-table td:nth-child(even):hover {
+  background: #4a4a4a; /* Highlighted background on hover */
+}
+/* First Column Styling */
+.calendar-table th:first-child,
+.calendar-table td:first-child {
+  background: #3c3c3c; /* Slightly darker background for the first column */
+  font-weight: bold;
+  text-align: left;
+  padding-left: 12px;
+  transition: width 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+  width: 25px; /* Default width */
+}
+
+.calendar-table :not(thead) tr:hover td:first-child   {
+  width: 200px !important; /* Increased width on hover */
+  background: #4a4a4a !important; /* Slightly lighter background on hover */
+}
+
+/* Editable Cell Styling */
 .editable-cell {
-  cursor: pointer;
+  position: relative;
 }
 
-.editable-cell input {
+.editable-cell select {
   width: 100%;
-  border: none;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.2); /* Glassy input background */
-  color: #fff; /* White text for input */
-  border-radius: 5px;
+  height: 100%;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #3a3a3a;
+  color: #e0e0e0;
+  font-size: 14px;
+  padding: 4px;
+  appearance: none; /* Remove default browser styling */
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.editable-cell input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.4); /* Slightly brighter background on focus */
+.editable-cell select:hover {
+  border-color: #666; /* Highlight border on hover */
+}
+
+.editable-cell select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Blue glow on focus */
+}
+
+.editable-cell select option {
+  background: #3a3a3a;
+  color: #e0e0e0;
+}
+
+/* Table Header Styling */
+.calendar-table th {
+  font-size: 12px;
+  padding: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .calendar-table th,
+  .calendar-table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .editable-cell select {
+    font-size: 12px;
+    padding: 2px;
+  }
 }
 </style>

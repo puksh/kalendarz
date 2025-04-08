@@ -15,11 +15,21 @@
     </div>
   </section>
   <section>
+    <button
+      class="top-right-buttons buttonRefresh"
+      @click="checkShiftDataSync()"
+    >
+      <img
+        :src="'/assets/icons/refresh.svg'"
+        style="width: 30px; height: 30px; cursor: pointer"
+        alt="Refresh"
+      />
+    </button>
     <section class="monthChange">
       <button class="buttonMonthChange" @click="changeMonth(-1)">
         &#8249;
       </button>
-      <span style="font-weight: bold"> {{ monthYear.toUpperCase() }} </span>
+      <span style="font-weight: bold; width: 200px !important;"> {{ monthYear.toUpperCase() }} </span>
       <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
     </section>
     <button
@@ -620,7 +630,6 @@ export default {
           }
         }
       }
-      this.calculateAllShiftCounts();
     },
     resetSyncedChangesSessionStorage() {
       // Load synced changes from sessionStorage
@@ -645,32 +654,6 @@ export default {
       if (daysOfWeek[dayIndex] === "Nd") return "nd-color";
       if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
       return "normal-color";
-    },
-    countShiftsForPerson(personId) {
-      if (!personId) return 0;
-      let tempCount = 0;
-
-      for (let i = 0; i < this.monthDays.length; i++) {
-        if (this.monthDays[i].dayShift1 === personId) {
-          tempCount += 1;
-        }
-        if (this.monthDays[i].dayShift2 === personId) {
-          tempCount += 1;
-        }
-        if (this.monthDays[i].nightShift1 === personId) {
-          tempCount += 1;
-        }
-        if (this.monthDays[i].nightShift2 === personId) {
-          tempCount += 1;
-        }
-      }
-      return tempCount;
-    },
-
-    calculateAllShiftCounts() {
-      this.people.forEach((person) => {
-        person.shiftCount = this.countShiftsForPerson(person.id);
-      });
     },
   },
 
@@ -815,64 +798,4 @@ export default {
   cursor: pointer !important;
 }
 
-.glass-toggle {
-  display: inline-flex;
-  align-items: center;
-  position: fixed;
-  cursor: pointer;
-  user-select: none;
-  gap: 12px;
-	top: 8px;
-	right: 60px;
-  z-index: 1000;
-}
-
-.glass-toggle input {
-  position: absolute;
-  opacity: 0; /* Keeps the input accessible but invisible */
-  width: 0;
-  height: 0;
-}
-
-.glass-toggle .toggle-slider {
-  width: 50px;
-  height: 25px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 2px solid var(--glass-border-color);
-  border-radius: 15px;
-  box-shadow: var(--glass-box-shadow);
-  position: relative;
-  transition:
-    background 0.3s,
-    transform 0.3s;
-}
-
-.glass-toggle .toggle-slider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  transform: translateY(-50%);
-  box-shadow: var(--shadow-drop);
-  transition: transform 0.3s;
-}
-
-.glass-toggle input:checked + .toggle-slider {
-  background: rgba(0, 128, 255, 0.4); /* A subtle blue glow when checked */
-}
-
-.glass-toggle input:checked + .toggle-slider::before {
-  transform: translateY(-50%) translateX(24px);
-}
-
-.glass-toggle .label-text {
-  font-size: 1rem;
-  color: white;
-  text-shadow: var(--shadow-modal);
-}
 </style>

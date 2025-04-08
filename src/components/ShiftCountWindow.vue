@@ -43,6 +43,44 @@ export default {
       required: true,
     },
   },
+  methods: {
+    countShiftsForPerson(personId) {
+      if (!personId) return 0;
+      let tempCount = 0;
+
+      for (let i = 0; i < this.monthDays.length; i++) {
+        if (this.monthDays[i].dayShift1 === personId) {
+          tempCount += 1;
+        }
+        if (this.monthDays[i].dayShift2 === personId) {
+          tempCount += 1;
+        }
+        if (this.monthDays[i].nightShift1 === personId) {
+          tempCount += 1;
+        }
+        if (this.monthDays[i].nightShift2 === personId) {
+          tempCount += 1;
+        }
+      }
+      return tempCount;
+    },
+    calculateAllShiftCounts() {
+      this.people.forEach((person) => {
+        person.shiftCount = this.countShiftsForPerson(person.id);
+      });
+    },
+  },
+  mounted() {
+    this.calculateAllShiftCounts();
+  },
+  watch: {
+    monthDays: {
+      handler() {
+        this.calculateAllShiftCounts(); // Recalculate shift counts when monthDays changes
+      },
+      deep: true, // Watch for deep changes in the monthDays array
+    },
+  },
 };
 </script>
 
