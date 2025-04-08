@@ -28,8 +28,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="person in orderedPeople" :key="person.id">
-          <td>{{ person.name }}</td>
+        <tr v-for="person in orderedPeople" :key="person.id" >
+          <td :class="{ 'ratownik': person.ratownik, 'pielegniarka': !person.ratownik }">{{ person.name }}</td>
           <td
             v-for="day in daysInMonth"
             :key="day"
@@ -39,12 +39,16 @@
             <span v-if="!isEditingMode || !isEditing(person.id, day)">
               {{ getShiftForPersonAndDay(person.id, day) || "" }}
             </span>
-            <input
-              v-else
-              type="text"
-              v-model="editedShifts[`${person.id}-${day}`]"
-              @blur="saveShift(person.id, day)"
-            />
+            <select
+            v-else
+            v-model="editedShifts[`${person.id}-${day}`]"
+            @change="saveShift(person.id, day)"
+            >
+             <option value=""></option>
+             <option value="D">D</option>
+             <option value="N">N</option>
+             <option value="D N">D N</option>
+            </select>
           </td>
         </tr>
       </tbody>
@@ -121,17 +125,102 @@ export default {
     editCell(personId, day) {
       if (this.isEditingMode) {
         const key = `${personId}-${day}`;
-        this.editedShifts[key] = this.getShiftForPersonAndDay(personId, day) || "";
+        const currentValue = this.getShiftForPersonAndDay(personId, day) || ""; // Get the current value
+        this.editedShifts[key] = currentValue; // Initialize the editedShifts object with the current value
       }
     },
     saveShift(personId, day) {
       const key = `${personId}-${day}`;
-      const newValue = this.editedShifts[key];
+      const newValue = this.editedShifts[key].trim().toUpperCase(); // Normalize input
+      const validValues = ["D", "N", "D N", ""]; // Allowed values
+
+      if (!validValues.includes(newValue)) {
+        alert("Invalid input! Only 'D', 'N', or 'D N' are allowed.");
+        delete this.editedShifts[key];
+        return;
+      }
+
       const date = this.monthDays.find((d) => d.date.getDate() === day)?.date.toDateString();
 
       if (date) {
         const shiftData = JSON.parse(localStorage.getItem(date) || "{}");
-        shiftData[`shift-${personId}`] = newValue;
+        const dayData = this.monthDays.find((d) => d.date.toDateString() === date);
+
+        // Reset all shifts for the person
+        if (newValue === "") {
+          shiftData.dayShift1 = null;
+          shiftData.dayShift2 = null;
+          shiftData.nightShift1 = null;
+          shiftData.nightShift2 = null;
+
+          dayData.dayShift1 = null;
+          dayData.dayShift2 = null;
+          dayData.nightShift1 = null;
+          dayData.nightShift2 = null;
+
+          localStorage.setItem(date, JSON.stringify(shiftData));
+          delete this.editedShifts[key];
+          return;
+        }
+
+        // Check if the person is a ratownik
+        const draggedPerson = this.people.find((p) => p.id === personId);
+        const isDraggedRatownik = draggedPerson?.ratownik;
+
+        // Check if another ratownik is already assigned to the shift
+        const currentShiftPeople = [
+          dayData.dayShift1,
+          dayData.dayShift2,
+          dayData.nightShift1,
+          dayData.nightShift2,
+        ].filter(Boolean);
+
+        const hasOtherRatownik = currentShiftPeople.some((id) => {
+          const person = this.people.find((p) => p.id === id);
+          return person?.ratownik;
+        });
+
+        if (isDraggedRatownik && hasOtherRatownik) {
+          alert("Nie można przypisać dwóch ratowników na jedną zmianę.");
+          delete this.editedShifts[key];
+          return;
+        }
+
+        // Assign the person to the appropriate shift slots
+        if (newValue.includes("D")) {
+          if (!dayData.dayShift1) {
+            dayData.dayShift1 = personId;
+            dayData.dayShift1Name = draggedPerson.name;
+          } else if (!dayData.dayShift2) {
+            dayData.dayShift2 = personId;
+            dayData.dayShift2Name = draggedPerson.name;
+          } else {
+            alert("Nie można przypisać więcej niż dwóch osób na zmianę dzienną.");
+            delete this.editedShifts[key];
+            return;
+          }
+        }
+
+        if (newValue.includes("N")) {
+          if (!dayData.nightShift1) {
+            dayData.nightShift1 = personId;
+            dayData.nightShift1Name = draggedPerson.name;
+          } else if (!dayData.nightShift2) {
+            dayData.nightShift2 = personId;
+            dayData.nightShift2Name = draggedPerson.name;
+          } else {
+            alert("Nie można przypisać więcej niż dwóch osób na zmianę nocną.");
+            delete this.editedShifts[key];
+            return;
+          }
+        }
+
+        // Save the updated data
+        shiftData.dayShift1 = dayData.dayShift1;
+        shiftData.dayShift2 = dayData.dayShift2;
+        shiftData.nightShift1 = dayData.nightShift1;
+        shiftData.nightShift2 = dayData.nightShift2;
+
         localStorage.setItem(date, JSON.stringify(shiftData));
       }
 
@@ -272,7 +361,7 @@ export default {
 }
 
 .edit-mode-button {
-  margin-bottom: 10px;
+  margin: 10px 0px 10px 0px;
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -286,34 +375,48 @@ export default {
 }
 
 .calendar-table {
-  width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Glassy blur effect */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
 
 .calendar-table th,
 .calendar-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Semi-transparent borders */
   text-align: center;
+  color: #fff; /* White text for contrast */
 }
 
 .calendar-table th {
-  background-color: #f4f4f4;
+  background: rgba(0, 0, 0, 0.4); /* Darker semi-transparent background for headers */
+  font-weight: bold;
+  font-size: 12px;
+  height: 28px !important;
 }
 
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-  width: 140px !important;
+  width: 134px !important;
   text-align: center;
 }
-.calendar-table td{
-  width: 36px !important;
-  height: 36px !important;
+
+.calendar-table td {
+  width: 38px !important;
+  height: 56px !important;
   text-align: center;
+  font-size: x-large;
+  background: rgba(255, 255, 255, 0.1); /* Slightly lighter background for cells */
 }
-.calendar-table thead{
-    font-size: 12px;
+
+.calendar-table td:hover {
+  background: rgba(255, 255, 255, 0.3); /* Highlight effect on hover */
+  cursor: pointer;
 }
+
 .editable-cell {
   cursor: pointer;
 }
@@ -322,5 +425,13 @@ export default {
   width: 100%;
   border: none;
   text-align: center;
+  background: rgba(255, 255, 255, 0.2); /* Glassy input background */
+  color: #fff; /* White text for input */
+  border-radius: 5px;
+}
+
+.editable-cell input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.4); /* Slightly brighter background on focus */
 }
 </style>
