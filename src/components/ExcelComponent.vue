@@ -148,15 +148,23 @@ export default {
 
         // Reset all shifts for the person
         if (newValue === "") {
-          shiftData.dayShift1 = null;
-          shiftData.dayShift2 = null;
-          shiftData.nightShift1 = null;
-          shiftData.nightShift2 = null;
-
-          dayData.dayShift1 = null;
-          dayData.dayShift2 = null;
-          dayData.nightShift1 = null;
-          dayData.nightShift2 = null;
+          if (dayData.dayShift1 === personId) {
+            dayData.dayShift1 = null;
+            dayData.dayShift1Name = "Not assigned";
+            shiftData.dayShift1 = null;
+          } else if (dayData.dayShift2 === personId) {
+            dayData.dayShift2 = null;
+            dayData.dayShift2Name = "Not assigned";
+            shiftData.dayShift2 = null;
+          } else if (dayData.nightShift1 === personId) {
+            dayData.nightShift1 = null;
+            dayData.nightShift1Name = "Not assigned";
+            shiftData.nightShift1 = null;
+          } else if (dayData.nightShift2 === personId) {
+            dayData.nightShift2 = null;
+            dayData.nightShift2Name = "Not assigned";
+            shiftData.nightShift2 = null;
+          }
 
           localStorage.setItem(date, JSON.stringify(shiftData));
           delete this.editedShifts[key];
