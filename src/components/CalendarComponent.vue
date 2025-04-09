@@ -18,7 +18,7 @@
   </button>
   <div v-if="showMobileWarning" class="mobile-warning-overlay">
     <div class="mobile-warning">
-      <h3>Urządzenie mobilne wykryte</h3>
+      <h3>!! Urządzenie mobilne wykryte !!</h3>
       <p>
         Niestety, tryb edycji w widoku kalendarza nie jest obsługiwany na
         urządzeniach mobilnych.
