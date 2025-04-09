@@ -45,7 +45,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="3"
           stroke-linecap="round"
           stroke-linejoin="round"
           class="pencil-icon"
@@ -61,7 +61,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="3"
           stroke-linecap="round"
           stroke-linejoin="round"
           class="pencil-icon"
@@ -608,6 +608,10 @@ export default {
     },
     showPasswordPrompt() {
       this.showPasswordModal = true; // Show the password modal
+    },
+    handleAuthorization() {
+      this.showPasswordModal = false;
+      this.madeChanges = false; // Reset changes flag after successful authorization
     },
   },
 
