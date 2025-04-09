@@ -157,14 +157,12 @@ body {
 /*Edit Mode Toggle */
 
 .compact-toggle {
-	position: relative;
 	display: inline-block;
 	width: 64px;
 	height: 44px;
 	z-index: 1000;
 	top: 8px;
 	right: 56px;
-	position: absolute;
 	border-radius: 20px;
 }
 
