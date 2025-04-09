@@ -144,21 +144,10 @@
     v-if="isEditingMode"
     style="display: flex; flex-direction: column; align-items: center"
   >
-    <h1
-      style="
-        background: var(--glass-bg-color);
-        backdrop-filter: blur(var(--glass-blur));
-        -webkit-backdrop-filter: blur(var(--glass-blur));
-        border: 1px solid var(--glass-border-color);
-        border-radius: var(--border-radius-small);
-        filter: drop-shadow(var(--shadow-drop));
-        color: var(--color-text-dark);
-        font-size: 20px;
-        box-shadow: var(--glass-box-shadow);
-        padding: var(--spacing-medium);
-      "
-    >
-      Tryb edytowania <a style="color: green">Włączony</a>
+    <h1 class="editing-mode-label">
+      Tryb edytowania
+      <a style="color: green">Włączony</a><br />
+      Kliknij na miejsce w tabeli, aby wybrać zmianę.
     </h1>
   </div>
   <ShiftCountWindow :people="people" :monthDays="monthDays" />
