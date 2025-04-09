@@ -112,7 +112,9 @@ body {
 	transition: background-color 0.3s ease;
 	padding-bottom: var(--spacing-small);
 	line-height: 16px;
-	transition: all 0.2s ease;
+	transition:
+		transform 0.2s ease,
+		filter 0.2s ease;
 }
 .buttonMonthChange:hover {
 	filter: brightness(0.8);
@@ -134,7 +136,11 @@ body {
 	border-radius: var(--border-radius-small);
 	filter: drop-shadow(var(--shadow-drop));
 	box-shadow: var(--glass-box-shadow);
-	transition: all 0.3s ease;
+	transition:
+		background-color 0.3s ease,
+		border-color 0.3s ease,
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
 }
 .top-right-buttons:hover {
 	background-color: #7fb9bd99;
@@ -160,6 +166,10 @@ body {
 .buttonRefresh {
 	top: 8px;
 	right: 4px;
+}
+.buttonRefresh img {
+	margin-top: 2px;
+	filter: invert(1);
 }
 
 /* Shift Types Colors */
@@ -220,8 +230,8 @@ body {
 }
 
 .compact-toggle .slider .pencil-icon {
-	width: 16px; /* Icon size */
-	height: 16px;
+	width: 24px; /* Icon size */
+	height: 24px;
 	color: white; /* Icon color */
 	transition: transform 0.2s ease;
 }

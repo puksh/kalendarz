@@ -45,7 +45,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="3"
           stroke-linecap="round"
           stroke-linejoin="round"
           class="pencil-icon"
@@ -61,7 +61,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="3"
           stroke-linecap="round"
           stroke-linejoin="round"
           class="pencil-icon"
@@ -249,7 +249,23 @@ export default {
       const shiftData = localStorage.getItem(date);
       if (shiftData) {
         const parsedData = JSON.parse(shiftData);
-        return Object.values(parsedData).find((shift) => shift === personId);
+        const shifts = [];
+
+        // Check if the person is assigned to day or night shifts
+        if (
+          parsedData.dayShift1 === personId ||
+          parsedData.dayShift2 === personId
+        ) {
+          shifts.push("D"); // Day shift
+        }
+        if (
+          parsedData.nightShift1 === personId ||
+          parsedData.nightShift2 === personId
+        ) {
+          shifts.push("N"); // Night shift
+        }
+
+        return shifts.join(" "); // Combine shifts (e.g., "D N" if both)
       }
       return null;
     },
@@ -268,7 +284,9 @@ export default {
 
       if (!validValues.includes(newValue)) {
         addNotification("Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.");
-        delete this.editedShifts[key];
+        this.$nextTick(() => {
+          this.editedShifts[key] = previousValue;
+        });
         return;
       }
 
@@ -318,42 +336,37 @@ export default {
         this.localData[date] = updatedData;
         localStorage.setItem(date, JSON.stringify(updatedData));
         this.madeChanges = true;
-        delete this.editedShifts[key];
+        this.$nextTick(() => {
+          this.editedShifts[key] = undefined;
+          delete this.editedShifts[key];
+          this.$forceUpdate();
+        });
         return;
       }
-      // Check if the person is a ratownik
       const draggedPerson = this.people.find((p) => p.id === personId);
-      const isDraggedRatownik = draggedPerson?.ratownik;
 
-      // Check if another ratownik is already assigned to the shift
-      const currentShiftPeople = [
-        dayData.dayShift1,
-        dayData.dayShift2,
-        dayData.nightShift1,
-        dayData.nightShift2,
-      ].filter(Boolean);
-
-      const hasOtherRatownik = currentShiftPeople.some((id) => {
-        const person = this.people.find((p) => p.id === id);
-        // Check if the person is a ratownik and not the dragged person
-        if (draggedPerson.id !== id) {
-          return person?.ratownik;
-        }
-        return false;
-      });
-
-      if (isDraggedRatownik && hasOtherRatownik) {
-        addNotification(
-          "Nie można przypisać dwóch ratowników na jedną zmianę.",
-        );
-        delete this.editedShifts[key];
-        return;
-      }
-
-      // Save day shift(s)
+      // --- Inside saveShift, before assigning a day shift ---
       if (newValue.includes("D")) {
+        // If the dragged person is a ratownik, check only the day shift columns.
+        if (draggedPerson?.ratownik) {
+          const dayShiftPeople = [dayData.dayShift1, dayData.dayShift2].filter(
+            Boolean,
+          );
+          const hasOtherRatownikDay = dayShiftPeople.some((id) => {
+            const person = this.people.find((p) => p.id === id);
+            return person?.ratownik && id !== personId;
+          });
+          if (hasOtherRatownikDay) {
+            addNotification(
+              "Nie można przypisać dwóch ratowników na zmianę dzienną.",
+            );
+            delete this.editedShifts[key];
+            return;
+          }
+        }
+
         if (newValue === "D" && previousValue !== "D N") {
-          // For a pure day shift, show error if already assigned
+          // For a pure day shift, assign to dayShift1 or dayShift2.
           if (
             dayData.dayShift1 === personId ||
             dayData.dayShift2 === personId
@@ -378,7 +391,7 @@ export default {
             return;
           }
         } else if (newValue === "D N") {
-          // For combined, if the day part is not yet assigned, assign it
+          // For combined, if the day part is not yet assigned, assign it.
           if (
             !(dayData.dayShift1 === personId || dayData.dayShift2 === personId)
           ) {
@@ -401,10 +414,29 @@ export default {
         }
       }
 
-      // Save night shift(s)
+      // --- Inside saveShift, before assigning a night shift ---
       if (newValue.includes("N")) {
+        // If the dragged person is a ratownik, check only the night shift columns.
+        if (draggedPerson?.ratownik) {
+          const nightShiftPeople = [
+            dayData.nightShift1,
+            dayData.nightShift2,
+          ].filter(Boolean);
+          const hasOtherRatownikNight = nightShiftPeople.some((id) => {
+            const person = this.people.find((p) => p.id === id);
+            return person?.ratownik && id !== personId;
+          });
+          if (hasOtherRatownikNight) {
+            addNotification(
+              "Nie można przypisać dwóch ratowników na zmianę nocną.",
+            );
+            delete this.editedShifts[key];
+            return;
+          }
+        }
+
         if (newValue === "N" && previousValue !== "D N") {
-          // For a pure night shift, show error if already assigned
+          // For a pure night shift, assign to nightShift1 or nightShift2.
           if (
             dayData.nightShift1 === personId ||
             dayData.nightShift2 === personId
@@ -429,7 +461,7 @@ export default {
             return;
           }
         } else if (newValue === "D N") {
-          // For combined, if the night part is not yet assigned, assign it
+          // For combined, if the night part is not yet assigned, assign it.
           if (
             !(
               dayData.nightShift1 === personId ||
@@ -591,35 +623,94 @@ export default {
         return null;
       }
     },
-    getShiftForPersonAndDay(personId, day) {
-      const date = this.monthDays
-        .find((d) => d.date.getDate() === day)
-        ?.date.toDateString();
-      const shiftData = localStorage.getItem(date);
-      if (shiftData) {
-        const parsedData = JSON.parse(shiftData);
-        const shifts = [];
+    async checkShiftDataSync() {
+      this.resetSyncedChangesSessionStorage();
+      const remoteData = await this.fetchServerShiftData();
 
-        // Check if the person is assigned to day or night shifts
-        if (
-          parsedData.dayShift1 === personId ||
-          parsedData.dayShift2 === personId
-        ) {
-          shifts.push("D"); // Day shift
-        }
-        if (
-          parsedData.nightShift1 === personId ||
-          parsedData.nightShift2 === personId
-        ) {
-          shifts.push("N"); // Night shift
-        }
-
-        return shifts.join(" "); // Combine shifts (e.g., "D N" if both)
+      if (!remoteData) {
+        console.log("No remote data fetched.");
+        return; // Exit if fetching fails
       }
-      return null;
+
+      //console.log("Remote data fetched:", remoteData);
+
+      const containedSyncedChanges = {}; // Reset synced changes
+
+      for (const [date, remoteShifts] of Object.entries(remoteData)) {
+        // Retrieve local shifts directly from localStorage
+        const savedStates = localStorage.getItem(date);
+        const localShifts = savedStates ? JSON.parse(savedStates) : null;
+
+        const differences = {};
+
+        //console.log(`Comparing shifts for date: ${date}`);
+        //console.log("Local shifts from localStorage:", localShifts);
+        //console.log("Remote shifts:", remoteShifts);
+
+        if (!localShifts) {
+          // New shifts entirely - add to synced changes and localStorage
+          containedSyncedChanges[date] = { ...remoteShifts };
+          localStorage.setItem(date, JSON.stringify(remoteShifts));
+          //console.log(`New shifts added for ${date}:`, remoteShifts);
+        } else {
+          // Compare existing shifts
+          for (const [shiftType, remoteValue] of Object.entries(remoteShifts)) {
+            const localValue = localShifts[shiftType] || null;
+            if (localValue !== remoteValue) {
+              differences[shiftType] = {
+                from: localValue || "Empty",
+                to: remoteValue || "Empty",
+              };
+            }
+          }
+
+          // If differences are found, track them
+          if (Object.keys(differences).length > 0) {
+            containedSyncedChanges[date] = differences;
+            //console.log(`Differences for ${date}:`, differences);
+          }
+
+          // Update local storage with the latest remote data
+          localStorage.setItem(date, JSON.stringify(remoteShifts));
+        }
+      }
+
+      this.generateMonthDays(); // Initialize local data first
+      // Update syncedChanges and save to sessionStorage
+      this.syncedChanges = containedSyncedChanges;
+      console.log("Updated syncedChanges:", this.syncedChanges);
+
+      sessionStorage.setItem(
+        "syncedChanges",
+        JSON.stringify(this.syncedChanges),
+      );
+
+      // Clear synced changes after 5 seconds
+      setTimeout(() => {
+        console.log("Clearing syncedChanges.");
+        this.syncedChanges = {};
+        sessionStorage.removeItem("syncedChanges");
+      }, 5000);
+    },
+    resetSyncedChangesSessionStorage() {
+      // Load synced changes from sessionStorage
+      const savedSyncedChanges = sessionStorage.getItem("syncedChanges");
+      if (savedSyncedChanges) {
+        this.syncedChanges = JSON.parse(savedSyncedChanges);
+
+        // Clear the syncedChanges after 5 seconds
+        setTimeout(() => {
+          this.syncedChanges = {};
+          sessionStorage.removeItem("syncedChanges");
+        }, 5000);
+      }
     },
     showPasswordPrompt() {
       this.showPasswordModal = true; // Show the password modal
+    },
+    handleAuthorization() {
+      this.showPasswordModal = false;
+      this.madeChanges = false; // Reset changes flag after successful authorization
     },
   },
   mounted() {
