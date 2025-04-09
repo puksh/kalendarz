@@ -261,8 +261,8 @@ export default {
     },
     saveShift(personId, day) {
       const key = `${personId}-${day}`;
-      const newValue = this.editedShifts[key].trim().toUpperCase(); // Normalize input
-      const validValues = ["D", "N", "D N", ""]; // Allowed values
+      const newValue = this.editedShifts[key]?.trim().toUpperCase() || "";
+      const validValues = ["D", "N", "D N", ""];
 
       if (!validValues.includes(newValue)) {
         alert("Invalid input! Only 'D', 'N', or 'D N' are allowed.");
@@ -273,132 +273,134 @@ export default {
       const date = this.monthDays
         .find((d) => d.date.getDate() === day)
         ?.date.toDateString();
+      if (!date || !this.monthDays) return;
 
-      if (date) {
-        const shiftData = JSON.parse(localStorage.getItem(date) || "{}");
-        const dayData = this.monthDays.find(
-          (d) => d.date.toDateString() === date,
-        );
+      const dayData = this.monthDays.find(
+        (d) => d.date.toDateString() === date,
+      );
+      if (!dayData) return;
 
-        if (newValue === "") {
-          if (dayData.dayShift1 === personId) {
-            dayData.dayShift1 = null;
-            dayData.dayShift1Name = "Not assigned";
-            dayData.dayShift1UserChanged = true; // Mark as user-changed
-          } else if (dayData.dayShift2 === personId) {
-            dayData.dayShift2 = null;
-            dayData.dayShift2Name = "Not assigned";
-            dayData.dayShift2UserChanged = true; // Mark as user-changed
-          } else if (dayData.nightShift1 === personId) {
-            dayData.nightShift1 = null;
-            dayData.nightShift1Name = "Not assigned";
-            dayData.nightShift1UserChanged = true; // Mark as user-changed
-          } else if (dayData.nightShift2 === personId) {
-            dayData.nightShift2 = null;
-            dayData.nightShift2Name = "Not assigned";
-            dayData.nightShift2UserChanged = true; // Mark as user-changed
-          }
-
-          const updatedData = {
-            dayShift1: dayData.dayShift1,
-            dayShift2: dayData.dayShift2,
-            nightShift1: dayData.nightShift1,
-            nightShift2: dayData.nightShift2,
-          };
-
-          this.localData[day.date.toDateString()] = updatedData;
-          localStorage.setItem(date, JSON.stringify(updatedData));
-          delete this.editedShifts[key];
-          return;
+      if (newValue === "") {
+        if (dayData.dayShift1 === personId) {
+          dayData.dayShift1 = null;
+          dayData.dayShift1Name = "Not assigned";
+          dayData.dayShift1UserChanged = true;
         }
-        // Check if the person is a ratownik
-        const draggedPerson = this.people.find((p) => p.id === personId);
-        const isDraggedRatownik = draggedPerson?.ratownik;
-
-        // Check if another ratownik is already assigned to the shift
-        const currentShiftPeople = [
-          dayData.dayShift1,
-          dayData.dayShift2,
-          dayData.nightShift1,
-          dayData.nightShift2,
-        ].filter(Boolean);
-
-        const hasOtherRatownik = currentShiftPeople.some((id) => {
-          const person = this.people.find((p) => p.id === id);
-          return person?.ratownik;
-        });
-
-        if (isDraggedRatownik && hasOtherRatownik) {
-          alert("Nie można przypisać dwóch ratowników na jedną zmianę.");
-          delete this.editedShifts[key];
-          return;
+        if (dayData.dayShift2 === personId) {
+          dayData.dayShift2 = null;
+          dayData.dayShift2Name = "Not assigned";
+          dayData.dayShift2UserChanged = true;
+        }
+        if (dayData.nightShift1 === personId) {
+          dayData.nightShift1 = null;
+          dayData.nightShift1Name = "Not assigned";
+          dayData.nightShift1UserChanged = true;
+        }
+        if (dayData.nightShift2 === personId) {
+          dayData.nightShift2 = null;
+          dayData.nightShift2Name = "Not assigned";
+          dayData.nightShift2UserChanged = true;
         }
 
-        // Assign the person to the appropriate shift slots
-        if (newValue.includes("D")) {
-          if (
-            dayData.dayShift1 === personId ||
-            dayData.dayShift2 === personId
-          ) {
-            alert("This person is already assigned to the day shift.");
-            delete this.editedShifts[key];
-            return;
-          }
-
-          if (!dayData.dayShift1) {
-            dayData.dayShift1 = personId;
-            dayData.dayShift1Name = draggedPerson.name;
-            dayData.dayShift1UserChanged = true;
-          } else if (!dayData.dayShift2) {
-            dayData.dayShift2 = personId;
-            dayData.dayShift2Name = draggedPerson.name;
-            dayData.dayShift2UserChanged = true;
-          } else {
-            alert(
-              "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
-            );
-            delete this.editedShifts[key];
-            return;
-          }
-        }
-
-        if (newValue.includes("N")) {
-          if (
-            dayData.nightShift1 === personId ||
-            dayData.nightShift2 === personId
-          ) {
-            alert("This person is already assigned to the night shift.");
-            delete this.editedShifts[key];
-            return;
-          }
-
-          if (!dayData.nightShift1) {
-            dayData.nightShift1 = personId;
-            dayData.nightShift1Name = draggedPerson.name;
-            dayData.nightShift1UserChanged = true;
-          } else if (!dayData.nightShift2) {
-            dayData.nightShift2 = personId;
-            dayData.nightShift2Name = draggedPerson.name;
-            dayData.nightShift2UserChanged = true;
-          } else {
-            alert("Nie można przypisać więcej niż dwóch osób na zmianę nocną.");
-            delete this.editedShifts[key];
-            return;
-          }
-        }
-
-        // Save the updated data
         const updatedData = {
           dayShift1: dayData.dayShift1,
           dayShift2: dayData.dayShift2,
           nightShift1: dayData.nightShift1,
           nightShift2: dayData.nightShift2,
+          dayShift1Name: dayData.dayShift1Name,
+          dayShift2Name: dayData.dayShift2Name,
+          nightShift1Name: dayData.nightShift1Name,
+          nightShift2Name: dayData.nightShift2Name,
         };
 
         this.localData[date] = updatedData;
-        this.madeChanges = true; // Mark that changes have been made
         localStorage.setItem(date, JSON.stringify(updatedData));
+        this.madeChanges = true;
+        delete this.editedShifts[key];
+        return;
       }
+      // Check if the person is a ratownik
+      const draggedPerson = this.people.find((p) => p.id === personId);
+      const isDraggedRatownik = draggedPerson?.ratownik;
+
+      // Check if another ratownik is already assigned to the shift
+      const currentShiftPeople = [
+        dayData.dayShift1,
+        dayData.dayShift2,
+        dayData.nightShift1,
+        dayData.nightShift2,
+      ].filter(Boolean);
+
+      const hasOtherRatownik = currentShiftPeople.some((id) => {
+        const person = this.people.find((p) => p.id === id);
+        return person?.ratownik;
+      });
+
+      if (isDraggedRatownik && hasOtherRatownik) {
+        alert("Nie można przypisać dwóch ratowników na jedną zmianę.");
+        delete this.editedShifts[key];
+        return;
+      }
+
+      // Assign the person to the appropriate shift slots
+      if (newValue.includes("D")) {
+        if (dayData.dayShift1 === personId || dayData.dayShift2 === personId) {
+          alert("This person is already assigned to the day shift.");
+          delete this.editedShifts[key];
+          return;
+        }
+
+        if (!dayData.dayShift1) {
+          dayData.dayShift1 = personId;
+          dayData.dayShift1Name = draggedPerson.name;
+          dayData.dayShift1UserChanged = true;
+        } else if (!dayData.dayShift2) {
+          dayData.dayShift2 = personId;
+          dayData.dayShift2Name = draggedPerson.name;
+          dayData.dayShift2UserChanged = true;
+        } else {
+          alert("Nie można przypisać więcej niż dwóch osób na zmianę dzienną.");
+          delete this.editedShifts[key];
+          return;
+        }
+      }
+
+      if (newValue.includes("N")) {
+        if (
+          dayData.nightShift1 === personId ||
+          dayData.nightShift2 === personId
+        ) {
+          alert("This person is already assigned to the night shift.");
+          delete this.editedShifts[key];
+          return;
+        }
+
+        if (!dayData.nightShift1) {
+          dayData.nightShift1 = personId;
+          dayData.nightShift1Name = draggedPerson.name;
+          dayData.nightShift1UserChanged = true;
+        } else if (!dayData.nightShift2) {
+          dayData.nightShift2 = personId;
+          dayData.nightShift2Name = draggedPerson.name;
+          dayData.nightShift2UserChanged = true;
+        } else {
+          alert("Nie można przypisać więcej niż dwóch osób na zmianę nocną.");
+          delete this.editedShifts[key];
+          return;
+        }
+      }
+
+      // Save the updated data
+      const updatedData = {
+        dayShift1: dayData.dayShift1,
+        dayShift2: dayData.dayShift2,
+        nightShift1: dayData.nightShift1,
+        nightShift2: dayData.nightShift2,
+      };
+
+      this.localData[date] = updatedData;
+      this.madeChanges = true; // Mark that changes have been made
+      localStorage.setItem(date, JSON.stringify(updatedData));
 
       delete this.editedShifts[key];
     },
