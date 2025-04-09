@@ -146,10 +146,13 @@
                   :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
-                  @click="handleClickResetShift(day, 'dayShift1')"
-                  @touchend.prevent="
-                    handleTouchEnd($event, day.date, 'dayShift1')
+                  @pointerup.prevent="
+                    handlePointerUp($event, day.date, 'dayShift1')
                   "
+                  @pointermove.prevent="
+                    handlePointerMove($event, day.date, 'dayShift1')
+                  "
+                  @click="handleClickResetShift(day, 'dayShift1')"
                   :aria-label="getShiftAriaLabel(day, 'dayShift1')"
                   :title="getShiftTooltip(day, 'dayShift1')"
                   role="button"
@@ -171,10 +174,13 @@
                   }"
                   :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
-                  @click="handleClickResetShift(day, 'dayShift2')"
-                  @touchend.prevent="
-                    handleTouchEnd($event, day.date, 'dayShift2')
+                  @pointerup.prevent="
+                    handlePointerUp($event, day.date, 'dayShift2')
                   "
+                  @pointermove.prevent="
+                    handlePointerMove($event, day.date, 'dayShift2')
+                  "
+                  @click="handleClickResetShift(day, 'dayShift2')"
                   :aria-label="getShiftAriaLabel(day, 'dayShift2')"
                   :title="getShiftTooltip(day, 'dayShift2')"
                   role="button"
@@ -197,10 +203,13 @@
                   :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
-                  @click="handleClickResetShift(day, 'nightShift1')"
-                  @touchend.prevent="
-                    handleTouchEnd($event, day.date, 'nightShift1')
+                  @pointerup.prevent="
+                    handlePointerUp($event, day.date, 'nightShift1')
                   "
+                  @pointermove.prevent="
+                    handlePointerMove($event, day.date, 'nightShift1')
+                  "
+                  @click="handleClickResetShift(day, 'nightShift1')"
                   :aria-label="getShiftAriaLabel(day, 'nightShift1')"
                   :title="getShiftTooltip(day, 'nightShift1')"
                   role="button"
@@ -223,10 +232,13 @@
                   :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
-                  @click="handleClickResetShift(day, 'nightShift2')"
-                  @touchend.prevent="
-                    handleTouchEnd($event, day.date, 'nightShift2')
+                  @pointerup.prevent="
+                    handlePointerUp($event, day.date, 'nightShift2')
                   "
+                  @pointermove.prevent="
+                    handlePointerMove($event, day.date, 'nightShift2')
+                  "
+                  @click="handleClickResetShift(day, 'nightShift2')"
                   :aria-label="getShiftAriaLabel(day, 'nightShift2')"
                   :title="getShiftTooltip(day, 'nightShift2')"
                   role="button"
@@ -302,9 +314,7 @@ export default {
       password: "",
       locale: "pl",
       scrollContainer: null,
-      touchedPerson: null,
-      touchStartTime: 0,
-      touchTimeout: null,
+      currentDropTarget: { date: null, shiftType: null },
     };
   },
   computed: {
@@ -387,6 +397,31 @@ export default {
 
       localStorage.removeItem("draggedPerson");
     },
+    handlePointerMove(event, date, shiftType) {
+      // Update current drop target for visual feedback
+      this.currentDropTarget = { date, shiftType };
+      event.preventDefault(); // Prevent scrolling
+    },
+
+    handlePointerEnd(event, date, shiftType) {
+      // Check if we have a dragged person in localStorage
+      const draggedPerson = JSON.parse(localStorage.getItem("draggedPerson"));
+      if (draggedPerson) {
+        this.handleDrop(date, shiftType);
+
+        // Clear the drop target
+        this.currentDropTarget = { date: null, shiftType: null };
+      }
+    },
+
+    isDropTarget(date, shiftType) {
+      if (!this.currentDropTarget.date) return false;
+
+      return (
+        this.currentDropTarget.date.toDateString() === date.toDateString() &&
+        this.currentDropTarget.shiftType === shiftType
+      );
+    },
     handleClickResetShift(day, shift) {
       // Check if the shift is assigned
       if (day[shift] !== null) {
@@ -413,36 +448,6 @@ export default {
 
         this.madeChanges = true;
       }
-    },
-    handleTouchStart(event, person) {
-      // Prevent scrolling while dragging
-      event.preventDefault();
-      this.touchStartTime = Date.now();
-      this.touchTimeout = setTimeout(() => {
-        this.touchedPerson = person;
-        localStorage.setItem("draggedPerson", JSON.stringify(person));
-        addNotification("Osoba wybrana - przeciągnij na slot zmiany", "green");
-      }, 500); // Half second hold to initiate drag
-    },
-    handleTouchEnd(event, date, shiftType) {
-      clearTimeout(this.touchTimeout);
-      const touchDuration = Date.now() - this.touchStartTime;
-
-      if (this.touchedPerson && touchDuration > 500) {
-        this.handleDrop(date, shiftType);
-        this.touchedPerson = null;
-      }
-    },
-    handleTouchMove(event) {
-      if (this.touchTimeout) {
-        clearTimeout(this.touchTimeout);
-      }
-    },
-
-    cancelTouch() {
-      this.touchedPerson = null;
-      localStorage.removeItem("draggedPerson");
-      clearTimeout(this.touchTimeout);
     },
     resolvePersonName(id) {
       const person = this.people.find((person) => person.id === id);
@@ -807,5 +812,11 @@ export default {
 }
 .calendar-container {
   margin-top: 40px;
+}
+.shift-slot.touch-hover {
+  background-color: rgba(76, 175, 80, 0.2);
+  border: 2px dashed #4caf50;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
 }
 </style>

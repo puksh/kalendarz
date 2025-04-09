@@ -10,16 +10,22 @@
           v-for="person in people.filter((p) => p.ratownik)"
           :key="person.id"
           class="person-item ratownik"
-          :class="{ draggable: isEditingMode }"
+          :class="{
+            draggable: isEditingMode,
+            'being-touched': touchedPerson?.id === person.id,
+          }"
           :style="{
             borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
-          @touchstart.prevent="$emit('touchstart', $event, person)"
-          @touchend.prevent="$emit('touchend', $event)"
-          @touchmove.prevent="$emit('touchmove', $event)"
+          @pointerdown="
+            isEditingMode ? handlePointerDown($event, person) : null
+          "
+          @pointermove="isEditingMode ? handlePointerMove : null"
+          @pointerup="isEditingMode ? handlePointerUp : null"
+          @pointercancel="isEditingMode ? handlePointerCancel : null"
         >
           {{ person.name }}
         </div>
@@ -32,15 +38,21 @@
           v-for="person in people.filter((p) => !p.ratownik)"
           :key="person.id"
           class="person-item pielegniarka"
-          :class="{ draggable: isEditingMode }"
+          :class="{
+            draggable: isEditingMode,
+            'being-touched': touchedPerson?.id === person.id,
+          }"
           :style="{
             borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
-          @touchstart.prevent="$emit('touchstart', $event, person)"
-          @touchend.prevent="$emit('touchend', $event)"
-          @touchmove.prevent="$emit('touchmove', $event)"
+          @pointerdown="
+            isEditingMode ? handlePointerDown($event, person) : null
+          "
+          @pointermove="isEditingMode ? handlePointerMove : null"
+          @pointerup="isEditingMode ? handlePointerUp : null"
+          @pointercancel="isEditingMode ? handlePointerCancel : null"
         >
           {{ person.name }}
         </div>
@@ -50,6 +62,7 @@
 </template>
 
 <script>
+import { addNotification } from "./NotificationMessage.vue";
 export default {
   name: "PeopleListWindow",
   props: {
@@ -65,19 +78,87 @@ export default {
   data() {
     return {
       draggedPerson: null,
+      touchedPerson: null,
+      touchStartTime: 0,
+      touchTimer: null,
+      isDragging: false,
     };
   },
   methods: {
     startDrag(person) {
       localStorage.setItem("draggedPerson", JSON.stringify(person));
     },
-    startTouchDrag(person, event) {
-      this.draggedPerson = person;
-      localStorage.setItem("draggedPerson", JSON.stringify(person));
-      event.target.classList.add("dragging");
-      document.body.style.overflow = "hidden"; // Disable scrolling
-    },
     handleDragEnd() {
+      localStorage.removeItem("draggedPerson");
+    },
+    handlePointerDown(event, person) {
+      // Only handle touch events, not mouse
+      if (event.pointerType !== "touch") return;
+
+      // Start touch timer
+      this.touchStartTime = Date.now();
+
+      // Store which element and person we're working with
+      this.touchedElement = event.currentTarget;
+      this.touchedPerson = person;
+
+      // Capture all future pointer events (modern replacement for setCapture)
+      this.touchedElement.setPointerCapture(event.pointerId);
+
+      // Set timer for long press
+      this.touchTimer = setTimeout(() => {
+        this.isDragging = true;
+        localStorage.setItem("draggedPerson", JSON.stringify(person));
+
+        // Visual and haptic feedback
+        this.touchedElement.classList.add("being-touched");
+        if (navigator.vibrate) navigator.vibrate(50);
+
+        // Show toast notification
+        addNotification(`Przeciągnij ${person.name} na slot`, "green");
+      }, 500);
+    },
+
+    handlePointerMove(event) {
+      // Only handle touch events
+      if (event.pointerType !== "touch") return;
+
+      // If timer is still running, cancel it (user is scrolling)
+      if (this.touchTimer) {
+        clearTimeout(this.touchTimer);
+        this.touchTimer = null;
+      }
+
+      if (!this.isDragging || !this.touchedElement) return;
+
+      // Prevent default scrolling
+      event.preventDefault();
+    },
+
+    handlePointerUp(event) {
+      // Only handle touch events
+      if (event.pointerType !== "touch") return;
+
+      // Clean up
+      if (this.touchTimer) {
+        clearTimeout(this.touchTimer);
+        this.touchTimer = null;
+      }
+
+      if (this.touchedElement) {
+        // Release pointer capture (modern replacement for releaseCapture)
+        this.touchedElement.releasePointerCapture(event.pointerId);
+        this.touchedElement.classList.remove("being-touched");
+      }
+
+      this.isDragging = false;
+      this.touchedElement = null;
+      this.touchedPerson = null;
+    },
+
+    handlePointerCancel(event) {
+      // Similar to pointerUp but also clear localStorage
+      this.handlePointerUp(event);
       localStorage.removeItem("draggedPerson");
     },
   },
@@ -140,11 +221,24 @@ export default {
 .person-item.being-touched {
   opacity: 0.7;
   transform: scale(1.05);
-  background-color: var(--color-highlight);
+  background-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
 }
 .shift-slot.touch-hover {
   background-color: rgba(76, 175, 80, 0.2);
   border: 2px dashed #4caf50;
+}
+.touch-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 1000;
+  font-size: 16px;
 }
 /* Add touch feedback styles */
 @media (hover: none) {
