@@ -73,6 +73,7 @@ export default {
 .sidebar-button {
   display: flex;
   align-items: center;
+  position: fixed;
   gap: 6px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
