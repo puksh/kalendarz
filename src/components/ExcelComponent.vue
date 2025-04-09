@@ -166,6 +166,7 @@
 
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
+import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
 import AuthorizationModal from "./AuthorizationModal.vue";
@@ -266,7 +267,7 @@ export default {
       const validValues = ["D", "N", "D N", ""];
 
       if (!validValues.includes(newValue)) {
-        alert("Invalid input! Only 'D', 'N', or 'D N' are allowed.");
+        addNotification("Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.");
         delete this.editedShifts[key];
         return;
       }
@@ -342,7 +343,9 @@ export default {
       });
 
       if (isDraggedRatownik && hasOtherRatownik) {
-        alert("Nie można przypisać dwóch ratowników na jedną zmianę.");
+        addNotification(
+          "Nie można przypisać dwóch ratowników na jedną zmianę.",
+        );
         delete this.editedShifts[key];
         return;
       }
@@ -355,7 +358,7 @@ export default {
             dayData.dayShift1 === personId ||
             dayData.dayShift2 === personId
           ) {
-            alert("Ta osoba już ma zmianę dzienną.");
+            addNotification("Ta osoba już ma zmianę dzienną.");
             delete this.editedShifts[key];
             return;
           }
@@ -368,7 +371,7 @@ export default {
             dayData.dayShift2Name = draggedPerson.name;
             dayData.dayShift2UserChanged = true;
           } else {
-            alert(
+            addNotification(
               "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
             );
             delete this.editedShifts[key];
@@ -388,7 +391,7 @@ export default {
               dayData.dayShift2Name = draggedPerson.name;
               dayData.dayShift2UserChanged = true;
             } else {
-              alert(
+              addNotification(
                 "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
               );
               delete this.editedShifts[key];
@@ -406,7 +409,7 @@ export default {
             dayData.nightShift1 === personId ||
             dayData.nightShift2 === personId
           ) {
-            alert("Ta osoba już ma zmianę nocną.");
+            addNotification("Ta osoba już ma zmianę nocną.");
             delete this.editedShifts[key];
             return;
           }
@@ -419,7 +422,9 @@ export default {
             dayData.nightShift2Name = draggedPerson.name;
             dayData.nightShift2UserChanged = true;
           } else {
-            alert("Nie można przypisać więcej niż dwóch osób na zmianę nocną.");
+            addNotification(
+              "Nie można przypisać więcej niż dwóch osób na zmianę nocną.",
+            );
             delete this.editedShifts[key];
             return;
           }
@@ -440,7 +445,7 @@ export default {
               dayData.nightShift2Name = draggedPerson.name;
               dayData.nightShift2UserChanged = true;
             } else {
-              alert(
+              addNotification(
                 "Nie można przypisać więcej niż dwóch osób na zmianę nocną.",
               );
               delete this.editedShifts[key];
@@ -533,6 +538,10 @@ export default {
             }
           } catch (error) {
             console.error("Failed to load local data:", error);
+            addNotification(
+              "Nie udało się załadować danych lokalnych. Sprawdź konsolę.",
+              "red",
+            );
           }
         }
       }
@@ -560,10 +569,17 @@ export default {
         //console.log(response);
         if (!response.ok) {
           if (response.status === 404) {
-            addNotification("Data not found on server", "red");
+            console.error("Nie znaleziono harmonogramu na serwerze");
+            addNotification("Nie znaleziono harmonogramu na serwerze", "red");
           }
           throw new Error(
-            `Failed to fetch data from server: ${response.status}`,
+            console.error(
+              `Nie udało się połączyć z serwerem: ${response.status}`,
+            ),
+            addNotification(
+              `Nie udało się połączyć z serwerem: ${response.status}`,
+              "red",
+            ),
           );
         }
 

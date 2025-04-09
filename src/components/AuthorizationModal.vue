@@ -42,7 +42,8 @@ export default {
           const encodedContent = await this.encodeLargeData(this.localData);
 
           if (!encodedContent) {
-            addNotification("Failed to encode data", "red");
+            console.error("Failed to encode data");
+            addNotification("Brak zakodowanych danych", "red");
             return;
           }
 
@@ -54,24 +55,25 @@ export default {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ key: "shiftData", value: encodedContent }),
-            }
+            },
           );
 
           if (!response.ok) {
-            throw new Error("Failed to update data on the server");
+            throw new Error("Nie udało się zaktualizować danych na serwerze");
           }
 
-          addNotification("Zmiany zapisano :3 !", "green");
+          addNotification("Zmiany zapisano!", "green");
           this.$emit("authorized"); // Notify parent of successful authorization
         } catch (error) {
           console.error("Error updating server data:", error);
           addNotification(
-            error.message || "Failed to update data on the server",
-            "red"
+            error.message || "Nie udało się zaktualizować danych",
+            "red",
           );
         }
       } else {
         addNotification("Złe hasło", "red");
+        console.error("Incorrect password entered");
       }
 
       this.closeModal();
@@ -111,7 +113,7 @@ export default {
         return base64String;
       } catch (error) {
         console.error("Error encoding large data:", error);
-        addNotification("Error encoding data", "red");
+        addNotification("Nie udało się zakodować danych", "red");
 
         localStorage.setItem("isEditingMode", JSON.stringify(true));
 
@@ -161,7 +163,9 @@ export default {
   background-color: #2e2e3e; /* Dark background for input */
   color: #e0e0e0; /* Light text for input */
   outline: none;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .modal-content input[type="password"]:focus {
