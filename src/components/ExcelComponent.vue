@@ -555,123 +555,84 @@ export default {
 .calendar-table {
   width: 100%;
   margin-top: 50px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 1px;
   table-layout: auto;
-  background: #2e2e2e;
-  border: 1px solid #444;
+  background: #1a3c3c;
+  border: 1px solid var(--glass-border-color);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .calendar-table th,
 .calendar-table td {
-  border: 1px solid #444; /* Subtle grid lines */
+  border: 1px solid #1e5e5e;
   text-align: center;
   padding: 8px;
   font-size: 14px;
-  color: #e0e0e0; /* Muted light text for better readability */
+  color: var(--color-text-light);
+  transition: background 0.2s ease;
 }
 
 .calendar-table th {
-  background: #3c3c3c; /* Slightly darker header background */
-  color: #ffffff; /* White text for headers */
+  background: #0a3c3c;
+  color: #ffffff;
   font-weight: bold;
   text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-table td {
-  background: #2e2e2e;
+  background: #113535;
 }
 
 .calendar-table tr:nth-child(even) td {
-  background: #3a3a3a; /* Alternating row colors */
+  background: #163939;
 }
 
 .calendar-table td:hover {
-  background: #585858;
+  background: #1e5e5e;
+  z-index: 1;
 }
 
-.calendar-table td:nth-child(even):hover {
-  background: #4a4a4a;
-}
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-  background: #3c3c3c;
+  background: #0a3c3c;
   font-weight: bold;
   text-align: left;
   padding-left: 12px;
-  transition: all 0.3s ease;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
   width: 24px;
   max-width: 24px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-right: 2px solid #1e5e5e;
 }
 
 .calendar-table td:first-child:hover {
   width: 88px !important;
   max-width: 88px !important;
-  background: #4a4a4a !important;
-}
-
-/* Editable Cell Styling */
-.editable-cell {
-  position: relative;
-  text-wrap: disabled;
+  background: #1e5e5e !important;
 }
 
 .editable-cell select {
-  width: 100%;
-  height: 100%;
-  border: 1px solid #555;
-  border-radius: 4px;
-  background: #3a3a3a;
-  color: #e0e0e0;
-  font-size: 14px;
-  padding: 4px;
-  appearance: none; /* Remove default browser styling */
-  outline: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+  border: 1px solid #1e5e5e;
+  background: #0a3c3c;
+  color: var(--color-text-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .editable-cell select:hover {
-  border-color: #666; /* Highlight border on hover */
+  border-color: #27bebe;
 }
 
 .editable-cell select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Blue glow on focus */
-}
-
-.editable-cell select option {
-  background: #3a3a3a;
-  color: #e0e0e0;
-}
-
-/* Table Header Styling */
-.calendar-table th {
-  font-size: 12px;
-  padding: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .calendar-table th,
-  .calendar-table td {
-    font-size: 12px;
-    padding: 6px;
-  }
-
-  .editable-cell select {
-    font-size: 12px;
-    padding: 2px;
-  }
+  border-color: #27bebe;
+  box-shadow: 0 0 4px rgba(0, 200, 200, 0.5);
 }
 </style>
