@@ -1,13 +1,20 @@
 <template>
   <div class="app-container">
-    <SideBarComponent @navigate="handleNavigation" />
+    <SideBarComponent
+      :currentComponent="currentPage"
+      @navigate="handleNavigation"
+    />
     <main class="main-content">
-      <CalendarComponent v-if="currentPage === 'CalendarComponent'" 
+      <CalendarComponent
+        v-if="currentPage === 'CalendarComponent'"
         :isEditingMode="isEditingMode"
-        @update-editing-mode="updateEditingMode"/>
-      <ExcelComponent v-if="currentPage === 'ExcelComponent'" 
+        @update-editing-mode="updateEditingMode"
+      />
+      <ExcelComponent
+        v-if="currentPage === 'ExcelComponent'"
         :isEditingMode="isEditingMode"
-        @update-editing-mode="updateEditingMode"/>
+        @update-editing-mode="updateEditingMode"
+      />
       <NotificationMessage />
     </main>
   </div>

@@ -1,14 +1,47 @@
 <template>
   <aside class="sidebar">
-    <button 
+    <button
+      v-if="currentComponent === 'ExcelComponent'"
       @click="$emit('navigate', 'CalendarComponent')"
-      class="sidebar-button">
+      class="sidebar-button"
+      title="Switch to Harmonogram View"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <line x1="9" y1="4" x2="9" y2="22" />
+      </svg>
       Harmonogram
     </button>
     <button
+      v-else
       @click="$emit('navigate', 'ExcelComponent')"
       class="sidebar-button"
+      title="Switch to Table View"
     >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="3" y1="15" x2="21" y2="15" />
+        <line x1="9" y1="3" x2="9" y2="21" />
+        <line x1="15" y1="3" x2="15" y2="21" />
+      </svg>
       Tabela
     </button>
   </aside>
@@ -17,59 +50,64 @@
 <script>
 export default {
   name: "SideBarComponent",
+  props: {
+    currentComponent: {
+      type: String,
+      required: true,
+      validator: (value) =>
+        ["CalendarComponent", "ExcelComponent"].includes(value),
+    },
+  },
 };
 </script>
 
 <style scoped>
 .sidebar {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 4px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  border-radius: 4px;
-  z-index: 10;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 1001;
 }
 
-/* Sidebar buttons with glass effects */
+/* Sidebar button with glass effects */
 .sidebar-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   color: var(--color-text-dark);
-  width: 49%;
-  height: 32px;
+  height: 36px;
   border-radius: 8px;
   font-size: 14px;
-  padding: 0;
-  margin: 0 5px;
+  padding: 0 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
+  box-shadow: var(--glass-box-shadow);
 }
 
 .sidebar-button:hover {
-  background-color: rgba(155, 126, 189, 0.6);
-  color: var(--color-text-dark);
-  border-color: rgba(155, 126, 189, 0.6);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  transform: scale(1.01);
+  background-color: #7fb9bd99;
+  border-color: #7fb6bd99;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-button:active {
-  background-color: rgba(86, 43, 122, 0.7);
-  color: #111;
-  border-color: rgba(86, 43, 122, 0.7);
+  background-color: #2b717ab3;
+  border-color: #2b6a7ab3;
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-  transform: scale(0.95);
+  transform: translateY(1px);
+}
+
+.sidebar-button svg {
+  transition: transform 0.2s ease;
+}
+
+.sidebar-button:hover svg {
+  transform: scale(1.1);
 }
 </style>
