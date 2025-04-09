@@ -11,6 +11,7 @@
           :key="person.id"
           class="person-item ratownik"
           :class="{ draggable: isEditingMode }"
+          :style="{ borderRadius: isEditingMode ? 'var(--border-radius)' : '0' }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
@@ -29,6 +30,7 @@
           :key="person.id"
           class="person-item pielegniarka"
           :class="{ draggable: isEditingMode }"
+          :style="{ borderRadius: isEditingMode ? 'var(--border-radius)' : '0' }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
@@ -117,14 +119,13 @@ export default {
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius);
   font-weight: bold;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, border-radius 0.2s ease;
   user-select: none;
   line-height: 2ch;
 }
 .person-item:draggable {
-  cursor: grab;
+  cursor: grab;  
 }
 .person-item.draggable:hover {
   cursor: grabbing;
