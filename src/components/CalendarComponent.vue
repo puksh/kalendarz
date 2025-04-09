@@ -397,9 +397,6 @@ export default {
       this.selectedMonth = this.selectedMonth + newMonth;
       this.generateMonthDays(); // Regenerate the days for the new month
     },
-    showPasswordPrompt() {
-      this.showPasswordModal = true;
-    },
     emitEditingMode(newMode) {
       this.$emit("update-editing-mode", newMode); // Notify parent of the change
     },
@@ -590,6 +587,9 @@ export default {
       if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
       return "normal-color";
     },
+    showPasswordPrompt() {
+      this.showPasswordModal = true; // Show the password modal
+    },
   },
 
   async mounted() {
@@ -607,35 +607,6 @@ export default {
 </script>
 
 <style scoped>
-/* Button Styles */
-.submit-button {
-  position: fixed;
-  bottom: 100px;
-  right: 20px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius-small);
-  filter: drop-shadow(var(--shadow-drop));
-  box-shadow: var(--glass-box-shadow);
-  padding: var(--spacing-medium) var(--spacing-large);
-  cursor: pointer;
-  font-size: var(--font-size-large);
-  transition: all 0.3s ease;
-}
-
-.submit-button:hover:not(:disabled) {
-  background-color: rgba(200, 200, 255, 0.3);
-  transform: scale(1.1);
-}
-
-.submit-button:disabled {
-  background-color: var(--color-button-disabled-bg);
-  cursor: not-allowed;
-  filter: none;
-  visibility: hidden !important;
-}
 /* Changes Highlight */
 .userChanged {
   color: var(--color-user-changed) !important; /* Highlight user-made changes */

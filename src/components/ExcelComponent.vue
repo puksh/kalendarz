@@ -1,4 +1,17 @@
 <template>
+  <AuthorizationModal
+    :show="showPasswordModal"
+    :localData="localData"
+    @close="showPasswordModal = false"
+    @authorized="handleAuthorization"
+  />
+  <button
+    :disabled="!madeChanges"
+    @click="showPasswordPrompt"
+    class="submit-button"
+  >
+    Zapisz
+  </button>
   <div class="spreadsheet-view">
     <section class="monthChange">
       <button class="buttonMonthChange" @click="changeMonth(-1)">
@@ -20,8 +33,8 @@
     <label class="glass-toggle">
       <input
         type="checkbox"
-        v-model="isEditingMode"
-        @change="updateEditingMode"
+        :checked="isEditingMode"
+        @change="emitEditingMode($event.target.checked)"
       />
       <span class="toggle-slider"></span>
       <span class="label-text">Tryb edytowania</span>
@@ -85,20 +98,24 @@
 <script>
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
+import AuthorizationModal from "./AuthorizationModal.vue";
 export default {
   name: "SpreadsheetView",
-  components: { ShiftCountWindow, PeopleListWindow },
+  emits: ["update-editing-mode"],
+  components: { ShiftCountWindow, PeopleListWindow, AuthorizationModal },
   props: {
-    monthDays: Array,
-    people: Array,
+    isEditingMode: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
-      isEditingMode: false,
       editedShifts: {},
       selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
       selectedYear: new Date().getFullYear(),
       monthDays: [],
+      localData: {},
       madeChanges: false,
       people: [
         { id: 1, name: "Milena", ratownik: false },
@@ -113,6 +130,7 @@ export default {
         { id: 7, name: "Teresa", ratownik: false },
       ],
       locale: "pl",
+      showPasswordModal: false,
     };
   },
   computed: {
@@ -136,8 +154,8 @@ export default {
     },
   },
   methods: {
-    toggleEditingMode() {
-      this.isEditingMode = !this.isEditingMode;
+    emitEditingMode(newMode) {
+      this.$emit("update-editing-mode", newMode); // Notify parent of the change
     },
     isEditing(personId, day) {
       return this.editedShifts.hasOwnProperty(`${personId}-${day}`);
@@ -175,31 +193,38 @@ export default {
         const shiftData = JSON.parse(localStorage.getItem(date) || "{}");
         const dayData = this.monthDays.find((d) => d.date.toDateString() === date);
 
-        // Reset all shifts for the person
         if (newValue === "") {
           if (dayData.dayShift1 === personId) {
             dayData.dayShift1 = null;
             dayData.dayShift1Name = "Not assigned";
-            shiftData.dayShift1 = null;
+            dayData.dayShift1UserChanged = true; // Mark as user-changed
           } else if (dayData.dayShift2 === personId) {
             dayData.dayShift2 = null;
             dayData.dayShift2Name = "Not assigned";
-            shiftData.dayShift2 = null;
+            dayData.dayShift2UserChanged = true; // Mark as user-changed
           } else if (dayData.nightShift1 === personId) {
             dayData.nightShift1 = null;
             dayData.nightShift1Name = "Not assigned";
-            shiftData.nightShift1 = null;
+            dayData.nightShift1UserChanged = true; // Mark as user-changed
           } else if (dayData.nightShift2 === personId) {
             dayData.nightShift2 = null;
             dayData.nightShift2Name = "Not assigned";
-            shiftData.nightShift2 = null;
+            dayData.nightShift2UserChanged = true; // Mark as user-changed
           }
+              
+          const updatedData = {
+            dayShift1: dayData.dayShift1,
+            dayShift2: dayData.dayShift2,
+            nightShift1: dayData.nightShift1,
+            nightShift2: dayData.nightShift2,
+          };
 
-          localStorage.setItem(date, JSON.stringify(shiftData));
+          
+          this.localData[day.date.toDateString()] = updatedData;
+          localStorage.setItem(date, JSON.stringify(updatedData));
           delete this.editedShifts[key];
           return;
         }
-
         // Check if the person is a ratownik
         const draggedPerson = this.people.find((p) => p.id === personId);
         const isDraggedRatownik = draggedPerson?.ratownik;
@@ -222,15 +247,23 @@ export default {
           delete this.editedShifts[key];
           return;
         }
-
+        
         // Assign the person to the appropriate shift slots
         if (newValue.includes("D")) {
+          if (dayData.dayShift1 === personId || dayData.dayShift2 === personId) {
+            alert("This person is already assigned to the day shift.");
+            delete this.editedShifts[key];
+            return;
+          }
+
           if (!dayData.dayShift1) {
             dayData.dayShift1 = personId;
             dayData.dayShift1Name = draggedPerson.name;
+            dayData.dayShift1UserChanged = true;
           } else if (!dayData.dayShift2) {
             dayData.dayShift2 = personId;
             dayData.dayShift2Name = draggedPerson.name;
+            dayData.dayShift2UserChanged = true;
           } else {
             alert("Nie można przypisać więcej niż dwóch osób na zmianę dzienną.");
             delete this.editedShifts[key];
@@ -239,12 +272,20 @@ export default {
         }
 
         if (newValue.includes("N")) {
+          if (dayData.nightShift1 === personId || dayData.nightShift2 === personId) {
+            alert("This person is already assigned to the night shift.");
+            delete this.editedShifts[key];
+            return;
+          }
+
           if (!dayData.nightShift1) {
             dayData.nightShift1 = personId;
             dayData.nightShift1Name = draggedPerson.name;
+            dayData.nightShift1UserChanged = true;
           } else if (!dayData.nightShift2) {
             dayData.nightShift2 = personId;
             dayData.nightShift2Name = draggedPerson.name;
+            dayData.nightShift2UserChanged = true;
           } else {
             alert("Nie można przypisać więcej niż dwóch osób na zmianę nocną.");
             delete this.editedShifts[key];
@@ -253,12 +294,16 @@ export default {
         }
 
         // Save the updated data
-        shiftData.dayShift1 = dayData.dayShift1;
-        shiftData.dayShift2 = dayData.dayShift2;
-        shiftData.nightShift1 = dayData.nightShift1;
-        shiftData.nightShift2 = dayData.nightShift2;
-
-        localStorage.setItem(date, JSON.stringify(shiftData));
+        const updatedData = {
+          dayShift1: dayData.dayShift1,
+          dayShift2: dayData.dayShift2,
+          nightShift1: dayData.nightShift1,
+          nightShift2: dayData.nightShift2,
+        };
+        
+        this.localData[date] = updatedData;
+        this.madeChanges = true; // Mark that changes have been made
+        localStorage.setItem(date, JSON.stringify(updatedData));
       }
 
       delete this.editedShifts[key];
@@ -338,6 +383,10 @@ export default {
         ? { name: person.name, isRatownik: person.ratownik }
         : { name: undefined, isRatownik: false };
     },
+    
+    showPasswordPrompt() {
+      this.showPasswordModal = true;
+    },
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
@@ -387,6 +436,9 @@ export default {
         return shifts.join(" "); // Combine shifts (e.g., "D N" if both)
       }
       return null;
+    },
+    showPasswordPrompt() {
+      this.showPasswordModal = true; // Show the password modal
     },
   },
   mounted() {
