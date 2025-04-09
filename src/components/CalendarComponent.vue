@@ -16,6 +16,19 @@
   >
     Zapisz
   </button>
+  <div v-if="showMobileWarning" class="mobile-warning-overlay">
+    <div class="mobile-warning">
+      <h3>Urządzenie mobilne wykryte</h3>
+      <p>
+        Niestety, tryb edycji kalendarza nie jest obsługiwany na urządzeniach
+        mobilnych.
+      </p>
+      <p>Proszę przejdź do widoku tabelarycznego lub skorzystaj z komputera.</p>
+      <button @click="handleMobileWarningClose" class="warning-button">
+        Ok :(
+      </button>
+    </div>
+  </div>
   <section>
     <section class="monthChange">
       <button
@@ -315,6 +328,8 @@ export default {
       locale: "pl",
       scrollContainer: null,
       currentDropTarget: { date: null, shiftType: null },
+      showMobileWarning: false,
+      isMobileDevice: false,
     };
   },
   computed: {
@@ -714,6 +729,18 @@ export default {
         ? `${shiftName}: ${day[`${shiftType}Name`]} (Kliknij by usunąć)`
         : `Przeciągnij członka zespołu by nadać im - ${shiftName.toLowerCase()}`;
     },
+    checkMobilePlatform() {
+      // Check if user is on mobile device (iOS or Android)
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      this.isMobileDevice = /android|iphone|ipad|ipod/i.test(
+        userAgent.toLowerCase(),
+      );
+    },
+
+    handleMobileWarningClose() {
+      this.showMobileWarning = false;
+      this.emitEditingMode(false); // Disable editing mode
+    },
   },
 
   async mounted() {
@@ -721,10 +748,14 @@ export default {
     this.resetUserChanges();
     await this.checkShiftDataSync(); // Then sync with remote data
     this.scrollContainer = this.$refs.scrollContainer;
+    this.checkMobilePlatform();
   },
   watch: {
     isEditingMode(newValue) {
       localStorage.setItem("isEditingMode", JSON.stringify(newValue)); // Save to localStorage
+      if (newValue && this.isMobileDevice) {
+        this.showMobileWarning = true;
+      }
     },
   },
 };
@@ -818,5 +849,49 @@ export default {
   border: 2px dashed #4caf50;
   transform: scale(1.05);
   transition: all 0.2s ease;
+} /* Mobile warning styles */
+.mobile-warning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.mobile-warning {
+  background-color: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-warning h3 {
+  color: #ff5252;
+  margin-top: 0;
+}
+
+.mobile-warning p {
+  margin: 15px 0;
+}
+
+.warning-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
 }
 </style>
