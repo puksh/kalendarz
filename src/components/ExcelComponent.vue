@@ -17,7 +17,9 @@
       <button class="buttonMonthChange" @click="changeMonth(-1)">
         &#8249;
       </button>
-      <span style="font-weight: bold; width: 200px !important;"> {{ monthYear.toUpperCase() }} </span>
+      <span style="font-weight: bold; width: 200px !important">
+        {{ monthYear.toUpperCase() }}
+      </span>
       <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
     </section>
     <button
@@ -30,51 +32,118 @@
         alt="Refresh"
       />
     </button>
-    <label class="glass-toggle">
+    <label class="top-right-buttons compact-toggle">
       <input
         type="checkbox"
         :checked="isEditingMode"
         @change="emitEditingMode($event.target.checked)"
       />
-      <span class="toggle-slider"></span>
-      <span class="label-text">Tryb edytowania</span>
+      <span class="slider">
+        <svg
+          v-if="!isEditingMode"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="pencil-icon"
+        >
+          <path d="M12 20h9"></path>
+          <path
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+          ></path>
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="pencil-icon"
+        >
+          <path d="M12 20h9"></path>
+          <path
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+          ></path>
+        </svg>
+      </span>
     </label>
     <table class="calendar-table">
       <thead>
         <tr>
           <th></th>
-          <th v-for="day in daysInMonth" :key="day">{{ day }}</th>
+          <th
+            v-for="day in daysInMonth"
+            :key="day"
+            :class="{
+              'nd-color':
+                daysOfWeek[
+                  new Date(selectedYear, selectedMonth, day).getDay()
+                ] === 'Nd',
+              'sob-color':
+                daysOfWeek[
+                  new Date(selectedYear, selectedMonth, day).getDay()
+                ] === 'Sob',
+            }"
+          >
+            {{ day }}
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="person in orderedPeople" :key="person.id" >
-          <td :class="{ 'ratownik': person.ratownik, 'pielegniarka': !person.ratownik }">{{ person.name }}</td>
+        <tr v-for="person in orderedPeople" :key="person.id">
+          <td
+            :class="{
+              ratownik: person.ratownik,
+              pielegniarka: !person.ratownik,
+            }"
+          >
+            {{ person.name }}
+          </td>
           <td
             v-for="day in daysInMonth"
             :key="day"
             class="editable-cell"
+            :class="{
+              'nd-color':
+                daysOfWeek[
+                  new Date(selectedYear, selectedMonth, day).getDay()
+                ] === 'Nd',
+              'sob-color':
+                daysOfWeek[
+                  new Date(selectedYear, selectedMonth, day).getDay()
+                ] === 'Sob',
+            }"
             @click="editCell(person.id, day)"
           >
             <span v-if="!isEditingMode || !isEditing(person.id, day)">
               {{ getShiftForPersonAndDay(person.id, day) || "" }}
             </span>
             <select
-            v-else
-            v-model="editedShifts[`${person.id}-${day}`]"
-            @change="saveShift(person.id, day)"
+              v-else
+              v-model="editedShifts[`${person.id}-${day}`]"
+              @change="saveShift(person.id, day)"
             >
-             <option value=""></option>
-             <option value="D">D</option>
-             <option value="N">N</option>
-             <option value="D N">D N</option>
+              <option value=""></option>
+              <option value="D">D</option>
+              <option value="N">N</option>
+              <option value="D N">D N</option>
             </select>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-  <PeopleListWindow :people="people" :isEditingMode="false"/>
-  <div v-if="isEditingMode" style="display: flex; flex-direction: column; align-items: center">
+  <PeopleListWindow :people="people" :isEditingMode="false" />
+  <div
+    v-if="isEditingMode"
+    style="display: flex; flex-direction: column; align-items: center"
+  >
     <h1
       style="
         background: var(--glass-bg-color);
@@ -96,6 +165,7 @@
 </template>
 
 <script>
+import { daysOfWeek } from "@/data/daysOfWeek.js";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
 import AuthorizationModal from "./AuthorizationModal.vue";
@@ -116,6 +186,7 @@ export default {
       selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
+      daysOfWeek,
       madeChanges: false,
       people: [
         { id: 1, name: "Milena", ratownik: false },
@@ -138,10 +209,20 @@ export default {
       return this.monthDays.map((day) => day.date.getDate());
     },
     orderedPeople() {
-      const order = ["Milena", "Mikołaj", "Aleksandra", "Joanna", "Łukasz", "Natalia", "Marcin"];
-      return this.people.filter((person) => order.includes(person.name)).sort((a, b) => {
-        return order.indexOf(a.name) - order.indexOf(b.name);
-      });
+      const order = [
+        "Milena",
+        "Mikołaj",
+        "Aleksandra",
+        "Joanna",
+        "Łukasz",
+        "Natalia",
+        "Marcin",
+      ];
+      return this.people
+        .filter((person) => order.includes(person.name))
+        .sort((a, b) => {
+          return order.indexOf(a.name) - order.indexOf(b.name);
+        });
     },
     monthYear() {
       return new Date(this.selectedYear, this.selectedMonth).toLocaleString(
@@ -161,7 +242,9 @@ export default {
       return this.editedShifts.hasOwnProperty(`${personId}-${day}`);
     },
     getShiftForPersonAndDay(personId, day) {
-      const date = this.monthDays.find((d) => d.date.getDate() === day)?.date.toDateString();
+      const date = this.monthDays
+        .find((d) => d.date.getDate() === day)
+        ?.date.toDateString();
       const shiftData = localStorage.getItem(date);
       if (shiftData) {
         const parsedData = JSON.parse(shiftData);
@@ -187,11 +270,15 @@ export default {
         return;
       }
 
-      const date = this.monthDays.find((d) => d.date.getDate() === day)?.date.toDateString();
+      const date = this.monthDays
+        .find((d) => d.date.getDate() === day)
+        ?.date.toDateString();
 
       if (date) {
         const shiftData = JSON.parse(localStorage.getItem(date) || "{}");
-        const dayData = this.monthDays.find((d) => d.date.toDateString() === date);
+        const dayData = this.monthDays.find(
+          (d) => d.date.toDateString() === date,
+        );
 
         if (newValue === "") {
           if (dayData.dayShift1 === personId) {
@@ -211,7 +298,7 @@ export default {
             dayData.nightShift2Name = "Not assigned";
             dayData.nightShift2UserChanged = true; // Mark as user-changed
           }
-              
+
           const updatedData = {
             dayShift1: dayData.dayShift1,
             dayShift2: dayData.dayShift2,
@@ -219,7 +306,6 @@ export default {
             nightShift2: dayData.nightShift2,
           };
 
-          
           this.localData[day.date.toDateString()] = updatedData;
           localStorage.setItem(date, JSON.stringify(updatedData));
           delete this.editedShifts[key];
@@ -247,10 +333,13 @@ export default {
           delete this.editedShifts[key];
           return;
         }
-        
+
         // Assign the person to the appropriate shift slots
         if (newValue.includes("D")) {
-          if (dayData.dayShift1 === personId || dayData.dayShift2 === personId) {
+          if (
+            dayData.dayShift1 === personId ||
+            dayData.dayShift2 === personId
+          ) {
             alert("This person is already assigned to the day shift.");
             delete this.editedShifts[key];
             return;
@@ -265,14 +354,19 @@ export default {
             dayData.dayShift2Name = draggedPerson.name;
             dayData.dayShift2UserChanged = true;
           } else {
-            alert("Nie można przypisać więcej niż dwóch osób na zmianę dzienną.");
+            alert(
+              "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
+            );
             delete this.editedShifts[key];
             return;
           }
         }
 
         if (newValue.includes("N")) {
-          if (dayData.nightShift1 === personId || dayData.nightShift2 === personId) {
+          if (
+            dayData.nightShift1 === personId ||
+            dayData.nightShift2 === personId
+          ) {
             alert("This person is already assigned to the night shift.");
             delete this.editedShifts[key];
             return;
@@ -300,7 +394,7 @@ export default {
           nightShift1: dayData.nightShift1,
           nightShift2: dayData.nightShift2,
         };
-        
+
         this.localData[date] = updatedData;
         this.madeChanges = true; // Mark that changes have been made
         localStorage.setItem(date, JSON.stringify(updatedData));
@@ -334,7 +428,7 @@ export default {
     changeMonth(newMonth) {
       if (this.madeChanges) {
         const confirmSwitch = confirm(
-          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded."
+          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded.",
         );
         if (!confirmSwitch) {
           return; // Cancel the month change
@@ -358,7 +452,9 @@ export default {
         if (savedStates) {
           try {
             const parsedStates = JSON.parse(savedStates);
-            const day = this.monthDays.find((day) => day.date.toDateString() === date);
+            const day = this.monthDays.find(
+              (day) => day.date.toDateString() === date,
+            );
 
             if (day) {
               day.dayShift1 = parsedStates.dayShift1;
@@ -368,8 +464,10 @@ export default {
 
               day.dayShift1Name = parsedStates.dayShift1Name || "Not assigned";
               day.dayShift2Name = parsedStates.dayShift2Name || "Not assigned";
-              day.nightShift1Name = parsedStates.nightShift1Name || "Not assigned";
-              day.nightShift2Name = parsedStates.nightShift2Name || "Not assigned";
+              day.nightShift1Name =
+                parsedStates.nightShift1Name || "Not assigned";
+              day.nightShift2Name =
+                parsedStates.nightShift2Name || "Not assigned";
             }
           } catch (error) {
             console.error("Failed to load local data:", error);
@@ -383,22 +481,19 @@ export default {
         ? { name: person.name, isRatownik: person.ratownik }
         : { name: undefined, isRatownik: false };
     },
-    
+
     showPasswordPrompt() {
       this.showPasswordModal = true;
     },
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch(
-          "https://mc.kot.li/?key=shiftData.json",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+        });
 
         //console.log(response);
         if (!response.ok) {
@@ -419,17 +514,25 @@ export default {
       }
     },
     getShiftForPersonAndDay(personId, day) {
-      const date = this.monthDays.find((d) => d.date.getDate() === day)?.date.toDateString();
+      const date = this.monthDays
+        .find((d) => d.date.getDate() === day)
+        ?.date.toDateString();
       const shiftData = localStorage.getItem(date);
       if (shiftData) {
         const parsedData = JSON.parse(shiftData);
         const shifts = [];
 
         // Check if the person is assigned to day or night shifts
-        if (parsedData.dayShift1 === personId || parsedData.dayShift2 === personId) {
+        if (
+          parsedData.dayShift1 === personId ||
+          parsedData.dayShift2 === personId
+        ) {
           shifts.push("D"); // Day shift
         }
-        if (parsedData.nightShift1 === personId || parsedData.nightShift2 === personId) {
+        if (
+          parsedData.nightShift1 === personId ||
+          parsedData.nightShift2 === personId
+        ) {
           shifts.push("N"); // Night shift
         }
 
@@ -451,7 +554,7 @@ export default {
 /* General Table Styling */
 .calendar-table {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 50px;
   border-collapse: collapse;
   table-layout: fixed;
   background: #2e2e2e; /* Dark background for the table */
@@ -499,11 +602,13 @@ export default {
   font-weight: bold;
   text-align: left;
   padding-left: 12px;
-  transition: width 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease; /* Smooth transition */
   width: 25px; /* Default width */
 }
 
-.calendar-table :not(thead) tr:hover td:first-child   {
+.calendar-table :not(thead) tr:hover td:first-child {
   width: 200px !important; /* Increased width on hover */
   background: #4a4a4a !important; /* Slightly lighter background on hover */
 }
@@ -511,6 +616,7 @@ export default {
 /* Editable Cell Styling */
 .editable-cell {
   position: relative;
+  text-wrap: disabled;
 }
 
 .editable-cell select {
@@ -525,7 +631,9 @@ export default {
   appearance: none; /* Remove default browser styling */
   outline: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .editable-cell select:hover {

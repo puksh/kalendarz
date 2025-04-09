@@ -17,7 +17,9 @@
       <button class="buttonMonthChange" @click="changeMonth(-1)">
         &#8249;
       </button>
-      <span style="font-weight: bold; width: 200px !important;"> {{ monthYear.toUpperCase() }} </span>
+      <span style="font-weight: bold; width: 200px !important">
+        {{ monthYear.toUpperCase() }}
+      </span>
       <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
     </section>
     <button
@@ -30,14 +32,46 @@
         alt="Refresh"
       />
     </button>
-    <label class="glass-toggle">
+    <label class="top-right-buttons compact-toggle">
       <input
         type="checkbox"
         :checked="isEditingMode"
         @change="emitEditingMode($event.target.checked)"
       />
-      <span class="toggle-slider"></span>
-      <span class="label-text">Tryb edytowania</span>
+      <span class="slider">
+        <svg
+          v-if="!isEditingMode"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="pencil-icon"
+        >
+          <path d="M12 20h9"></path>
+          <path
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+          ></path>
+        </svg>
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="pencil-icon"
+        >
+          <path d="M12 20h9"></path>
+          <path
+            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+          ></path>
+        </svg>
+      </span>
     </label>
   </section>
   <div class="calendar-container">
@@ -159,8 +193,11 @@
       </div>
     </section>
   </div>
-  <PeopleListWindow :people="people" :isEditingMode="isEditingMode"/>
-  <div v-if="isEditingMode" style="display: flex; flex-direction: column; align-items: center">
+  <PeopleListWindow :people="people" :isEditingMode="isEditingMode" />
+  <div
+    v-if="isEditingMode"
+    style="display: flex; flex-direction: column; align-items: center"
+  >
     <h1
       style="
         background: var(--glass-bg-color);
@@ -191,7 +228,7 @@ import AuthorizationModal from "./AuthorizationModal.vue";
 export default {
   name: "CalendarComponent",
   emits: ["update-editing-mode"],
-  components: { ShiftCountWindow, PeopleListWindow, AuthorizationModal  },
+  components: { ShiftCountWindow, PeopleListWindow, AuthorizationModal },
   props: {
     isEditingMode: {
       type: Boolean,
@@ -383,15 +420,12 @@ export default {
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
-        const response = await fetch(
-          "https://mc.kot.li/?key=shiftData.json",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+        });
 
         //console.log(response);
         if (!response.ok) {
@@ -546,7 +580,12 @@ export default {
       for (const key in localStorage) {
         if (localStorage.hasOwnProperty(key)) {
           const savedData = JSON.parse(localStorage.getItem(key) || "{}");
-          if (savedData.dayShift1UserChanged || savedData.dayShift2UserChanged || savedData.nightShift1UserChanged || savedData.nightShift2UserChanged) {
+          if (
+            savedData.dayShift1UserChanged ||
+            savedData.dayShift2UserChanged ||
+            savedData.nightShift1UserChanged ||
+            savedData.nightShift2UserChanged
+          ) {
             localStorage.removeItem(key); // Remove user-modified data
           }
         }
@@ -595,76 +634,78 @@ export default {
   cursor: pointer !important;
 }
 .calendar-grid {
-	margin-top: 3ch;
-	display: grid;
-	grid-template-columns: repeat(31, 1fr);
-	border-radius: 8px;
-	position: relative;
+  margin-top: 3ch;
+  display: grid;
+  grid-template-columns: repeat(31, 1fr);
+  border-radius: 8px;
+  position: relative;
 }
 
 .day-header {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .day-column {
-	scroll-snap-align: center;
-	margin: 0 1px 0 0;
+  scroll-snap-align: center;
+  margin: 0 1px 0 0;
 }
 
 .day-cell {
-	border: 1px solid var(--glass-border-color);
-	padding: 1ch 1ch 1ch 0.5ch;
-	width: var(--width-day-cell);
-	background-color: var(--glass-bg-color);
-	backdrop-filter: blur(var(--glass-blur));
-	-webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  padding: 1ch 1ch 1ch 0.5ch;
+  width: var(--width-day-cell);
+  background-color: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .day-date {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 /* Shifts styles */
 .shift-slot {
-	margin-top: var(--spacing-small);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
+  margin-top: var(--spacing-small);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 .shift-slot:has(.empty-slot) {
-	filter: saturate(0.3) opacity(0.7);
-	border: 2px solid var(--color-empty-slot) !important;
-	font-weight: 600;
+  filter: saturate(0.3) opacity(0.7);
+  border: 2px solid var(--color-empty-slot) !important;
+  font-weight: 600;
 }
 .empty-slot {
-	color: var(--color-text-dark);
-	padding: var(--spacing-small);
-	height: var(--height-empty-slot);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: var(--font-size-medium);
-	width: 100%;
-	background-color: transparent !important;
+  color: var(--color-text-dark);
+  padding: var(--spacing-small);
+  height: var(--height-empty-slot);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-medium);
+  width: 100%;
+  background-color: transparent !important;
 }
 /* Assigned Person Styles */
 .assigned-person {
-	padding: var(--spacing-small);
-	background-color: transparent;
-	height: 30px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: var(--font-size-medium);
-	font-weight: bolder;
-	transition: all 0.2s ease;
-	width: 100%;
+  padding: var(--spacing-small);
+  background-color: transparent;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-medium);
+  font-weight: bolder;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
 .shift-label {
-	background-color: var(--color-label-bg);
-	padding: var(--spacing-small);
+  background-color: var(--color-label-bg);
+  padding: var(--spacing-small);
 }
-
+.calendar-container {
+  margin-top: 24px;
+}
 </style>
