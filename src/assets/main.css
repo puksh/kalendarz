@@ -1,4 +1,4 @@
-html{
+html {
 	color-scheme: dark light;
 }
 
@@ -56,15 +56,6 @@ html{
 	/* Drag */
 	--drag-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
 	--drag-scale: 1.05;
-
-	/* Scrollbar */
-
-	--scrollbar-width: 10px;
-	--scrollbar-thumb-bg: var(--color-primary);
-	--scrollbar-thumb-bg-hover: var(--color-primary);
-	--scrollbar-thumb-hover-bg: rgba(86, 43, 122, 0.9);
-	--scrollbar-track-bg: rgba(238, 238, 238, 0.5);
-	--scrollbar-thumb-radius: 5px;
 }
 * {
 	font-family: "IBMPlexMono", monospace;
@@ -82,34 +73,9 @@ body {
 	margin: 0 auto;
 	width: 100%;
 }
-/* Applies to all scrollable elements */
-::-webkit-scrollbar {
-	width: var(--scrollbar-width); /* Set the width of the vertical scrollbar */
-}
-
-::-webkit-scrollbar-track {
-	background: rgba(0, 50, 50, 0.2); /* Dark mint-tinted track */
-	border-radius: 5px;
-	backdrop-filter: blur(4px); /* Glass effect on the scrollbar track */
-	-webkit-backdrop-filter: blur(4px);
-}
-
-::-webkit-scrollbar-thumb {
-	background: rgba(0, 200, 200, 0.5); /* Mint-colored thumb */
-	border-radius: var(--scrollbar-thumb-radius);
-	backdrop-filter: blur(4px); /* Glass effect for thumb */
-	-webkit-backdrop-filter: blur(4px);
-	transition: all 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(0, 255, 255, 0.7); /* Brighter mint on hover */
-}
 
 .scrollable-container {
 	overflow-x: scroll;
-	scrollbar-width: thin; /* Firefox's scrollbar width setting */
-	scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg); /* Firefox colors */
 }
 .ratownik {
 	border: 2px solid var(--color-ratownik) !important;
@@ -134,6 +100,7 @@ body {
 	border-bottom: 1px solid var(--glass-border-color);
 	box-shadow: var(--glass-box-shadow);
 	z-index: 1000;
+	height: 44px;
 }
 
 .buttonMonthChange {
@@ -150,10 +117,10 @@ body {
 	border: none;
 	position: fixed;
 	z-index: 1000;
-	height: 40px;
+	height: 44px;
 	width: 40px;
 	color: var(--color-text-dark);
-	background: var(--glass-bg-color);
+	background-color: var(--glass-bg-color);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
 	border: 1px solid var(--glass-border-color);
@@ -162,7 +129,7 @@ body {
 	box-shadow: var(--glass-box-shadow);
 }
 .buttonRefresh {
-	top: 0;
+	top: 8px;
 	right: 4px;
 }
 
@@ -174,118 +141,95 @@ body {
 	background-color: var(--color-night);
 }
 .synced-changed {
-	color: var(
-		--color-synced-changed
-	) !important; /* Highlight server-synced changes */
+	color: var(--color-synced-changed) !important; /* Highlight server-synced changes */
 }
 .scrollable-container {
 	scroll-snap-type: x mandatory;
 }
 .nd-color {
-	background-color: rgba(112, 5, 5, 0.35);
-	backdrop-filter: blur(var(--glass-blur));
-	-webkit-backdrop-filter: blur(var(--glass-blur));
-	box-shadow: var(--glass-box-shadow);
+	background-color: rgba(112, 5, 5, 0.35) !important;
 }
 
 .sob-color {
-	background-color: rgba(10, 88, 10, 0.35);
-	backdrop-filter: blur(var(--glass-blur)) !important;
-	-webkit-backdrop-filter: blur(var(--glass-blur));
-	box-shadow: var(--glass-box-shadow);
+	background-color: rgba(10, 88, 10, 0.35) !important;
 }
 
 /*Edit Mode Toggle */
 
-.glass-toggle {
-  display: inline-flex;
-  align-items: center;
-  position: fixed;
-  cursor: pointer;
-  user-select: none;
-  gap: 12px;
+.compact-toggle {
+	position: relative;
+	display: inline-block;
+	width: 64px;
+	height: 44px;
+	z-index: 1000;
 	top: 8px;
-	right: 60px;
-  z-index: 1000;
+	right: 56px;
+	position: absolute;
+	border-radius: 20px;
 }
 
-.glass-toggle input {
-  position: absolute;
-  opacity: 0; /* Keeps the input accessible but invisible */
-  width: 0;
-  height: 0;
+.compact-toggle input {
+	opacity: 0;
+	width: 0;
+	height: 0;
 }
 
-.glass-toggle .toggle-slider {
-  width: 50px;
-  height: 25px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  border: 2px solid var(--glass-border-color);
-  border-radius: 15px;
-  box-shadow: var(--glass-box-shadow);
-  position: relative;
-  transition:
-    background 0.3s,
-    transform 0.3s;
+.compact-toggle .slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	transition: 0.2s;
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.glass-toggle .toggle-slider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 4px;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  transform: translateY(-50%);
-  box-shadow: var(--shadow-drop);
-  transition: transform 0.3s;
+.compact-toggle input:checked + .slider {
+	background-color: #4caf50; /* Green background when checked */
 }
 
-.glass-toggle input:checked + .toggle-slider {
-  background: rgba(0, 200, 200, 0.4); /* Mint glow when checked */
+.compact-toggle .slider .pencil-icon {
+	width: 16px; /* Icon size */
+	height: 16px;
+	color: white; /* Icon color */
+	transition: transform 0.2s ease;
 }
 
-.glass-toggle input:checked + .toggle-slider::before {
-  transform: translateY(-50%) translateX(24px);
-  background: rgba(0, 255, 255, 0.8); /* Bright mint for the toggle knob */
-}
-
-.glass-toggle .label-text {
-  font-size: 1rem;
-  color: white;
-  text-shadow: var(--shadow-modal);
+.compact-toggle input:checked + .slider .pencil-icon {
+	transform: rotate(20deg); /* Slight rotation when checked */
 }
 
 /* Button Styles */
 .submit-button {
-  position: fixed;
-  bottom: 100px;
-  right: 20px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius-small);
-  filter: drop-shadow(var(--shadow-drop));
-  box-shadow: var(--glass-box-shadow);
-  padding: var(--spacing-medium) var(--spacing-large);
-  cursor: pointer;
-  font-size: var(--font-size-large);
-  transition: all 0.3s ease;
+	position: fixed;
+	bottom: 100px;
+	right: 20px;
+	background: var(--glass-bg-color);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+	border: 1px solid var(--glass-border-color);
+	border-radius: var(--border-radius-small);
+	filter: drop-shadow(var(--shadow-drop));
+	box-shadow: var(--glass-box-shadow);
+	padding: var(--spacing-medium) var(--spacing-large);
+	cursor: pointer;
+	font-size: var(--font-size-large);
+	transition: all 0.3s ease;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: rgba(0, 200, 200, 0.3); /* Lighter mint on hover */
-  transform: scale(1.1);
+	background-color: rgba(0, 200, 200, 0.3); /* Lighter mint on hover */
+	transform: scale(1.1);
 }
 
 .submit-button:disabled {
-  background-color: var(--color-button-disabled-bg);
-  cursor: not-allowed;
-  filter: none;
-  visibility: hidden !important;
+	background-color: var(--color-button-disabled-bg);
+	cursor: not-allowed;
+	filter: none;
+	visibility: hidden !important;
 }
 /* Changes Highlight */
