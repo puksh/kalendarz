@@ -4,7 +4,8 @@
       v-if="currentComponent === 'ExcelComponent'"
       @click="$emit('navigate', 'CalendarComponent')"
       class="sidebar-button"
-      title="Switch to Harmonogram View"
+      title="Zmień widok na kalendarz"
+      aria-label="Zmień widok na kalendarz"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +26,8 @@
       v-else
       @click="$emit('navigate', 'ExcelComponent')"
       class="sidebar-button"
-      title="Switch to Table View"
+      title="Zmień widok na tabele"
+      aria-label="Zmień widok na tabele"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

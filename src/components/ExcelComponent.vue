@@ -14,13 +14,29 @@
   </button>
   <div class="spreadsheet-view">
     <section class="monthChange">
-      <button class="buttonMonthChange" @click="changeMonth(-1)">
+      <button
+        class="buttonMonthChange"
+        @click="changeMonth(-1)"
+        aria-label="Poprzedni miesiąc"
+        title="Idź do poprzedniego miesiąca"
+      >
         &#8249;
       </button>
-      <span style="font-weight: bold; width: 200px !important">
+      <span
+        style="font-weight: bold; width: 200px !important"
+        role="heading"
+        aria-level="2"
+      >
         {{ monthYear.toUpperCase() }}
       </span>
-      <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
+      <button
+        class="buttonMonthChange"
+        @click="changeMonth(1)"
+        aria-label="Następny miesiąc"
+        title="Idź do następnego miesiąca"
+      >
+        &#8250;
+      </button>
     </section>
     <button
       class="top-right-buttons buttonRefresh"
@@ -30,9 +46,14 @@
         :src="'/assets/icons/refresh.svg'"
         style="width: 30px; height: 30px; cursor: pointer"
         alt="Refresh"
+        role="presentation"
+        title="Odśwież harmonogram"
       />
     </button>
-    <label class="top-right-buttons compact-toggle">
+    <label
+      class="top-right-buttons compact-toggle"
+      title="Przełącz tryb edytowania"
+    >
       <input
         type="checkbox"
         :checked="isEditingMode"
@@ -120,6 +141,9 @@
                 ] === 'Sob',
             }"
             @click="editCell(person.id, day)"
+            :aria-label="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
+            :title="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
+            role="gridcell"
           >
             <span v-if="!isEditingMode || !isEditing(person.id, day)">
               {{ getShiftForPersonAndDay(person.id, day) || "" }}
@@ -763,6 +787,7 @@ export default {
   padding-left: 12px;
   transition:
     width 0.3s ease,
+    max-width 0.3s ease,
     background 0.3s ease;
   width: 24px;
   max-width: 24px;
@@ -777,14 +802,12 @@ export default {
   max-width: 88px !important;
   background: #1e5e5e !important;
 }
-
 .editable-cell select {
   border: 1px solid #1e5e5e;
   background: #0a3c3c;
   color: var(--color-text-light);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
-
 .editable-cell select:hover {
   border-color: #27bebe;
 }

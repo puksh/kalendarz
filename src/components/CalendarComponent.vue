@@ -4,41 +4,68 @@
     :localData="localData"
     @close="showPasswordModal = false"
     @authorized="handleAuthorization"
+    aria-label="Zapisz zmiany"
+    title="Zapisz zmiany w harmonogramie"
   />
   <button
     :disabled="!madeChanges"
     @click="showPasswordPrompt"
     class="submit-button"
+    aria-label="Zapisz zmiany"
+    title="Zapisz zmiany w harmonogramie"
   >
     Zapisz
   </button>
   <section>
     <section class="monthChange">
-      <button class="buttonMonthChange" @click="changeMonth(-1)">
+      <button
+        class="buttonMonthChange"
+        @click="changeMonth(-1)"
+        aria-label="Poprzedni miesiąc"
+        title="Idź do poprzedniego miesiąca"
+      >
         &#8249;
       </button>
-      <span style="font-weight: bold; width: 200px !important">
+      <span
+        style="font-weight: bold; width: 200px !important"
+        role="heading"
+        aria-level="2"
+      >
         {{ monthYear.toUpperCase() }}
       </span>
-      <button class="buttonMonthChange" @click="changeMonth(1)">&#8250;</button>
+      <button
+        class="buttonMonthChange"
+        @click="changeMonth(1)"
+        aria-label="Następny miesiąc"
+        title="Idź do następnego miesiąca"
+      >
+        &#8250;
+      </button>
     </section>
     <button
       class="top-right-buttons buttonRefresh"
       @click="checkShiftDataSync()"
+      aria-label="Odśwież harmonogram"
     >
       <img
         :src="'/assets/icons/refresh.svg'"
         style="width: 30px; height: 30px; cursor: pointer"
         alt="Refresh"
+        role="presentation"
+        title="Odśwież harmonogram"
       />
     </button>
-    <label class="top-right-buttons compact-toggle">
+    <label
+      class="top-right-buttons compact-toggle"
+      title="Przełącz tryb edytowania"
+    >
       <input
         type="checkbox"
         :checked="isEditingMode"
         @change="emitEditingMode($event.target.checked)"
+        aria-label="Przełącz tryb edytowania"
       />
-      <span class="slider">
+      <span class="slider" role="switch" :aria-checked="isEditingMode">
         <svg
           v-if="!isEditingMode"
           xmlns="http://www.w3.org/2000/svg"
@@ -121,6 +148,10 @@
                   @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
                   @touchend="handleDrop(day.date, 'dayShift1')"
+                  :aria-label="getShiftAriaLabel(day, 'dayShift1')"
+                  :title="getShiftTooltip(day, 'dayShift1')"
+                  role="button"
+                  tabindex="0"
                 >
                   <div class="assigned-person" v-if="day.dayShift1">
                     {{ day.dayShift1Name }}
@@ -140,6 +171,10 @@
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
                   @touchend="handleDrop(day.date, 'dayShift2')"
+                  :aria-label="getShiftAriaLabel(day, 'dayShift2')"
+                  :title="getShiftTooltip(day, 'dayShift2')"
+                  role="button"
+                  tabindex="0"
                 >
                   <div class="assigned-person" v-if="day.dayShift2">
                     {{ day.dayShift2Name }}
@@ -160,6 +195,10 @@
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
                   @touchend="handleDrop(day.date, 'nightShift1')"
+                  :aria-label="getShiftAriaLabel(day, 'nightShift1')"
+                  :title="getShiftTooltip(day, 'nightShift1')"
+                  role="button"
+                  tabindex="0"
                 >
                   <div class="assigned-person" v-if="day.nightShift1">
                     {{ day.nightShift1Name }}
@@ -180,6 +219,10 @@
                   @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
                   @touchend="handleDrop(day.date, 'nightShift2')"
+                  :aria-label="getShiftAriaLabel(day, 'nightShift2')"
+                  :title="getShiftTooltip(day, 'nightShift2')"
+                  role="button"
+                  tabindex="0"
                 >
                   <div class="assigned-person" v-if="day.nightShift2">
                     {{ day.nightShift2Name }}
@@ -603,6 +646,28 @@ export default {
       this.showPasswordModal = false;
       this.madeChanges = false; // Reset changes flag after successful authorization
     },
+    getShiftAriaLabel(day, shiftType) {
+      const shift = day[shiftType];
+      const shiftName = shiftType.includes("day")
+        ? "Zmiana dzienna"
+        : "Zmiana nocna";
+      const personName = day[`${shiftType}Name`];
+
+      return shift
+        ? `${shiftName}: ${personName}. Kliknij aby usunąć zmianę.`
+        : `${shiftName}: Pusta zmiana. Przeciągnij członka zespołu by nadać im zmianę.`;
+    },
+
+    getShiftTooltip(day, shiftType) {
+      const shift = day[shiftType];
+      const shiftName = shiftType.includes("day")
+        ? "Zmiana dzienna"
+        : "Zmiana nocna";
+
+      return shift
+        ? `${shiftName}: ${day[`${shiftType}Name`]} (Kliknij by usunąć)`
+        : `Przeciągnij członka zespołu by nadać im - ${shiftName.toLowerCase()}`;
+    },
   },
 
   async mounted() {
@@ -700,6 +765,6 @@ export default {
   padding: var(--spacing-small);
 }
 .calendar-container {
-  margin-top: 24px;
+  margin-top: 40px;
 }
 </style>

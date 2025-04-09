@@ -124,10 +124,10 @@ body {
 }
 .top-right-buttons {
 	border: none;
-	position: fixed;
+	position: fixed !important;
 	z-index: 1000;
 	height: 44px;
-	width: 40px;
+	width: 44px;
 	color: var(--color-text-dark);
 	background-color: var(--glass-bg-color);
 	backdrop-filter: blur(var(--glass-blur));
@@ -242,7 +242,7 @@ body {
 
 /* Button Styles */
 .submit-button {
-	position: fixed;
+	position: absolute;
 	bottom: 100px;
 	right: 20px;
 	background: var(--glass-bg-color);
@@ -281,4 +281,13 @@ body {
 	font-size: 20px;
 	box-shadow: var(--glass-box-shadow);
 	padding: var(--spacing-medium);
+}
+.shift-slot[clickable="true"] {
+	cursor: pointer;
+}
+
+/* Improve visibility of disabled state */
+button:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
 }
