@@ -556,10 +556,10 @@ export default {
   width: 100%;
   margin-top: 50px;
   border-collapse: collapse;
-  table-layout: fixed;
-  background: #2e2e2e; /* Dark background for the table */
-  border: 1px solid #444; /* Subtle border for the table */
-  border-radius: 8px; /* Rounded corners */
+  table-layout: auto;
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
@@ -581,7 +581,7 @@ export default {
 }
 
 .calendar-table td {
-  background: #2e2e2e; /* Dark background for cells */
+  background: #2e2e2e;
 }
 
 .calendar-table tr:nth-child(even) td {
@@ -589,28 +589,31 @@ export default {
 }
 
 .calendar-table td:hover {
-  background: #585858; /* Highlighted background on hover */
+  background: #585858;
 }
 
 .calendar-table td:nth-child(even):hover {
-  background: #4a4a4a; /* Highlighted background on hover */
+  background: #4a4a4a;
 }
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-  background: #3c3c3c; /* Slightly darker background for the first column */
+  background: #3c3c3c;
   font-weight: bold;
   text-align: left;
   padding-left: 12px;
-  transition:
-    width 0.3s ease,
-    background-color 0.3s ease; /* Smooth transition */
-  width: 25px; /* Default width */
+  transition: all 0.3s ease;
+  width: 24px;
+  max-width: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.calendar-table :not(thead) tr:hover td:first-child {
-  width: 200px !important; /* Increased width on hover */
-  background: #4a4a4a !important; /* Slightly lighter background on hover */
+.calendar-table td:first-child:hover {
+  width: 88px !important;
+  max-width: 88px !important;
+  background: #4a4a4a !important;
 }
 
 /* Editable Cell Styling */
