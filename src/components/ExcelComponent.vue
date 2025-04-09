@@ -490,7 +490,7 @@ export default {
     changeMonth(newMonth) {
       if (this.madeChanges) {
         const confirmSwitch = confirm(
-          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded.",
+          "Masz niezapisane zmiany. Czy napewno chcesz zmienić miesiąc? Zmiany zostaną usunięte.",
         );
         if (!confirmSwitch) {
           return; // Cancel the month change
