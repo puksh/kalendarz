@@ -146,7 +146,7 @@
   >
     <h1 class="editing-mode-label">
       Tryb edytowania
-      <a style="color: green">Włączony</a><br />
+      <a style="color: #4caf50">Włączony</a><br />
       Kliknij na miejsce w tabeli, aby wybrać zmianę.
     </h1>
   </div>

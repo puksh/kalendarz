@@ -200,7 +200,7 @@
   >
     <h1 class="editing-mode-label">
       Tryb edytowania
-      <a style="color: green">Włączony</a><br />
+      <a style="color: #4caf50">Włączony</a><br />
       Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na zajętą
       zmianę, aby ją wyczyścić.
     </h1>
