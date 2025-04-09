@@ -13,16 +13,6 @@
     Zapisz
   </button>
   <section>
-    <button
-      class="top-right-buttons buttonRefresh"
-      @click="checkShiftDataSync()"
-    >
-      <img
-        :src="'/assets/icons/refresh.svg'"
-        style="width: 30px; height: 30px; cursor: pointer"
-        alt="Refresh"
-      />
-    </button>
     <section class="monthChange">
       <button class="buttonMonthChange" @click="changeMonth(-1)">
         &#8249;
@@ -40,16 +30,6 @@
         alt="Refresh"
       />
     </button>
-    <!--
-    <button class="top-right-buttons buttonFilter" @click="filterCalendar()">
-      <img
-        :src="'/assets/icons/filter.svg'"
-        style="width: 30px; height: 30px; cursor: pointer"
-        alt="Refresh"
-      />
-    </button>
-    -->
-    
     <label class="glass-toggle">
       <input
         type="checkbox"
@@ -613,6 +593,78 @@ export default {
 }
 .assigned-person {
   cursor: pointer !important;
+}
+.calendar-grid {
+	margin-top: 3ch;
+	display: grid;
+	grid-template-columns: repeat(31, 1fr);
+	border-radius: 8px;
+	position: relative;
+}
+
+.day-header {
+	font-weight: bold;
+}
+
+.day-column {
+	scroll-snap-align: center;
+	margin: 0 1px 0 0;
+}
+
+.day-cell {
+	border: 1px solid var(--glass-border-color);
+	padding: 1ch 1ch 1ch 0.5ch;
+	width: var(--width-day-cell);
+	background-color: var(--glass-bg-color);
+	backdrop-filter: blur(var(--glass-blur));
+	-webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.day-date {
+	font-weight: bold;
+}
+
+/* Shifts styles */
+.shift-slot {
+	margin-top: var(--spacing-small);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+.shift-slot:has(.empty-slot) {
+	filter: saturate(0.3) opacity(0.7);
+	border: 2px solid var(--color-empty-slot) !important;
+	font-weight: 600;
+}
+.empty-slot {
+	color: var(--color-text-dark);
+	padding: var(--spacing-small);
+	height: var(--height-empty-slot);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--font-size-medium);
+	width: 100%;
+	background-color: transparent !important;
+}
+/* Assigned Person Styles */
+.assigned-person {
+	padding: var(--spacing-small);
+	background-color: transparent;
+	height: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--font-size-medium);
+	font-weight: bolder;
+	transition: all 0.2s ease;
+	width: 100%;
+}
+
+.shift-label {
+	background-color: var(--color-label-bg);
+	padding: var(--spacing-small);
 }
 
 </style>
