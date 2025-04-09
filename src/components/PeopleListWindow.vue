@@ -17,8 +17,9 @@
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
-          @touchstart="isEditingMode ? startTouchDrag(person, $event) : null"
-          @touchend="handleTouchEnd"
+          @touchstart.prevent="$emit('touchstart', $event, person)"
+          @touchend.prevent="$emit('touchend', $event)"
+          @touchmove.prevent="$emit('touchmove', $event)"
         >
           {{ person.name }}
         </div>
@@ -37,9 +38,9 @@
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
-          @dragend="handleDragEnd"
-          @touchstart="isEditingMode ? startTouchDrag(person, $event) : null"
-          @touchend="handleTouchEnd"
+          @touchstart.prevent="$emit('touchstart', $event, person)"
+          @touchend.prevent="$emit('touchend', $event)"
+          @touchmove.prevent="$emit('touchmove', $event)"
         >
           {{ person.name }}
         </div>
