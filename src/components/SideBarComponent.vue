@@ -19,7 +19,7 @@
         <line x1="3" y1="10" x2="21" y2="10" />
         <line x1="9" y1="4" x2="9" y2="22" />
       </svg>
-      Harmonogram
+      Kalendarz
     </button>
     <button
       v-else
