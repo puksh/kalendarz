@@ -11,7 +11,9 @@
           :key="person.id"
           class="person-item ratownik"
           :class="{ draggable: isEditingMode }"
-          :style="{ borderRadius: isEditingMode ? 'var(--border-radius)' : '0' }"
+          :style="{
+            borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
+          }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
@@ -30,7 +32,9 @@
           :key="person.id"
           class="person-item pielegniarka"
           :class="{ draggable: isEditingMode }"
-          :style="{ borderRadius: isEditingMode ? 'var(--border-radius)' : '0' }"
+          :style="{
+            borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
+          }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
@@ -71,10 +75,6 @@ export default {
       localStorage.setItem("draggedPerson", JSON.stringify(person));
       event.target.classList.add("dragging");
       document.body.style.overflow = "hidden"; // Disable scrolling
-    },
-    handleTouchEnd(event) {
-      event.target.classList.remove("dragging");
-      document.body.style.overflow = ""; // Re-enable scrolling
     },
     handleDragEnd() {
       localStorage.removeItem("draggedPerson");
@@ -120,16 +120,40 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   font-weight: bold;
-  transition: transform 0.2s ease, border-radius 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-radius 0.2s ease;
   user-select: none;
   line-height: 2ch;
+  touch-action: none; /* Prevents browser handling of touch events */
+  user-select: none; /* Prevents text selection during touch */
 }
 .person-item:draggable {
-  cursor: grab;  
+  cursor: grab;
 }
 .person-item.draggable:hover {
   cursor: grabbing;
   transform: scale(1.1);
   transition: transform 0.2s ease; /* Smooth transition */
+}
+.person-item.being-touched {
+  opacity: 0.7;
+  transform: scale(1.05);
+  background-color: var(--color-highlight);
+}
+.shift-slot.touch-hover {
+  background-color: rgba(76, 175, 80, 0.2);
+  border: 2px dashed #4caf50;
+}
+/* Add touch feedback styles */
+@media (hover: none) {
+  .person-item:active {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+
+  .shift-slot:active {
+    background-color: rgba(76, 175, 80, 0.2);
+  }
 }
 </style>

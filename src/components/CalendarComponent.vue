@@ -147,7 +147,9 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
                   @click="handleClickResetShift(day, 'dayShift1')"
-                  @touchend="handleDrop(day.date, 'dayShift1')"
+                  @touchend.prevent="
+                    handleTouchEnd($event, day.date, 'dayShift1')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'dayShift1')"
                   :title="getShiftTooltip(day, 'dayShift1')"
                   role="button"
@@ -170,7 +172,9 @@
                   :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
                   @click="handleClickResetShift(day, 'dayShift2')"
-                  @touchend="handleDrop(day.date, 'dayShift2')"
+                  @touchend.prevent="
+                    handleTouchEnd($event, day.date, 'dayShift2')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'dayShift2')"
                   :title="getShiftTooltip(day, 'dayShift2')"
                   role="button"
@@ -194,7 +198,9 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @click="handleClickResetShift(day, 'nightShift1')"
-                  @touchend="handleDrop(day.date, 'nightShift1')"
+                  @touchend.prevent="
+                    handleTouchEnd($event, day.date, 'nightShift1')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'nightShift1')"
                   :title="getShiftTooltip(day, 'nightShift1')"
                   role="button"
@@ -218,7 +224,9 @@
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
                   @click="handleClickResetShift(day, 'nightShift2')"
-                  @touchend="handleDrop(day.date, 'nightShift2')"
+                  @touchend.prevent="
+                    handleTouchEnd($event, day.date, 'nightShift2')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'nightShift2')"
                   :title="getShiftTooltip(day, 'nightShift2')"
                   role="button"
@@ -294,6 +302,9 @@ export default {
       password: "",
       locale: "pl",
       scrollContainer: null,
+      touchedPerson: null,
+      touchStartTime: 0,
+      touchTimeout: null,
     };
   },
   computed: {
@@ -402,6 +413,36 @@ export default {
 
         this.madeChanges = true;
       }
+    },
+    handleTouchStart(event, person) {
+      // Prevent scrolling while dragging
+      event.preventDefault();
+      this.touchStartTime = Date.now();
+      this.touchTimeout = setTimeout(() => {
+        this.touchedPerson = person;
+        localStorage.setItem("draggedPerson", JSON.stringify(person));
+        addNotification("Osoba wybrana - przeciągnij na slot zmiany", "green");
+      }, 500); // Half second hold to initiate drag
+    },
+    handleTouchEnd(event, date, shiftType) {
+      clearTimeout(this.touchTimeout);
+      const touchDuration = Date.now() - this.touchStartTime;
+
+      if (this.touchedPerson && touchDuration > 500) {
+        this.handleDrop(date, shiftType);
+        this.touchedPerson = null;
+      }
+    },
+    handleTouchMove(event) {
+      if (this.touchTimeout) {
+        clearTimeout(this.touchTimeout);
+      }
+    },
+
+    cancelTouch() {
+      this.touchedPerson = null;
+      localStorage.removeItem("draggedPerson");
+      clearTimeout(this.touchTimeout);
     },
     resolvePersonName(id) {
       const person = this.people.find((person) => person.id === id);
