@@ -20,10 +20,10 @@
     <div class="mobile-warning">
       <h3>Urządzenie mobilne wykryte</h3>
       <p>
-        Niestety, tryb edycji kalendarza nie jest obsługiwany na urządzeniach
-        mobilnych.
+        Niestety, tryb edycji w widoku kalendarza nie jest obsługiwany na
+        urządzeniach mobilnych.
       </p>
-      <p>Proszę przejdź do widoku tabelarycznego lub skorzystaj z komputera.</p>
+      <p>Proszę przejdź do widoku tabeli lub skorzystaj z komputera.</p>
       <button @click="handleMobileWarningClose" class="warning-button">
         Ok :(
       </button>
