@@ -7,15 +7,14 @@ html{
 	--color-background: #356b85;
 	--color-primary: #83d8ff;
 	--color-text-light: #ffffff;
-	--color-text-dark: #222;
+	--color-text-dark: #ffffff;
 	--color-ratownik: #ff9800;
 	--color-pielegniarka: #00c0c9;
 	--color-shadow: rgba(0, 0, 0, 0.4);
 	--color-border: #ddd;
 	--color-empty-slot: #6196af;
-	--color-day: #66c6f3;
-	--color-day: #66c6f3;
-	--color-night: #2581ac;
+	--color-day: #258dac;
+	--color-night: #2560ac;
 	--color-modal-bg: rgba(0, 0, 0, 0.5);
 	--color-modal-content-bg: #fff;
 	--color-button-bg: #3b1e54;
@@ -48,15 +47,11 @@ html{
 	--shadow-drop: 0px 3px 6px var(--color-shadow);
 	--shadow-modal: 0 2px 4px var(--color-shadow);
 
-	--glass-bg-color: rgba(
-		255,
-		255,
-		255,
-		0.363
-	); /* Semi-transparent background */
-	--glass-blur: 8px; /* Blur intensity */
-	--glass-border-color: rgba(455, 255, 255, 0.5); /* Border color */
-	--glass-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+	/* Updated Glass Theme Colors */
+	--glass-bg-color: rgba(0, 50, 50, 0.4); /* Dark mint-tinted background */
+	--glass-border-color: rgba(0, 200, 200, 0.5); /* Mint-colored border */
+	--glass-box-shadow: 0 4px 6px rgba(0, 200, 200, 0.2); /* Mint shadow for depth */
+	--glass-blur: 10px; /* Blur intensity */
 
 	/* Drag */
 	--drag-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
@@ -93,14 +88,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-	background: var(--scrollbar-track-bg);
+	background: rgba(0, 50, 50, 0.2); /* Dark mint-tinted track */
 	border-radius: 5px;
 	backdrop-filter: blur(4px); /* Glass effect on the scrollbar track */
 	-webkit-backdrop-filter: blur(4px);
 }
 
 ::-webkit-scrollbar-thumb {
-	background: var(--scrollbar-thumb-bg);
+	background: rgba(0, 200, 200, 0.5); /* Mint-colored thumb */
 	border-radius: var(--scrollbar-thumb-radius);
 	backdrop-filter: blur(4px); /* Glass effect for thumb */
 	-webkit-backdrop-filter: blur(4px);
@@ -108,7 +103,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: var(--scrollbar-thumb-hover-bg);
+	background: rgba(0, 255, 255, 0.7); /* Brighter mint on hover */
 }
 
 .scrollable-container {
@@ -370,11 +365,12 @@ body {
 }
 
 .glass-toggle input:checked + .toggle-slider {
-  background: rgba(0, 128, 255, 0.4); /* A subtle blue glow when checked */
+  background: rgba(0, 200, 200, 0.4); /* Mint glow when checked */
 }
 
 .glass-toggle input:checked + .toggle-slider::before {
   transform: translateY(-50%) translateX(24px);
+  background: rgba(0, 255, 255, 0.8); /* Bright mint for the toggle knob */
 }
 
 .glass-toggle .label-text {
@@ -382,3 +378,34 @@ body {
   color: white;
   text-shadow: var(--shadow-modal);
 }
+
+/* Button Styles */
+.submit-button {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  background: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-color);
+  border-radius: var(--border-radius-small);
+  filter: drop-shadow(var(--shadow-drop));
+  box-shadow: var(--glass-box-shadow);
+  padding: var(--spacing-medium) var(--spacing-large);
+  cursor: pointer;
+  font-size: var(--font-size-large);
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: rgba(0, 200, 200, 0.3); /* Lighter mint on hover */
+  transform: scale(1.1);
+}
+
+.submit-button:disabled {
+  background-color: var(--color-button-disabled-bg);
+  cursor: not-allowed;
+  filter: none;
+  visibility: hidden !important;
+}
+/* Changes Highlight */
