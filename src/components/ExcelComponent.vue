@@ -94,74 +94,80 @@
         </svg>
       </span>
     </label>
-    <table class="calendar-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th
-            v-for="day in daysInMonth"
-            :key="day"
-            :class="{
-              'nd-color':
-                daysOfWeek[
-                  new Date(selectedYear, selectedMonth, day).getDay()
-                ] === 'Nd',
-              'sob-color':
-                daysOfWeek[
-                  new Date(selectedYear, selectedMonth, day).getDay()
-                ] === 'Sob',
-            }"
-          >
-            {{ day }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="person in orderedPeople" :key="person.id">
-          <td
-            :class="{
-              ratownik: person.ratownik,
-              pielegniarka: !person.ratownik,
-            }"
-          >
-            {{ person.name }}
-          </td>
-          <td
-            v-for="day in daysInMonth"
-            :key="day"
-            class="editable-cell"
-            :class="{
-              'nd-color':
-                daysOfWeek[
-                  new Date(selectedYear, selectedMonth, day).getDay()
-                ] === 'Nd',
-              'sob-color':
-                daysOfWeek[
-                  new Date(selectedYear, selectedMonth, day).getDay()
-                ] === 'Sob',
-            }"
-            @click="editCell(person.id, day)"
-            :aria-label="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
-            :title="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
-            role="gridcell"
-          >
-            <span v-if="!isEditingMode || !isEditing(person.id, day)">
-              {{ getShiftForPersonAndDay(person.id, day) || "" }}
-            </span>
-            <select
-              v-else
-              v-model="editedShifts[`${person.id}-${day}`]"
-              @change="saveShift(person.id, day)"
+    <div
+      class="scroll-container"
+      @wheel.prevent="handleScroll"
+      ref="scrollContainer"
+    >
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th
+              v-for="day in daysInMonth"
+              :key="day"
+              :class="{
+                'nd-color':
+                  daysOfWeek[
+                    new Date(selectedYear, selectedMonth, day).getDay()
+                  ] === 'Nd',
+                'sob-color':
+                  daysOfWeek[
+                    new Date(selectedYear, selectedMonth, day).getDay()
+                  ] === 'Sob',
+              }"
             >
-              <option value=""></option>
-              <option value="D">D</option>
-              <option value="N">N</option>
-              <option value="D N">D N</option>
-            </select>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              {{ day }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="person in orderedPeople" :key="person.id">
+            <td
+              :class="{
+                ratownik: person.ratownik,
+                pielegniarka: !person.ratownik,
+              }"
+            >
+              {{ person.name }}
+            </td>
+            <td
+              v-for="day in daysInMonth"
+              :key="day"
+              class="editable-cell"
+              :class="{
+                'nd-color':
+                  daysOfWeek[
+                    new Date(selectedYear, selectedMonth, day).getDay()
+                  ] === 'Nd',
+                'sob-color':
+                  daysOfWeek[
+                    new Date(selectedYear, selectedMonth, day).getDay()
+                  ] === 'Sob',
+              }"
+              @click="editCell(person.id, day)"
+              :aria-label="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
+              :title="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
+              role="gridcell"
+            >
+              <span v-if="!isEditingMode || !isEditing(person.id, day)">
+                {{ getShiftForPersonAndDay(person.id, day) || "" }}
+              </span>
+              <select
+                v-else
+                v-model="editedShifts[`${person.id}-${day}`]"
+                @change="saveShift(person.id, day)"
+              >
+                <option value=""></option>
+                <option value="D">D</option>
+                <option value="N">N</option>
+                <option value="D N">D N</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <PeopleListWindow :people="people" :isEditingMode="false" />
   <div
@@ -216,6 +222,7 @@ export default {
       ],
       locale: "pl",
       showPasswordModal: false,
+      scrollContainer: null,
     };
   },
   computed: {
@@ -725,17 +732,33 @@ export default {
       this.showPasswordModal = false;
       this.madeChanges = false; // Reset changes flag after successful authorization
     },
+    handleScroll(event) {
+      if (this.scrollContainer) {
+        event.preventDefault(); // Prevent default vertical scrolling
+        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
+      }
+    },
   },
   mounted() {
     this.generateMonthDays();
+    this.scrollContainer = this.$refs.scrollContainer;
   },
 };
 </script>
 
 <style scoped>
+.scroll-container {
+  width: 100%;
+  max-width: 9999px;
+  margin: 0 auto;
+  overflow-x: auto;
+  position: relative;
+}
 /* General Table Styling */
 .calendar-table {
   width: 100%;
+  min-width: 1160px;
+  max-width: 9999px;
   margin-top: 50px;
   border-collapse: separate;
   border-spacing: 1px;
@@ -815,5 +838,10 @@ export default {
 .editable-cell select:focus {
   border-color: #27bebe;
   box-shadow: 0 0 4px rgba(0, 200, 200, 0.5);
+}
+.editable-cell {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  scroll-snap-type: x mandatory;
 }
 </style>
