@@ -753,6 +753,7 @@ export default {
   margin: 0 auto;
   overflow-x: auto;
   position: relative;
+  scrollbar-gutter: stable;
 }
 /* General Table Styling */
 .calendar-table {
@@ -760,7 +761,6 @@ export default {
   min-width: 1160px;
   max-width: 9999px;
   margin-top: 50px;
-  border-collapse: separate;
   border-spacing: 1px;
   table-layout: auto;
   background: #1a3c3c;
@@ -768,6 +768,8 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+  border-spacing: 0;
 }
 
 .calendar-table th,
@@ -785,7 +787,6 @@ export default {
   color: #ffffff;
   font-weight: bold;
   text-transform: uppercase;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .calendar-table td {
@@ -804,6 +805,7 @@ export default {
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
+  position: sticky;
   background: #0a3c3c;
   font-weight: bold;
   text-align: left;
@@ -818,6 +820,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   border-right: 2px solid #1e5e5e;
+  z-index: 2;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+.calendar-table th:first-child {
+  z-index: 3;
 }
 
 .calendar-table td:first-child:hover {
