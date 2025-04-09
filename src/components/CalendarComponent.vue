@@ -1,4 +1,10 @@
 <template>
+  <AuthorizationModal
+    :show="showPasswordModal"
+    :localData="localData"
+    @close="showPasswordModal = false"
+    @authorized="handleAuthorization"
+  />
   <button
     :disabled="!madeChanges"
     @click="showPasswordPrompt"
@@ -6,14 +12,6 @@
   >
     Zapisz
   </button>
-  <section v-if="showPasswordModal" class="modal">
-    <div class="modal-content">
-      <p>Wpisz hasło:</p>
-      <input type="password" v-model="password" />
-      <button @click="authorize">Zapisz</button>
-      <button @click="cancel">Anuluj</button>
-    </div>
-  </section>
   <section>
     <button
       class="top-right-buttons buttonRefresh"
@@ -55,8 +53,8 @@
     <label class="glass-toggle">
       <input
         type="checkbox"
-        v-model="isEditingMode"
-        @change="updateEditingMode"
+        :checked="isEditingMode"
+        @change="emitEditingMode($event.target.checked)"
       />
       <span class="toggle-slider"></span>
       <span class="label-text">Tryb edytowania</span>
@@ -205,17 +203,23 @@
 
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
-import { MD5 } from "crypto-js";
 import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
+import AuthorizationModal from "./AuthorizationModal.vue";
 
 export default {
   name: "CalendarComponent",
-  components: { ShiftCountWindow, PeopleListWindow },
+  emits: ["update-editing-mode"],
+  components: { ShiftCountWindow, PeopleListWindow, AuthorizationModal  },
+  props: {
+    isEditingMode: {
+      type: Boolean,
+      required: true,
+    },
+  },
   data() {
     return {
-      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false,
       selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
       selectedYear: new Date().getFullYear(),
       monthDays: [],
@@ -240,7 +244,6 @@ export default {
       password: "",
       locale: "pl",
       scrollContainer: null,
-      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Retrieve initial state
     };
   },
   computed: {
@@ -397,50 +400,9 @@ export default {
     showPasswordPrompt() {
       this.showPasswordModal = true;
     },
-    updateEditingMode() {
-      localStorage.setItem("isEditingMode", JSON.stringify(this.isEditingMode)); // Sync with localStorage
+    emitEditingMode(newMode) {
+      this.$emit("update-editing-mode", newMode); // Notify parent of the change
     },
-    async authorize() {
-      const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
-      const enteredPasswordHash = MD5(this.password).toString();
-
-      if (enteredPasswordHash === hashedPassword) {
-        //addNotification("Authorized", "green");
-
-        // Prepare data for committing
-        const encodedContent = btoa(JSON.stringify(this.localData)); // Encode as Base64
-        try {
-          const response = await fetch(
-            "https://mc.kot.li/?key=shiftData.json",
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ key: "shiftData", value: encodedContent }),
-            },
-          );
-          if (!response.ok) {
-            throw new Error("Failed to update data on the server");
-          }
-          //addNotification("Data successfully updated on the server", "green");
-          this.madeChanges = false;
-        } catch (error) {
-          console.error("Error updating server data:", error);
-          addNotification(
-            error.message || "Failed to update data on the server",
-            "red",
-          );
-        }
-        addNotification("Zmiany zapisano :3 !", "green");
-      } else {
-        addNotification("Złe hasło", "red");
-      }
-
-      this.showPasswordModal = false;
-      this.password = "";
-    },
-
     async fetchServerShiftData() {
       this.syncedChanges = {};
       try {
@@ -542,48 +504,6 @@ export default {
         sessionStorage.removeItem("syncedChanges");
       }, 5000);
     },
-    async encodeLargeData(data) {
-      try {
-        // Remove the toggle value before encoding
-        localStorage.removeItem("isEditingMode");
-
-        // Convert data to a JSON string
-        const jsonString = JSON.stringify(data, null, 2);
-
-        // Create a Blob from the JSON string
-        const blob = new Blob([jsonString], { type: "application/json" });
-
-        // Use FileReader to convert Blob to base64
-        const reader = new FileReader();
-
-        const base64String = await new Promise((resolve, reject) => {
-          reader.onloadend = () => {
-            // Resolve the base64 encoded string
-            resolve(reader.result.split(",")[1]); // Remove the "data:..." prefix
-          };
-
-          reader.onerror = () => reject(new Error("Failed to read the Blob"));
-
-          // Read the Blob as data URL (base64)
-          reader.readAsDataURL(blob);
-        });
-
-        localStorage.setItem("isEditingMode", JSON.stringify(true));
-
-        return base64String;
-      } catch (error) {
-        console.error("Error encoding large data:", error);
-        this.addNotification("Error encoding data", "red");
-
-        localStorage.setItem("isEditingMode", JSON.stringify(true));
-
-        return null;
-      }
-    },
-    cancel() {
-      this.showPasswordModal = false;
-      this.password = "";
-    },
     loadFromLocalStorage() {
       const year = this.selectedYear;
       const month = this.selectedMonth;
@@ -644,6 +564,21 @@ export default {
         }, 5000);
       }
     },
+    resetUserChanges() {
+      // Clear user-made changes from localStorage
+      for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          const savedData = JSON.parse(localStorage.getItem(key) || "{}");
+          if (savedData.dayShift1UserChanged || savedData.dayShift2UserChanged || savedData.nightShift1UserChanged || savedData.nightShift2UserChanged) {
+            localStorage.removeItem(key); // Remove user-modified data
+          }
+        }
+      }
+
+      // Reset the localData object
+      this.localData = {};
+      this.madeChanges = false; // Reset the madeChanges flag
+    },
     handleScroll(event) {
       if (this.scrollContainer) {
         event.preventDefault(); // Prevent default vertical scrolling
@@ -658,6 +593,8 @@ export default {
   },
 
   async mounted() {
+    // Clear user-made changes on refresh
+    this.resetUserChanges();
     await this.checkShiftDataSync(); // Then sync with remote data
     this.scrollContainer = this.$refs.scrollContainer;
   },
@@ -699,97 +636,6 @@ export default {
   filter: none;
   visibility: hidden !important;
 }
-
-/* Modal Styles */
-.modal {
-  position: fixed;
-  z-index: 10;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-modal-bg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-/* Base modal container styles */
-.modal-content {
-  background-color: var(--color-modal-content-bg, rgba(255, 255, 255, 0.95));
-  padding: var(--spacing-large, 1.5rem);
-  border-radius: var(--border-radius-large, 12px);
-  box-shadow: var(--shadow-modal, 0 4px 10px rgba(0, 0, 0, 0.2));
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* Password Input */
-.modal-content input[type="password"] {
-  max-width: 400px;
-  padding: 0.8rem;
-  margin: 10px 0;
-  border: 1px solid var(--color-border, #ccc);
-  border-radius: var(--border-radius-small, 4px);
-  outline: none;
-  transition: box-shadow 0.2s ease;
-}
-
-.modal-content input[type="password"]:focus {
-  box-shadow: 0 0 5px var(--color-primary, #7e5bef);
-}
-
-/* Button styles */
-.modal-content button {
-  background-color: var(--color-button-bg, #7e5bef);
-  color: var(--color-text-dark);
-  padding: 0.8rem 1.2rem;
-  margin: 5px;
-  border: none;
-  border-radius: var(--border-radius-small, 4px);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.modal-content button:hover {
-  background-color: var(--color-button-hover-bg, #9b7ebd);
-  transform: scale(1.05);
-}
-
-.modal-content button:active {
-  transform: scale(0.95);
-}
-
-/* Responsive Modal */
-@media (max-width: 500px) {
-  .modal-content {
-    padding: 1rem;
-  }
-
-  .modal-content input[type="password"] {
-    font-size: 14px;
-  }
-
-  .modal-content button {
-    font-size: 14px;
-  }
-}
-
-/* Animation */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Changes Highlight */
 .userChanged {
   color: var(--color-user-changed) !important; /* Highlight user-made changes */
