@@ -2,8 +2,12 @@
   <div class="app-container">
     <SideBarComponent @navigate="handleNavigation" />
     <main class="main-content">
-      <CalendarComponent v-if="currentPage === 'CalendarComponent'" />
-      <ExcelComponent v-if="currentPage === 'ExcelComponent'" />
+      <CalendarComponent v-if="currentPage === 'CalendarComponent'" 
+        :isEditingMode="isEditingMode"
+        @update-editing-mode="updateEditingMode"/>
+      <ExcelComponent v-if="currentPage === 'ExcelComponent'" 
+        :isEditingMode="isEditingMode"
+        @update-editing-mode="updateEditingMode"/>
       <NotificationMessage />
     </main>
   </div>
@@ -30,11 +34,16 @@ export default {
   data() {
     return {
       currentPage: "CalendarComponent",
+      isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Shared editing mode state
     };
   },
   methods: {
     handleNavigation(section) {
       this.currentPage = section;
+    },
+    updateEditingMode(newMode) {
+      this.isEditingMode = newMode;
+      localStorage.setItem("isEditingMode", JSON.stringify(newMode)); // Persist state
     },
   },
   mounted() {
