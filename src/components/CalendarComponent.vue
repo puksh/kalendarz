@@ -30,35 +30,6 @@
     </div>
   </div>
   <section>
-    <section class="monthChange">
-      <button
-        class="buttonMonthChange"
-        @click="changeMonth(-1)"
-        aria-label="Poprzedni miesiąc"
-        title="Idź do poprzedniego miesiąca"
-      >
-        &#8249;
-      </button>
-      <span
-        style="
-          font-weight: bold;
-          width: 144px !important;
-          color: var(--color-text-dark);
-        "
-        role="heading"
-        aria-level="2"
-      >
-        {{ monthYear.toUpperCase() }}
-      </span>
-      <button
-        class="buttonMonthChange"
-        @click="changeMonth(1)"
-        aria-label="Następny miesiąc"
-        title="Idź do następnego miesiąca"
-      >
-        &#8250;
-      </button>
-    </section>
     <button
       class="top-right-buttons buttonRefresh"
       @click="checkShiftDataSync()"
@@ -325,11 +296,17 @@ export default {
       type: Boolean,
       required: true,
     },
+    selectedMonth: {
+      type: Number,
+      required: true,
+    },
+    selectedYear: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {
-      selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
-      selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
       syncedChanges: {}, // Server-synced changes
@@ -356,17 +333,6 @@ export default {
       showMobileWarning: false,
       isMobileDevice: false,
     };
-  },
-  computed: {
-    monthYear() {
-      return new Date(this.selectedYear, this.selectedMonth).toLocaleString(
-        this.locale,
-        {
-          month: "long",
-          year: "numeric",
-        },
-      );
-    },
   },
   methods: {
     handleDrop(date, shiftType) {
@@ -519,19 +485,9 @@ export default {
 
       this.loadFromLocalStorage();
     },
-    changeMonth(newMonth) {
-      if (this.madeChanges) {
-        const confirmSwitch = confirm(
-          "You have unsaved changes. Are you sure you want to switch the month? Your changes will be discarded.",
-        );
-        if (!confirmSwitch) {
-          return; // Cancel the month change
-        }
-      }
-
-      // Update the selected month and year
-      this.selectedMonth = this.selectedMonth + newMonth;
-      this.generateMonthDays(); // Regenerate the days for the new month
+    updateChanges(hasChanges) {
+      this.madeChanges = hasChanges;
+      this.$emit("has-changes", hasChanges);
     },
     emitEditingMode(newMode) {
       this.$emit("update-editing-mode", newMode); // Notify parent of the change
@@ -809,6 +765,12 @@ export default {
       if (newValue && this.isMobileDevice) {
         this.showMobileWarning = true;
       }
+    },
+    selectedMonth() {
+      this.generateMonthDays();
+    },
+    selectedYear() {
+      this.generateMonthDays();
     },
   },
 };

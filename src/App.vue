@@ -4,15 +4,26 @@
       :currentComponent="currentPage"
       @navigate="handleNavigation"
     />
+    <MonthSelector
+      :currentMonth="selectedMonth"
+      :currentYear="selectedYear"
+      :locale="locale"
+      :hasUnsavedChanges="hasUnsavedChanges"
+      @change-month="handleMonthChange"
+    />
     <main class="main-content">
       <CalendarComponent
         v-if="currentPage === 'CalendarComponent'"
         :isEditingMode="isEditingMode"
+        :selectedMonth="selectedMonth"
+        :selectedYear="selectedYear"
         @update-editing-mode="updateEditingMode"
       />
       <ExcelComponent
         v-if="currentPage === 'ExcelComponent'"
         :isEditingMode="isEditingMode"
+        :selectedMonth="selectedMonth"
+        :selectedYear="selectedYear"
         @update-editing-mode="updateEditingMode"
       />
       <NotificationMessage />
@@ -25,6 +36,8 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
+import MonthSelector from "./components/MonthSelector.vue";
+
 export default {
   name: "VueCalendar",
   components: {
@@ -40,25 +53,50 @@ export default {
     NotificationMessage: defineAsyncComponent(
       () => import("./components/NotificationMessage.vue"),
     ),
+    MonthSelector,
   },
   data() {
     return {
       currentPage: "CalendarComponent",
       isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Shared editing mode state
+
+      selectedMonth: new Date().getMonth(), //MonthSelector
+      selectedYear: new Date().getFullYear(), //MonthSelector
     };
   },
   methods: {
     handleNavigation(section) {
+      if (this.hasUnsavedChanges) {
+        const confirmSwitch = confirm(
+          "Masz niezapisane zmiany. Czy na pewno chcesz zmienić widok? Twoje zmiany zostaną utracone.",
+        );
+        if (!confirmSwitch) {
+          return;
+        }
+      }
       this.currentPage = section;
+      this.hasUnsavedChanges = false;
+    },
+    handleMonthChange(delta) {
+      //MonthSelector
+      this.selectedMonth += delta;
+
+      // Handle year change if needed
+      if (this.selectedMonth > 11) {
+        this.selectedMonth = 0;
+        this.selectedYear += 1;
+      } else if (this.selectedMonth < 0) {
+        this.selectedMonth = 11;
+        this.selectedYear -= 1;
+      }
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
       localStorage.setItem("isEditingMode", JSON.stringify(newMode)); // Persist state
     },
-  },
-  mounted() {
-    const isEditingMode =
-      JSON.parse(localStorage.getItem("isEditingMode")) || false;
+    updateUnsavedChanges(hasChanges) {
+      this.hasUnsavedChanges = hasChanges;
+    },
   },
 };
 </script>

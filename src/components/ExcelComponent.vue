@@ -13,35 +13,6 @@
     Zapisz
   </button>
   <div class="spreadsheet-view">
-    <section class="monthChange">
-      <button
-        class="buttonMonthChange"
-        @click="changeMonth(-1)"
-        aria-label="Poprzedni miesiąc"
-        title="Idź do poprzedniego miesiąca"
-      >
-        &#8249;
-      </button>
-      <span
-        style="
-          font-weight: bold;
-          width: 144px !important;
-          color: var(--color-text-dark);
-        "
-        role="heading"
-        aria-level="2"
-      >
-        {{ monthYear.toUpperCase() }}
-      </span>
-      <button
-        class="buttonMonthChange"
-        @click="changeMonth(1)"
-        aria-label="Następny miesiąc"
-        title="Idź do następnego miesiąca"
-      >
-        &#8250;
-      </button>
-    </section>
     <button
       class="top-right-buttons buttonRefresh"
       @click="checkShiftDataSync()"
@@ -205,21 +176,32 @@ import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
 import AuthorizationModal from "./AuthorizationModal.vue";
+
 export default {
   name: "SpreadsheetView",
   emits: ["update-editing-mode"],
-  components: { ShiftCountWindow, PeopleListWindow, AuthorizationModal },
+  components: {
+    ShiftCountWindow,
+    PeopleListWindow,
+    AuthorizationModal,
+  },
   props: {
     isEditingMode: {
       type: Boolean,
+      required: true,
+    },
+    selectedMonth: {
+      type: Number,
+      required: true,
+    },
+    selectedYear: {
+      type: Number,
       required: true,
     },
   },
   data() {
     return {
       editedShifts: {},
-      selectedMonth: new Date().getMonth(), // 0-indexed (January = 0)
-      selectedYear: new Date().getFullYear(),
       monthDays: [],
       localData: {},
       daysOfWeek,
@@ -261,14 +243,13 @@ export default {
           return order.indexOf(a.name) - order.indexOf(b.name);
         });
     },
-    monthYear() {
-      return new Date(this.selectedYear, this.selectedMonth).toLocaleString(
-        this.locale,
-        {
-          month: "long",
-          year: "numeric",
-        },
-      );
+  },
+  watch: {
+    selectedMonth() {
+      this.generateMonthDays();
+    },
+    selectedYear() {
+      this.generateMonthDays();
     },
   },
   methods: {
@@ -560,22 +541,9 @@ export default {
 
       this.loadFromLocalStorage();
     },
-    changeMonth(newMonth) {
-      if (this.madeChanges) {
-        const confirmSwitch = confirm(
-          "Masz niezapisane zmiany. Czy napewno chcesz zmienić miesiąc? Zmiany zostaną usunięte.",
-        );
-        if (!confirmSwitch) {
-          return; // Cancel the month change
-        }
-      }
-
-      // Clear the editedShifts object to reset editing state
-      this.editedShifts = {};
-
-      // Update the selected month and year
-      this.selectedMonth = this.selectedMonth + newMonth;
-      this.generateMonthDays(); // Regenerate the days for the new month
+    updateChanges(hasChanges) {
+      this.madeChanges = hasChanges;
+      this.$emit("has-changes", hasChanges);
     },
     loadFromLocalStorage() {
       const year = this.selectedYear;

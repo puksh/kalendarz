@@ -85,44 +85,6 @@ body {
 	border: 2px solid var(--color-pielegniarka) !important;
 }
 
-/* Month Change top bar */
-.monthChange {
-	position: fixed;
-	top: 0;
-	left: 0;
-	display: flex;
-	justify-content: center;
-	padding: 1ch 0;
-	align-items: center;
-	width: 100%;
-	background: var(--glass-bg-color);
-	backdrop-filter: blur(var(--glass-blur));
-	-webkit-backdrop-filter: blur(var(--glass-blur));
-	border-bottom: 1px solid var(--glass-border-color);
-	box-shadow: var(--glass-box-shadow);
-	z-index: 1000;
-	height: 44px;
-}
-
-.buttonMonthChange {
-	color: var(--color-text-dark);
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	font-size: xx-large;
-	transition: background-color 0.3s ease;
-	padding-bottom: var(--spacing-small);
-	line-height: 16px;
-	transition:
-		transform 0.2s ease,
-		filter 0.2s ease;
-}
-.buttonMonthChange:hover {
-	filter: brightness(0.8);
-}
-.buttonMonthChange:active {
-	transform: scale(0.95);
-}
 .top-right-buttons {
 	border: none;
 	position: fixed !important;
