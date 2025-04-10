@@ -68,11 +68,16 @@ export default {
         const confirmSwitch = confirm(
           "Masz niezapisane zmiany. Czy na pewno chcesz zmienić miesiąc? Twoje zmiany zostaną utracone.",
         );
+
         if (!confirmSwitch) {
           return; // Cancel the month change
         }
+
+        // User confirmed discarding changes
+        this.$emit("discard-changes"); // Signal parent to discard changes
       }
 
+      // Emit the month change event with delta
       this.$emit("change-month", delta);
     },
   },

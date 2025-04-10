@@ -80,6 +80,10 @@
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
 import { addNotification } from "./NotificationMessage.vue";
+import {
+  checkShiftDataSync,
+  resetSyncedChangesSessionStorage,
+} from "@/utils/dataSync.js";
 
 export default {
   name: "SpreadsheetView",
@@ -239,6 +243,7 @@ export default {
         this.localData[date] = updatedData;
         localStorage.setItem(date, JSON.stringify(updatedData));
         this.madeChanges = true;
+        this.$emit("has-changes", this.madeChanges);
         this.$nextTick(() => {
           this.editedShifts[key] = undefined;
           delete this.editedShifts[key];
@@ -399,12 +404,14 @@ export default {
       };
 
       this.localData[date] = updatedData;
-      this.madeChanges = true; // Mark that changes have been made
+      this.madeChanges = true;
+      this.$emit("has-changes", this.madeChanges);
       localStorage.setItem(date, JSON.stringify(updatedData));
 
       delete this.editedShifts[key];
     },
     generateMonthDays() {
+      this.resetUserChanges();
       const year = this.selectedYear;
       const month = this.selectedMonth;
       const lastDay = new Date(year, month + 1, 0).getDate();
@@ -430,7 +437,7 @@ export default {
     },
     updateChanges(hasChanges) {
       this.madeChanges = hasChanges;
-      this.$emit("has-changes", hasChanges);
+      this.$emit("has-changes", this.madeChanges);
     },
     loadFromLocalStorage() {
       const year = this.selectedYear;
@@ -475,120 +482,14 @@ export default {
         ? { name: person.name, isRatownik: person.ratownik }
         : { name: undefined, isRatownik: false };
     },
-    async fetchServerShiftData() {
-      this.syncedChanges = {};
-      try {
-        const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
 
-        //console.log(response);
-        if (!response.ok) {
-          if (response.status === 404) {
-            console.error("Nie znaleziono harmonogramu na serwerze");
-            addNotification("Nie znaleziono harmonogramu na serwerze", "red");
-          }
-          throw new Error(
-            console.error(
-              `Nie udało się połączyć z serwerem: ${response.status}`,
-            ),
-            addNotification(
-              `Nie udało się połączyć z serwerem: ${response.status}`,
-              "red",
-            ),
-          );
-        }
-
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error("Error fetching data from server:", error);
-        addNotification("Failed to fetch data from server", "red");
-        return null;
-      }
-    },
     async checkShiftDataSync() {
-      this.resetSyncedChangesSessionStorage();
-      const remoteData = await this.fetchServerShiftData();
-
-      if (!remoteData) {
-        console.log("No remote data fetched.");
-        return; // Exit if fetching fails
-      }
-
-      //console.log("Remote data fetched:", remoteData);
-
-      const containedSyncedChanges = {}; // Reset synced changes
-
-      for (const [date, remoteShifts] of Object.entries(remoteData)) {
-        // Retrieve local shifts directly from localStorage
-        const savedStates = localStorage.getItem(date);
-        const localShifts = savedStates ? JSON.parse(savedStates) : null;
-
-        const differences = {};
-
-        //console.log(`Comparing shifts for date: ${date}`);
-        //console.log("Local shifts from localStorage:", localShifts);
-        //console.log("Remote shifts:", remoteShifts);
-
-        if (!localShifts) {
-          // New shifts entirely - add to synced changes and localStorage
-          containedSyncedChanges[date] = { ...remoteShifts };
-          localStorage.setItem(date, JSON.stringify(remoteShifts));
-          //console.log(`New shifts added for ${date}:`, remoteShifts);
-        } else {
-          // Compare existing shifts
-          for (const [shiftType, remoteValue] of Object.entries(remoteShifts)) {
-            const localValue = localShifts[shiftType] || null;
-            if (localValue !== remoteValue) {
-              differences[shiftType] = {
-                from: localValue || "Empty",
-                to: remoteValue || "Empty",
-              };
-            }
-          }
-
-          // If differences are found, track them
-          if (Object.keys(differences).length > 0) {
-            containedSyncedChanges[date] = differences;
-            //console.log(`Differences for ${date}:`, differences);
-          }
-
-          // Update local storage with the latest remote data
-          localStorage.setItem(date, JSON.stringify(remoteShifts));
-        }
-      }
-
-      this.generateMonthDays(); // Initialize local data first
-      // Update syncedChanges and save to sessionStorage
-      this.syncedChanges = containedSyncedChanges;
-
-      sessionStorage.setItem(
-        "syncedChanges",
-        JSON.stringify(this.syncedChanges),
+      this.syncedChanges = await checkShiftDataSync(() =>
+        this.generateMonthDays(),
       );
-
-      // Clear synced changes after 5 seconds
-      setTimeout(() => {
-        this.syncedChanges = {};
-        sessionStorage.removeItem("syncedChanges");
-      }, 5000);
     },
     resetSyncedChangesSessionStorage() {
-      // Load synced changes from sessionStorage
-      const savedSyncedChanges = sessionStorage.getItem("syncedChanges");
-      if (savedSyncedChanges) {
-        this.syncedChanges = JSON.parse(savedSyncedChanges);
-
-        // Clear the syncedChanges after 5 seconds
-        setTimeout(() => {
-          this.syncedChanges = {};
-          sessionStorage.removeItem("syncedChanges");
-        }, 5000);
-      }
+      this.syncedChanges = resetSyncedChangesSessionStorage();
     },
     handleScroll(event) {
       if (this.scrollContainer) {
@@ -596,8 +497,30 @@ export default {
         this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
       }
     },
+    resetUserChanges() {
+      // Clear user-made changes from localStorage
+      for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          const savedData = JSON.parse(localStorage.getItem(key) || "{}");
+          if (
+            savedData.dayShift1UserChanged ||
+            savedData.dayShift2UserChanged ||
+            savedData.nightShift1UserChanged ||
+            savedData.nightShift2UserChanged
+          ) {
+            localStorage.removeItem(key); // Remove user-modified data
+          }
+        }
+      }
+
+      this.localData = {};
+      this.madeChanges = false;
+      this.$emit("has-changes", this.madeChanges);
+      this.editedShifts = {};
+    },
   },
   mounted() {
+    this.resetUserChanges();
     this.generateMonthDays();
     this.scrollContainer = this.$refs.scrollContainer;
   },

@@ -27,6 +27,7 @@
       :locale="locale"
       :hasUnsavedChanges="hasUnsavedChanges"
       @change-month="handleMonthChange"
+      @discard-changes="discardChanges"
     />
     <section>
       <button
@@ -100,6 +101,7 @@
     </section>
     <main class="main-content">
       <CalendarComponent
+        ref="calendarComponent"
         v-if="currentPage === 'CalendarComponent'"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
@@ -110,6 +112,7 @@
         @month-days-updated="updateMonthDays"
       />
       <ExcelComponent
+        ref="excelComponent"
         v-if="currentPage === 'ExcelComponent'"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
@@ -158,7 +161,7 @@ import MonthSelector from "./components/MonthSelector.vue";
 import AuthorizationModal from "./components/AuthorizationModal.vue";
 import PeopleListWindow from "./components/PeopleListWindow.vue";
 import ShiftCountWindow from "./components/ShiftCountWindow.vue";
-
+import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 
 export default {
@@ -230,7 +233,7 @@ export default {
       this.hasUnsavedChanges = false;
     },
     handleMonthChange(delta) {
-      //MonthSelector
+      // Just handle the month change logic
       this.selectedMonth += delta;
 
       // Handle year change if needed
@@ -241,6 +244,30 @@ export default {
         this.selectedMonth = 11;
         this.selectedYear -= 1;
       }
+    },
+    discardChanges() {
+      this.hasUnsavedChanges = false;
+      this.checkShiftDataSync();
+    },
+    generateCurrentView() {
+      // Regenerate the current component's view
+      if (
+        this.currentPage === "CalendarComponent" &&
+        this.$refs.calendarComponent
+      ) {
+        this.$refs.calendarComponent.generateMonthDays();
+      } else if (
+        this.currentPage === "ExcelComponent" &&
+        this.$refs.excelComponent
+      ) {
+        this.$refs.excelComponent.generateMonthDays();
+      }
+    },
+    async checkShiftDataSync() {
+      this.syncedChanges = await checkShiftDataSync(() =>
+        this.generateCurrentView(),
+      );
+      addNotification("Odświeżanie...", "blue");
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
@@ -268,6 +295,10 @@ export default {
       this.monthDays = days;
     },
   },
+  async mounted() {
+    this.discardChanges();
+  },
+
   computed: {
     peopleListEditingMode() {
       switch (this.currentPage) {
