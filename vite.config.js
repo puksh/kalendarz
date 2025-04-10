@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import viteCompression from "vite-plugin-compression";
 import { visualizer } from "rollup-plugin-visualizer";
+import autoprefixer from "autoprefixer";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -50,7 +51,7 @@ export default defineConfig({
       },
     },
     postcss: {
-      plugins: [require("autoprefixer")()],
+      plugins: [autoprefixer],
     },
   },
   optimizeDeps: {
