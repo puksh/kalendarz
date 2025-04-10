@@ -1,24 +1,14 @@
-html {
-	color-scheme: dark;
-}
-
 :root {
+	color-scheme: dark;
 	/* Color Variables */
 	--color-background: #356b85;
-	--color-primary: #83d8ff;
-	--color-text-light: #ffffff;
-	--color-text-dark: #ffffff;
+	--color-text: #ffffff;
 	--color-ratownik: #ff9800;
 	--color-pielegniarka: #00c0c9;
 	--color-shadow: rgba(0, 0, 0, 0.4);
-	--color-border: #ddd;
 	--color-empty-slot: #6196af;
 	--color-day: #258dac;
 	--color-night: #2560ac;
-	--color-modal-bg: rgba(0, 0, 0, 0.5);
-	--color-modal-content-bg: #fff;
-	--color-button-bg: #3b1e54;
-	--color-button-hover-bg: #6f4592;
 	--color-button-disabled-bg: #ccc;
 	--color-label-bg: #e0e0e0;
 	--color-user-changed: yellow;
@@ -36,7 +26,6 @@ html {
 	/* Border Radius */
 	--border-radius: 25px;
 	--border-radius-small: 4px;
-	--border-radius-large: 8px;
 
 	/* Dimensions */
 	--width-people-bar: 100%;
@@ -53,9 +42,6 @@ html {
 	--glass-box-shadow: 0 4px 6px rgba(0, 200, 200, 0.2); /* Mint shadow for depth */
 	--glass-blur: 10px; /* Blur intensity */
 
-	/* Drag */
-	--drag-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
-	--drag-scale: 1.05;
 	font-display: swap;
 }
 * {
@@ -91,7 +77,7 @@ body {
 	z-index: 1000;
 	height: 44px;
 	width: 44px;
-	color: var(--color-text-dark);
+	color: var(--color-text);
 	background-color: var(--glass-bg-color);
 	backdrop-filter: blur(var(--glass-blur));
 	-webkit-backdrop-filter: blur(var(--glass-blur));
@@ -240,7 +226,7 @@ body {
 	border: 1px solid var(--glass-border-color);
 	border-radius: var(--border-radius-small);
 	filter: drop-shadow(var(--shadow-drop));
-	color: var(--color-text-dark);
+	color: var(--color-text);
 	font-size: 20px;
 	box-shadow: var(--glass-box-shadow);
 	padding: var(--spacing-medium);

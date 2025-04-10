@@ -179,7 +179,7 @@ export default {
   line-height: 1ch;
   box-sizing: border-box;
   contain: layout paint;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 
 .person-lists {
@@ -189,7 +189,7 @@ export default {
   justify-content: center;
   text-wrap: wrap;
   margin: var(--spacing-small) auto;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 @media (max-width: 768px) {
   .people-list {
@@ -202,7 +202,7 @@ export default {
   min-width: 46px;
   padding: 1ch;
   width: auto 30%;
-  color: var(--color-text-dark);
+  color: var(--color-text);
   border: 1px solid var(--glass-border-color);
   font-weight: bold;
   transition:
@@ -237,7 +237,7 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.8);
-  color: var(--color-text-dark);
+  color: var(--color-text);
   padding: 12px 24px;
   border-radius: 8px;
   z-index: 1000;

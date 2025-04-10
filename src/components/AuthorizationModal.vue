@@ -171,7 +171,7 @@ export default {
   max-width: 400px;
   width: 90%;
   animation: modalEnter 0.3s ease-out;
-  color: var(--color-text-dark, #333);
+  color: var(--color-text, #333);
 }
 
 .modal-content h3 {
@@ -191,7 +191,7 @@ export default {
   border: 1px solid var(--glass-border-color, rgba(255, 255, 255, 0.2));
   border-radius: var(--border-radius, 8px);
   background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-dark, #333);
+  color: var(--color-text, #333);
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -231,7 +231,7 @@ export default {
 .secondary-button {
   background-color: transparent;
   border: 1px solid var(--glass-border-color, rgba(255, 255, 255, 0.2));
-  color: var(--color-text-dark, #333);
+  color: var(--color-text, #333);
 }
 
 .primary-button:hover {

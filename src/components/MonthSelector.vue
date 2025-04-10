@@ -107,7 +107,7 @@ export default {
 .monthChange span {
   font-weight: bold;
   width: 144px !important;
-  color: var(--color-text-dark);
+  color: var(--color-text);
   transition: all 0.3s ease;
   display: inline-block;
   animation-duration: 0.3s;
@@ -127,7 +127,7 @@ export default {
   animation-name: textPulse;
 }
 .buttonMonthChange {
-  color: var(--color-text-dark);
+  color: var(--color-text);
   background: transparent;
   border: none;
   cursor: pointer;

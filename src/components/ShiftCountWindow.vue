@@ -91,7 +91,7 @@ export default {
   line-height: 2.4ch;
   margin: 0 0 10px 0;
   list-style: none;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 .shift-counts-window {
   width: max(350px);
@@ -105,6 +105,6 @@ export default {
   box-shadow: var(--glass-box-shadow);
   border-radius: 8px;
   align-self: center;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 </style>

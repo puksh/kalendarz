@@ -582,7 +582,7 @@ export default {
 
 .day-header {
   font-weight: bold;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 
 .day-column {
@@ -601,7 +601,7 @@ export default {
 
 .day-date {
   font-weight: bold;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 
 /* Shifts styles */
@@ -618,7 +618,7 @@ export default {
   font-weight: 600;
 }
 .empty-slot {
-  color: var(--color-text-dark);
+  color: var(--color-text);
   padding: var(--spacing-small);
   height: var(--height-empty-slot);
   display: flex;
@@ -640,7 +640,7 @@ export default {
   font-weight: bolder;
   transition: all 0.2s ease;
   width: 100%;
-  color: var(--color-text-dark);
+  color: var(--color-text);
 }
 
 .shift-label {
@@ -671,7 +671,7 @@ export default {
 
 .mobile-warning {
   background-color: var(--glass-bg-color);
-  color: var(--color-text-dark);
+  color: var(--color-text);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
@@ -693,7 +693,7 @@ export default {
 
 .warning-button {
   background-color: #4caf50;
-  color: var(--color-text-dark);
+  color: var(--color-text);
   border: none;
   padding: 10px 20px;
   border-radius: 4px;

@@ -557,7 +557,7 @@ export default {
   text-align: center;
   padding: 8px;
   font-size: 14px;
-  color: var(--color-text-light);
+  color: var(--color-text);
   transition: background 0.2s ease;
 }
 
@@ -616,7 +616,7 @@ export default {
 .editable-cell select {
   border: 1px solid #1e5e5e;
   background: #0a3c3c;
-  color: var(--color-text-light);
+  color: var(--color-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 .editable-cell select:hover {

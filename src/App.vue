@@ -336,7 +336,7 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-top: 1px solid var(--glass-border-color);
   box-shadow: 0 -2px 10px rgba(0, 200, 200, 0.15);
-  color: var(--color-text-light, #e0e0e0);
+  color: var(--color-text, #e0e0e0);
   font-size: 12px;
   line-height: 0.8ch;
 }
