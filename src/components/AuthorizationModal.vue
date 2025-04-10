@@ -13,15 +13,14 @@
           ref="passwordInput"
         />
       </div>
+
       <div class="button-container">
         <button
           class="primary-button"
           @click="authorize"
           :disabled="isAuthorizing"
         >
-          <span class="button-text">{{
-            isAuthorizing ? "Weryfikacja..." : "Zapisz"
-          }}</span>
+          <span>{{ isAuthorizing ? "Weryfikacja..." : "Zapisz" }}</span>
           <span v-if="isAuthorizing" class="spinner"></span>
         </button>
         <button
@@ -46,10 +45,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    localData: {
-      type: Object,
-      required: true,
-    },
   },
   emits: ["close", "authorized"],
   data() {
@@ -64,111 +59,83 @@ export default {
       this.isAuthorizing = true;
 
       try {
-        // Dynamically import crypto-js only when needed
-        const cryptoModule = await import("crypto-js/md5");
-        const MD5 = cryptoModule.default;
-
+        // Password verification
+        const { default: MD5 } = await import("crypto-js/md5");
         const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
-        const enteredPasswordHash = MD5(this.password).toString();
 
-        if (enteredPasswordHash === hashedPassword) {
-          try {
-            // Prepare data for committing
-            const encodedContent = await this.encodeLargeData(this.localData);
-
-            if (!encodedContent) {
-              console.error("Failed to encode data");
-              addNotification("Brak zakodowanych danych", "red");
-              return;
-            }
-
-            const response = await fetch(
-              "https://mc.kot.li/?key=shiftData.json",
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  key: "shiftData",
-                  value: encodedContent,
-                }),
-              },
-            );
-
-            if (!response.ok) {
-              throw new Error("Nie udało się zaktualizować danych na serwerze");
-            }
-
-            addNotification("Zmiany zapisano!", "green");
-            this.$emit("authorized"); // Notify parent of successful authorization
-          } catch (error) {
-            console.error("Error updating server data:", error);
-            addNotification(
-              error.message || "Nie udało się zaktualizować danych",
-              "red",
-            );
-          }
-        } else {
-          addNotification("Złe hasło", "red");
-          console.error("Incorrect password entered");
+        if (MD5(this.password).toString() !== hashedPassword) {
+          addNotification("Nieprawidłowe hasło", "red");
+          this.password = "";
+          this.isAuthorizing = false;
+          return;
         }
-      } catch (error) {
-        console.error("Failed to load crypto library:", error);
-        addNotification("Błąd weryfikacji hasła", "red");
-      } finally {
-        this.isAuthorizing = false;
-        this.closeModal();
-      }
-    },
-    closeModal() {
-      this.password = "";
-      this.$emit("close"); // Notify parent to close the modal
-    },
-    async encodeLargeData(data) {
-      try {
-        // Remove the toggle value before encoding
-        localStorage.removeItem("isEditingMode");
 
-        // Convert data to a JSON string
-        const jsonString = JSON.stringify(data, null, 2);
+        // Collect all data from localStorage except isEditingMode
+        const collectedData = {};
 
-        // Create a Blob from the JSON string
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key !== "isEditingMode") {
+            try {
+              collectedData[key] = JSON.parse(localStorage.getItem(key));
+            } catch {}
+          }
+        }
+
+        if (Object.keys(collectedData).length === 0) {
+          addNotification("Brak zmian do zapisania", "yellow");
+          this.isAuthorizing = false;
+          return;
+        }
+
+        // Encode and send to server
+        const jsonString = JSON.stringify(collectedData);
         const blob = new Blob([jsonString], { type: "application/json" });
-
-        // Use FileReader to convert Blob to base64
         const reader = new FileReader();
 
-        const base64String = await new Promise((resolve, reject) => {
-          reader.onloadend = () => {
-            // Resolve the base64 encoded string
-            resolve(reader.result.split(",")[1]); // Remove the "data:..." prefix
-          };
-
-          reader.onerror = () => reject(new Error("Failed to read the Blob"));
-
-          // Read the Blob as data URL (base64)
+        const base64Data = await new Promise((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
 
-        localStorage.setItem("isEditingMode", JSON.stringify(true));
+        const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: "shiftData",
+            value: base64Data,
+          }),
+        });
 
-        return base64String;
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        addNotification("Zmiany zapisano pomyślnie!", "green");
+        this.$emit("authorized");
+        this.closeModal();
       } catch (error) {
-        console.error("Error encoding large data:", error);
-        addNotification("Nie udało się zakodować danych", "red");
-
-        localStorage.setItem("isEditingMode", JSON.stringify(true));
-
-        return null;
+        console.error(error);
+        addNotification("Nie udało się zaktualizować danych", "red");
+      } finally {
+        this.isAuthorizing = false;
       }
     },
+
+    closeModal() {
+      this.password = "";
+      this.$emit("close");
+    },
+
     cancel() {
-      this.closeModal();
+      if (!this.isAuthorizing) {
+        this.closeModal();
+      }
     },
   },
+
   mounted() {
-    // Focus the password input when modal appears
     this.$nextTick(() => {
       this.$refs.passwordInput?.focus();
     });
@@ -177,7 +144,6 @@ export default {
 </script>
 
 <style scoped>
-/* Modal Styles */
 .modal {
   position: fixed;
   z-index: 1111;

@@ -2,7 +2,6 @@
   <div class="app-container">
     <AuthorizationModal
       :show="showPasswordModal"
-      :localData="localData"
       @close="showPasswordModal = false"
       @authorized="handleAuthorization"
       aria-label="Zapisz zmiany"
@@ -285,8 +284,6 @@ export default {
     handleAuthorization() {
       this.showPasswordModal = false;
       this.hasUnsavedChanges = false;
-      addNotification("Zmiany zostały zapisane pomyślnie.", "green");
-
       // Notify active component that changes were saved
       this.$refs.activeComponent?.handleChangesSaved();
     },
