@@ -123,11 +123,6 @@ export default {
   transform: scale(1.05);
 }
 
-.buttonMonthChange:focus {
-  outline: 2px solid var(--color-focus-ring, #4caf50);
-  outline-offset: 2px;
-}
-
 .buttonMonthChange:active {
   transform: scale(0.95);
 }
