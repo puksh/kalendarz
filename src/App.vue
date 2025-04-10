@@ -126,6 +126,25 @@
         :people="people"
         :isEditingMode="peopleListEditingMode"
       />
+      <div
+        v-if="isEditingMode"
+        style="display: flex; flex-direction: column; align-items: center"
+      >
+        <h1
+          v-if="currentPage === 'CalendarComponent'"
+          class="editing-mode-label"
+        >
+          Tryb edytowania
+          <a style="color: #4caf50">Włączony</a><br />
+          Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na
+          zajętą zmianę, aby ją wyczyścić.
+        </h1>
+        <h1 v-if="currentPage === 'ExcelComponent'" class="editing-mode-label">
+          Tryb edytowania
+          <a style="color: #4caf50">Włączony</a><br />
+          Kliknij na miejsce w tabeli, aby wybrać zmianę.
+        </h1>
+      </div>
       <ShiftCountWindow
         v-if="monthDays.length > 0"
         :people="people"
@@ -133,22 +152,6 @@
       />
       <NotificationMessage />
     </main>
-  </div>
-  <div
-    v-if="isEditingMode"
-    style="display: flex; flex-direction: column; align-items: center"
-  >
-    <h1 v-if="currentPage === 'CalendarComponent'" class="editing-mode-label">
-      Tryb edytowania
-      <a style="color: #4caf50">Włączony</a><br />
-      Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na zajętą
-      zmianę, aby ją wyczyścić.
-    </h1>
-    <h1 v-if="currentPage === 'ExcelComponent'" class="editing-mode-label">
-      Tryb edytowania
-      <a style="color: #4caf50">Włączony</a><br />
-      Kliknij na miejsce w tabeli, aby wybrać zmianę.
-    </h1>
   </div>
   <footer class="footer">
     <p>© 2025 puksh - All rights reserved</p>
