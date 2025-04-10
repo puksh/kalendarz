@@ -2,7 +2,7 @@
 #-----------------------------------
 *.log
 npm-debug.log*
-
+stats.html
 # Dependencies
 #-----------------------------------
 node_modules/
