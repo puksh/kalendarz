@@ -11,7 +11,7 @@ export async function fetchServerShiftData() {
 
     if (!response.ok) {
       if (response.status === 404) {
-        addNotification("Data not found on server", "red");
+        addNotification("Brak danych na serwerze", "red");
       }
       throw new Error(`Failed to fetch data from server: ${response.status}`);
     }
@@ -20,7 +20,7 @@ export async function fetchServerShiftData() {
     return data;
   } catch (error) {
     console.error("Error fetching data from server:", error);
-    addNotification("Failed to fetch data from server", "red");
+    addNotification("Nie udało się połączyć z serwerem", "red");
     return null;
   }
 }
