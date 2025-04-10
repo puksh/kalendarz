@@ -42,6 +42,7 @@ export default defineConfig({
         },
       },
     },
+    assetsInlineLimit: 4096, // 4kb
   },
   css: {
     preprocessorOptions: {
@@ -53,5 +54,16 @@ export default defineConfig({
   optimizeDeps: {
     // Only preload what's needed immediately
     entries: ["./src/main.js"],
+  },
+  // Server config for dev
+  server: {
+    open: true,
+    cors: true,
+    host: true,
+    port: 5173,
+  },
+  esbuild: {
+    legalComments: "none",
+    drop: ["console", "debugger"],
   },
 });
