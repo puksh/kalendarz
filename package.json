@@ -10,6 +10,7 @@
 		"lint": "eslint . --fix"
 	},
 	"dependencies": {
+		"autoprefixer": "^10.4.21",
 		"cors": "^2.8.5",
 		"crypto-js": "^4.2.0",
 		"eslint-plugin-prettier": "^5.2.1",

@@ -1,5 +1,4 @@
 import { fileURLToPath, URL } from "node:url";
-
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import viteCompression from "vite-plugin-compression";
@@ -49,6 +48,9 @@ export default defineConfig({
       css: {
         additionalData: `@import "./assets/main.css";`,
       },
+    },
+    postcss: {
+      plugins: [require("autoprefixer")()],
     },
   },
   optimizeDeps: {
