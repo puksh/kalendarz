@@ -1,69 +1,60 @@
-# Calendar in Vue
+# Vue Calendar - Team Scheduling App
 
 [![GitHub Pages](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml/badge.svg)](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml)
 
-## Overview
+A drag-and-drop team scheduling application built with Vue 3 for managing team member shifts with a clean, responsive interface.
 
-This project is a calendar application built with Vue.js. It allows users to view and manage a harmonogram (schedule) for a team. The application supports both viewing and editing modes, with editing mode requiring a secure password for authorization.
+### 📖 Usage Guide
 
-## Features
+1. View Mode: Navigate between months and review existing schedules
+2. Edit Mode: In Calendar view - toggle edit mode, drag team members to shifts, click occupied slots to clear OR in table view - select certain shifts
+3. Save Changes: Click the save button, authenticate with a password
+4. Data Sync: Click the refresh button to manually synchronize with server
 
-- **View Harmonogram**: Users can view the harmonogram for the current month, including shifts for different team members.
-- **Edit Harmonogram**: Authorized users can edit the harmonogram by dragging and dropping team members into shift slots.
-- **Secure Authorization**: Editing the harmonogram requires entering a secure password.
-- **Responsive Design**: The application is designed to be responsive and works well on both desktop and mobile devices.
-- **Service Worker**: The application includes a service worker for offline support.
-- **Notifications**: Users receive notifications for actions such as successful updates or errors.
+### ✨ Features
 
-## Project Setup
+- interactive calendar & table Views - Visualize team schedules in multiple formats
+- drag & drop Interface - Easily assign team members to shifts in editing mode
+- responsive design - Works across desktop and tablet devices
+- authentication - Password protection for schedule changes
+- data synchronization - Automatically sync with remote data source
+
+### 🚀 Project Setup
 
 ```sh
+# Install dependencies
 bun install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Development server
 bun run dev
-```
 
-### Compile and Minify for Production
-
-```sh
+# Build
 bun run build
 ```
 
-## Usage
+### 🔧 Configuration
 
-1. **Viewing the Harmonogram**:
-   - Open the application in your browser.
-   - The default view shows the harmonogram for the current month.
-   - Use the navigation buttons to switch between months.
-
-2. **Editing the Harmonogram**:
-   - Click on the "Ustawienia" (Settings) button in the sidebar.
-   - Enable "Tryb edytowania" (Editing Mode) by toggling the switch.
-   - Navigate back to the harmonogram.
-   - Drag and drop team members into the desired shift slots.
-   - Click the "Zapisz" (Save) button to save changes.
-   - Enter the secure password when prompted to authorize the changes.
-
-3. **Syncing Data**:
-   - The application automatically syncs data with the server.
-   - Click the refresh button to manually sync data.
-
-## Environment Variables
-
-The application uses the following environment variables for secure operations:
+Two environment variables control secure operations
 
 - `VITE_AUTH_PASSWORD`: The secure password for authorizing changes.
 - `VITE_API_URL`: The URL of the API for fetching and updating harmonogram data.
 
-## Used Technologies
+### 🛠️ Used Technologies
 
-- **Vue.js**: The progressive JavaScript framework used for building the user interface.
-- **Vite**: Next generation frontend tooling for faster builds and hot module replacement.
-- **ESLint**: Tool for identifying and fixing linting issues in the codebase.
-- **Prettier**: Code formatter to ensure consistent code style.
-- **Service Workers**: For enabling offline support and caching.
-- **GitHub Actions**: For continuous integration and deployment workflows.
+#### Frontend
+
+- Vue 3.5 - Progressive JavaScript framework
+- Vite 6 - Next generation frontend tooling
+
+#### Backend Integration
+
+- Fetch API - Data synchronization
+- CryptoJS - Secure authentication
+- LocalStorage/SessionStorage - Offline data persistence
+
+#### Development & Deployment
+
+- Bun - JavaScript runtime and package manager
+- ESLint/Prettier - Code quality and formatting
+- GitHub Actions - CI/CD pipeline
+- GitHub Pages - hosting and deployment
