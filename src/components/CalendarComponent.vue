@@ -155,6 +155,7 @@
                     ratownik: day.dayShift1Ratownik === true,
                     pielegniarka: day.dayShift1Ratownik === false,
                     userChanged: day.dayShift1UserChanged === true,
+                    clickable: isEditingMode,
                   }"
                   :clickable="isEditingMode"
                   @dragover.prevent
@@ -165,7 +166,9 @@
                   @pointermove.prevent="
                     handlePointerMove($event, day.date, 'dayShift1')
                   "
-                  @click="handleClickResetShift(day, 'dayShift1')"
+                  @click="
+                    isEditingMode && handleClickResetShift(day, 'dayShift1')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'dayShift1')"
                   :title="getShiftTooltip(day, 'dayShift1')"
                   role="button"
@@ -184,6 +187,7 @@
                     ratownik: day.dayShift2Ratownik === true,
                     pielegniarka: day.dayShift2Ratownik === false,
                     userChanged: day.dayShift2UserChanged === true,
+                    clickable: isEditingMode,
                   }"
                   :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
@@ -193,7 +197,9 @@
                   @pointermove.prevent="
                     handlePointerMove($event, day.date, 'dayShift2')
                   "
-                  @click="handleClickResetShift(day, 'dayShift2')"
+                  @click="
+                    isEditingMode && handleClickResetShift(day, 'dayShift2')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'dayShift2')"
                   :title="getShiftTooltip(day, 'dayShift2')"
                   role="button"
@@ -212,8 +218,8 @@
                     ratownik: day.nightShift1Ratownik === true,
                     pielegniarka: day.nightShift1Ratownik === false,
                     userChanged: day.nightShift1UserChanged === true,
+                    clickable: isEditingMode,
                   }"
-                  :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
                   @pointerup.prevent="
@@ -222,7 +228,9 @@
                   @pointermove.prevent="
                     handlePointerMove($event, day.date, 'nightShift1')
                   "
-                  @click="handleClickResetShift(day, 'nightShift1')"
+                  @click="
+                    isEditingMode && handleClickResetShift(day, 'nightShift1')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'nightShift1')"
                   :title="getShiftTooltip(day, 'nightShift1')"
                   role="button"
@@ -241,6 +249,7 @@
                     ratownik: day.nightShift2Ratownik === true,
                     pielegniarka: day.nightShift2Ratownik === false,
                     userChanged: day.nightShift2UserChanged === true,
+                    clickable: isEditingMode,
                   }"
                   :clickable="isEditingMode"
                   @dragover.prevent
@@ -251,7 +260,9 @@
                   @pointermove.prevent="
                     handlePointerMove($event, day.date, 'nightShift2')
                   "
-                  @click="handleClickResetShift(day, 'nightShift2')"
+                  @click="
+                    isEditingMode && handleClickResetShift(day, 'nightShift2')
+                  "
                   :aria-label="getShiftAriaLabel(day, 'nightShift2')"
                   :title="getShiftTooltip(day, 'nightShift2')"
                   role="button"
@@ -713,10 +724,15 @@ export default {
         ? "Zmiana dzienna"
         : "Zmiana nocna";
       const personName = day[`${shiftType}Name`];
-
-      return shift
-        ? `${shiftName}: ${personName}. Kliknij aby usunąć zmianę.`
-        : `${shiftName}: Pusta zmiana. Przeciągnij członka zespołu by nadać im zmianę.`;
+      if (this.isEditingMode) {
+        return shift
+          ? `${shiftName}: ${personName}. Kliknij aby usunąć zmianę.`
+          : `${shiftName}: Pusta zmiana. Przeciągnij członka zespołu by nadać im zmianę.`;
+      } else {
+        return shift
+          ? `${shiftName}: ${personName}`
+          : `${shiftName}: Pusta zmiana.`;
+      }
     },
 
     getShiftTooltip(day, shiftType) {
@@ -725,9 +741,15 @@ export default {
         ? "Zmiana dzienna"
         : "Zmiana nocna";
 
-      return shift
-        ? `${shiftName}: ${day[`${shiftType}Name`]} (Kliknij by usunąć)`
-        : `Przeciągnij członka zespołu by nadać im - ${shiftName.toLowerCase()}`;
+      if (this.isEditingMode) {
+        return shift
+          ? `${shiftName}: ${day[`${shiftType}Name`]} (Kliknij by usunąć)`
+          : `Przeciągnij członka zespołu by nadać im - ${shiftName.toLowerCase()}`;
+      } else {
+        return shift
+          ? `${shiftName}: ${day[`${shiftType}Name`]}`
+          : `${shiftName}: Nieprzypisana`;
+      }
     },
     checkMobilePlatform() {
       // Check if user is on mobile device (iOS or Android)
@@ -740,6 +762,26 @@ export default {
     handleMobileWarningClose() {
       this.showMobileWarning = false;
       this.emitEditingMode(false); // Disable editing mode
+    },
+    handlePointerUp(event) {
+      // Only handle touch events
+      if (event.pointerType !== "touch") return;
+
+      // Clean up
+      if (this.touchTimer) {
+        clearTimeout(this.touchTimer);
+        this.touchTimer = null;
+      }
+
+      if (this.touchedElement) {
+        // Release pointer capture (modern replacement for releaseCapture)
+        this.touchedElement.releasePointerCapture(event.pointerId);
+        this.touchedElement.classList.remove("being-touched");
+      }
+
+      this.isDragging = false;
+      this.touchedElement = null;
+      this.touchedPerson = null;
     },
   },
 
@@ -766,7 +808,7 @@ export default {
 .userChanged {
   color: var(--color-user-changed) !important; /* Highlight user-made changes */
 }
-.assigned-person {
+.clickable {
   cursor: pointer !important;
 }
 .calendar-grid {
