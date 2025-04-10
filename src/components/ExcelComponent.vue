@@ -1,88 +1,7 @@
 <template>
-  <AuthorizationModal
-    :show="showPasswordModal"
-    :localData="localData"
-    @close="showPasswordModal = false"
-    @authorized="handleAuthorization"
-  />
-  <button
-    :disabled="!madeChanges"
-    @click="showPasswordPrompt"
-    class="submit-button"
-  >
-    Zapisz
-  </button>
   <div class="spreadsheet-view">
-    <button
-      class="top-right-buttons buttonRefresh"
-      @click="checkShiftDataSync()"
-      aria-label="Odśwież harmonogram"
-      title="Odśwież harmonogram"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="3"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="refresh-icon"
-        style="width: 30px; height: 30px"
-      >
-        <path d="M23 4v6h-6"></path>
-        <path d="M1 20v-6h6"></path>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
-        <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
-      </svg>
-    </button>
-    <label
-      class="top-right-buttons compact-toggle"
-      title="Przełącz tryb edytowania"
-    >
-      <input
-        type="checkbox"
-        :checked="isEditingMode"
-        @change="emitEditingMode($event.target.checked)"
-        aria-label="Przełącz tryb edytowania"
-      />
-      <span class="slider" role="switch" :aria-checked="isEditingMode">
-        <svg
-          v-if="!isEditingMode"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="pencil-icon"
-        >
-          <path d="M12 20h9"></path>
-          <path
-            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
-          ></path>
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="pencil-icon"
-        >
-          <path d="M12 20h9"></path>
-          <path
-            d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
-          ></path>
-        </svg>
-      </span>
-    </label>
     <div
-      class="scroll-container"
+      class="scrollable-container"
       @wheel.prevent="handleScroll"
       ref="scrollContainer"
     >
@@ -157,16 +76,6 @@
     </div>
   </div>
   <PeopleListWindow :people="people" :isEditingMode="false" />
-  <div
-    v-if="isEditingMode"
-    style="display: flex; flex-direction: column; align-items: center"
-  >
-    <h1 class="editing-mode-label">
-      Tryb edytowania
-      <a style="color: #4caf50">Włączony</a><br />
-      Kliknij na miejsce w tabeli, aby wybrać zmianę.
-    </h1>
-  </div>
   <ShiftCountWindow :people="people" :monthDays="monthDays" />
 </template>
 
@@ -175,15 +84,13 @@ import { daysOfWeek } from "@/data/daysOfWeek.js";
 import { addNotification } from "./NotificationMessage.vue";
 import ShiftCountWindow from "./ShiftCountWindow.vue";
 import PeopleListWindow from "./PeopleListWindow.vue";
-import AuthorizationModal from "./AuthorizationModal.vue";
 
 export default {
   name: "SpreadsheetView",
-  emits: ["update-editing-mode"],
+  emits: ["update-editing-mode", "has-changes"],
   components: {
     ShiftCountWindow,
     PeopleListWindow,
-    AuthorizationModal,
   },
   props: {
     isEditingMode: {
@@ -218,7 +125,6 @@ export default {
         { id: 9, name: "Ewelina", ratownik: false },
         { id: 7, name: "Teresa", ratownik: false },
       ],
-      locale: "pl",
       showPasswordModal: false,
       scrollContainer: null,
     };
@@ -253,9 +159,6 @@ export default {
     },
   },
   methods: {
-    emitEditingMode(newMode) {
-      this.$emit("update-editing-mode", newMode); // Notify parent of the change
-    },
     isEditing(personId, day) {
       return this.editedShifts.hasOwnProperty(`${personId}-${day}`);
     },
@@ -707,13 +610,6 @@ export default {
         }, 5000);
       }
     },
-    showPasswordPrompt() {
-      this.showPasswordModal = true; // Show the password modal
-    },
-    handleAuthorization() {
-      this.showPasswordModal = false;
-      this.madeChanges = false; // Reset changes flag after successful authorization
-    },
     handleScroll(event) {
       if (this.scrollContainer) {
         event.preventDefault(); // Prevent default vertical scrolling
@@ -729,7 +625,7 @@ export default {
 </script>
 
 <style scoped>
-.scroll-container {
+.scrollable-container {
   width: 100%;
   max-width: 9999px;
   margin: 0 auto;

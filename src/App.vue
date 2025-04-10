@@ -1,5 +1,22 @@
 <template>
   <div class="app-container">
+    <AuthorizationModal
+      :show="showPasswordModal"
+      :localData="localData"
+      @close="showPasswordModal = false"
+      @authorized="handleAuthorization"
+      aria-label="Zapisz zmiany"
+      title="Zapisz zmiany w harmonogramie"
+    />
+    <button
+      :disabled="!hasUnsavedChanges"
+      @click="showPasswordPrompt"
+      class="submit-button"
+      aria-label="Zapisz zmiany"
+      title="Zapisz zmiany w harmonogramie"
+    >
+      Zapisz
+    </button>
     <SideBarComponent
       :currentComponent="currentPage"
       @navigate="handleNavigation"
@@ -11,6 +28,76 @@
       :hasUnsavedChanges="hasUnsavedChanges"
       @change-month="handleMonthChange"
     />
+    <section>
+      <button
+        class="top-right-buttons buttonRefresh"
+        @click="checkShiftDataSync()"
+        aria-label="Odśwież harmonogram"
+        title="Odśwież harmonogram"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="refresh-icon"
+          style="width: 30px; height: 30px"
+        >
+          <path d="M23 4v6h-6"></path>
+          <path d="M1 20v-6h6"></path>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+          <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
+        </svg>
+      </button>
+      <label
+        class="top-right-buttons compact-toggle"
+        title="Przełącz tryb edytowania"
+      >
+        <input
+          type="checkbox"
+          :checked="isEditingMode"
+          @change="emitEditingMode($event.target.checked)"
+          aria-label="Przełącz tryb edytowania"
+        />
+        <span class="slider" role="switch" :aria-checked="isEditingMode">
+          <svg
+            v-if="!isEditingMode"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="pencil-icon"
+          >
+            <path d="M12 20h9"></path>
+            <path
+              d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+            ></path>
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="pencil-icon"
+          >
+            <path d="M12 20h9"></path>
+            <path
+              d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+            ></path>
+          </svg>
+        </span>
+      </label>
+    </section>
     <main class="main-content">
       <CalendarComponent
         v-if="currentPage === 'CalendarComponent'"
@@ -18,6 +105,7 @@
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
         @update-editing-mode="updateEditingMode"
+        @has-changes="updateUnsavedChanges"
       />
       <ExcelComponent
         v-if="currentPage === 'ExcelComponent'"
@@ -25,9 +113,27 @@
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
         @update-editing-mode="updateEditingMode"
+        @has-changes="updateUnsavedChanges"
       />
       <NotificationMessage />
     </main>
+  </div>
+  <div
+    v-if="isEditingMode"
+    class="editing-mode-banner"
+    style="display: flex; flex-direction: column; align-items: center"
+  >
+    <h1 v-if="currentPage === 'CalendarComponent'" class="editing-mode-label">
+      Tryb edytowania
+      <a style="color: #4caf50">Włączony</a><br />
+      Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na zajętą
+      zmianę, aby ją wyczyścić.
+    </h1>
+    <h1 v-if="currentPage === 'ExcelComponent'" class="editing-mode-label">
+      Tryb edytowania
+      <a style="color: #4caf50">Włączony</a><br />
+      Kliknij na miejsce w tabeli, aby wybrać zmianę.
+    </h1>
   </div>
   <footer class="footer">
     <p>© 2025 puksh - All rights reserved</p>
@@ -37,6 +143,8 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import MonthSelector from "./components/MonthSelector.vue";
+import AuthorizationModal from "./components/AuthorizationModal.vue";
+import { addNotification } from "./components/NotificationMessage.vue";
 
 export default {
   name: "VueCalendar",
@@ -53,15 +161,25 @@ export default {
     NotificationMessage: defineAsyncComponent(
       () => import("./components/NotificationMessage.vue"),
     ),
-    MonthSelector,
+    MonthSelector: defineAsyncComponent(
+      () => import("./components/MonthSelector.vue"),
+    ),
+    AuthorizationModal: defineAsyncComponent(
+      () => import("./components/AuthorizationModal.vue"),
+    ),
   },
   data() {
     return {
       currentPage: "CalendarComponent",
       isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Shared editing mode state
-
-      selectedMonth: new Date().getMonth(), //MonthSelector
-      selectedYear: new Date().getFullYear(), //MonthSelector
+      //MonthSelector
+      selectedMonth: new Date().getMonth(),
+      selectedYear: new Date().getFullYear(),
+      locale: "pl",
+      hasUnsavedChanges: false,
+      // Modal and Save state
+      showPasswordModal: false,
+      localData: {},
     };
   },
   methods: {
@@ -96,6 +214,21 @@ export default {
     },
     updateUnsavedChanges(hasChanges) {
       this.hasUnsavedChanges = hasChanges;
+    },
+    showPasswordPrompt() {
+      this.showPasswordModal = true;
+    },
+    handleAuthorization() {
+      this.showPasswordModal = false;
+      this.hasUnsavedChanges = false;
+      addNotification("Zmiany zostały zapisane pomyślnie.", "green");
+
+      // Notify active component that changes were saved
+      this.$refs.activeComponent?.handleChangesSaved();
+    },
+    emitEditingMode(newMode) {
+      // Directly update the state instead of emitting an event
+      this.updateEditingMode(newMode);
     },
   },
 };

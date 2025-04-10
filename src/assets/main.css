@@ -244,6 +244,7 @@ body {
 	font-size: 20px;
 	box-shadow: var(--glass-box-shadow);
 	padding: var(--spacing-medium);
+	text-align: center;
 }
 .shift-slot[clickable="true"] {
 	cursor: pointer;
