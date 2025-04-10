@@ -14,7 +14,7 @@
         height="20"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="3"
       >
         <rect x="3" y="4" width="18" height="18" rx="2" />
         <line x1="3" y1="10" x2="21" y2="10" />
@@ -36,7 +36,7 @@
         height="20"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="3"
       >
         <rect x="3" y="3" width="18" height="18" rx="2" />
         <line x1="3" y1="9" x2="21" y2="9" />
@@ -67,7 +67,7 @@ export default {
 .sidebar {
   position: absolute;
   left: 10px;
-  top: 10px;
+  top: 12px;
   z-index: 1001;
 }
 
@@ -83,7 +83,7 @@ export default {
   border: 1px solid var(--glass-border-color);
   color: var(--color-text-dark);
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--border-radius-small);
   font-size: 14px;
   padding: 0 12px;
   cursor: pointer;

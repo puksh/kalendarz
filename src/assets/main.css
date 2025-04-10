@@ -167,9 +167,8 @@ body {
 	top: 8px;
 	right: 4px;
 }
-.buttonRefresh img {
-	margin-top: 2px;
-	filter: invert(1);
+.buttonRefresh svg {
+	margin-top: 4px;
 }
 
 /* Shift Types Colors */
