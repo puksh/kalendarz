@@ -40,7 +40,11 @@
         &#8249;
       </button>
       <span
-        style="font-weight: bold; width: 144px !important"
+        style="
+          font-weight: bold;
+          width: 144px !important;
+          color: var(--color-text-dark);
+        "
         role="heading"
         aria-level="2"
       >
@@ -828,6 +832,7 @@ export default {
 
 .day-header {
   font-weight: bold;
+  color: var(--color-text-dark);
 }
 
 .day-column {
@@ -846,6 +851,7 @@ export default {
 
 .day-date {
   font-weight: bold;
+  color: var(--color-text-dark);
 }
 
 /* Shifts styles */
@@ -884,6 +890,7 @@ export default {
   font-weight: bolder;
   transition: all 0.2s ease;
   width: 100%;
+  color: var(--color-text-dark);
 }
 
 .shift-label {
@@ -914,6 +921,7 @@ export default {
 
 .mobile-warning {
   background-color: var(--glass-bg-color);
+  color: var(--color-text-dark);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
@@ -935,7 +943,7 @@ export default {
 
 .warning-button {
   background-color: #4caf50;
-  color: white;
+  color: var(--color-text-dark);
   border: none;
   padding: 10px 20px;
   border-radius: 4px;

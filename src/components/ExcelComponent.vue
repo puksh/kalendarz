@@ -23,7 +23,11 @@
         &#8249;
       </button>
       <span
-        style="font-weight: bold; width: 144px !important"
+        style="
+          font-weight: bold;
+          width: 144px !important;
+          color: var(--color-text-dark);
+        "
         role="heading"
         aria-level="2"
       >

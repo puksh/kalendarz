@@ -179,6 +179,7 @@ export default {
   line-height: 1ch;
   box-sizing: border-box;
   contain: layout paint;
+  color: var(--color-text-dark);
 }
 
 .person-lists {
@@ -188,6 +189,7 @@ export default {
   justify-content: center;
   text-wrap: wrap;
   margin: var(--spacing-small) auto;
+  color: var(--color-text-dark);
 }
 @media (max-width: 768px) {
   .people-list {
@@ -235,7 +237,7 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.8);
-  color: white;
+  color: var(--color-text-dark);
   padding: 12px 24px;
   border-radius: 8px;
   z-index: 1000;
