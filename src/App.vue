@@ -104,23 +104,35 @@
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
+        :people="people"
         @update-editing-mode="updateEditingMode"
         @has-changes="updateUnsavedChanges"
+        @month-days-updated="updateMonthDays"
       />
       <ExcelComponent
         v-if="currentPage === 'ExcelComponent'"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
+        :people="people"
         @update-editing-mode="updateEditingMode"
         @has-changes="updateUnsavedChanges"
+        @month-days-updated="updateMonthDays"
+      />
+      <PeopleListWindow
+        :people="people"
+        :isEditingMode="peopleListEditingMode"
+      />
+      <ShiftCountWindow
+        v-if="monthDays.length > 0"
+        :people="people"
+        :monthDays="monthDays"
       />
       <NotificationMessage />
     </main>
   </div>
   <div
     v-if="isEditingMode"
-    class="editing-mode-banner"
     style="display: flex; flex-direction: column; align-items: center"
   >
     <h1 v-if="currentPage === 'CalendarComponent'" class="editing-mode-label">
@@ -144,6 +156,9 @@
 import { defineAsyncComponent } from "vue";
 import MonthSelector from "./components/MonthSelector.vue";
 import AuthorizationModal from "./components/AuthorizationModal.vue";
+import PeopleListWindow from "./components/PeopleListWindow.vue";
+import ShiftCountWindow from "./components/ShiftCountWindow.vue";
+
 import { addNotification } from "./components/NotificationMessage.vue";
 
 export default {
@@ -167,6 +182,12 @@ export default {
     AuthorizationModal: defineAsyncComponent(
       () => import("./components/AuthorizationModal.vue"),
     ),
+    PeopleListWindow: defineAsyncComponent(
+      () => import("./components/PeopleListWindow.vue"),
+    ),
+    ShiftCountWindow: defineAsyncComponent(
+      () => import("./components/ShiftCountWindow.vue"),
+    ),
   },
   data() {
     return {
@@ -180,6 +201,19 @@ export default {
       // Modal and Save state
       showPasswordModal: false,
       localData: {},
+      people: [
+        { id: 1, name: "Milena", ratownik: false },
+        { id: 2, name: "Mikołaj", ratownik: false },
+        { id: 3, name: "Aleksandra", ratownik: false },
+        { id: 4, name: "Łukasz", ratownik: true },
+        { id: 5, name: "Joanna", ratownik: false },
+        { id: 6, name: "Natalia", ratownik: true },
+        { id: 7, name: "Marcin", ratownik: true },
+        { id: 8, name: "Alina", ratownik: false },
+        { id: 9, name: "Ewelina", ratownik: false },
+        { id: 10, name: "Teresa", ratownik: false },
+      ],
+      monthDays: [],
     };
   },
   methods: {
@@ -229,6 +263,21 @@ export default {
     emitEditingMode(newMode) {
       // Directly update the state instead of emitting an event
       this.updateEditingMode(newMode);
+    },
+    updateMonthDays(days) {
+      this.monthDays = days;
+    },
+  },
+  computed: {
+    peopleListEditingMode() {
+      switch (this.currentPage) {
+        case "CalendarComponent":
+          return this.isEditingMode;
+        case "ExcelComponent":
+          return false;
+        default:
+          return false;
+      }
     },
   },
 };

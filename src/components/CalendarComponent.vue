@@ -178,8 +178,6 @@
       </div>
     </section>
   </div>
-  <PeopleListWindow :people="people" :isEditingMode="isEditingMode" />
-  <ShiftCountWindow :people="people" :monthDays="monthDays" />
 </template>
 
 <script>
@@ -190,7 +188,7 @@ import PeopleListWindow from "./PeopleListWindow.vue";
 
 export default {
   name: "CalendarComponent",
-  emits: ["update-editing-mode", "has-changes"],
+  emits: ["update-editing-mode", "has-changes", "month-days-updated"],
   components: { ShiftCountWindow, PeopleListWindow },
   props: {
     isEditingMode: {
@@ -205,6 +203,10 @@ export default {
       type: Number,
       required: true,
     },
+    people: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
@@ -213,18 +215,6 @@ export default {
       syncedChanges: {}, // Server-synced changes
       daysOfWeek,
       currentDate: new Date(),
-      people: [
-        { id: 1, name: "Milena", ratownik: false },
-        { id: 2, name: "Mikołaj", ratownik: false },
-        { id: 3, name: "Aleksandra", ratownik: false },
-        { id: 4, name: "Łukasz", ratownik: true },
-        { id: 5, name: "Joanna", ratownik: false },
-        { id: 6, name: "Natalia", ratownik: true },
-        { id: 7, name: "Marcin", ratownik: true },
-        { id: 8, name: "Alina", ratownik: false },
-        { id: 9, name: "Ewelina", ratownik: false },
-        { id: 7, name: "Teresa", ratownik: false },
-      ],
       madeChanges: false,
       scrollContainer: null,
       currentDropTarget: { date: null, shiftType: null },
@@ -383,6 +373,9 @@ export default {
       }
 
       this.loadFromLocalStorage();
+
+      // Emit the updated monthDays to App.vue
+      this.$emit("month-days-updated", this.monthDays);
     },
     updateChanges(hasChanges) {
       this.madeChanges = hasChanges;
