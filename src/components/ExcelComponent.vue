@@ -533,8 +533,6 @@ export default {
   max-width: 9999px;
   margin: 0 auto;
   overflow-x: auto;
-  position: relative;
-  scrollbar-gutter: stable;
 }
 /* General Table Styling */
 .calendar-table {
@@ -628,10 +626,5 @@ export default {
 .editable-cell select:focus {
   border-color: #27bebe;
   box-shadow: 0 0 4px rgba(0, 200, 200, 0.5);
-}
-.editable-cell {
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-  scroll-snap-type: x mandatory;
 }
 </style>
