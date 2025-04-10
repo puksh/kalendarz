@@ -15,6 +15,12 @@ export default defineConfig({
     minify: "esbuild",
     target: "esnext",
     chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      // Disable automatic preloading
+      modulePreload: {
+        polyfill: false,
+      },
+    },
   },
   css: {
     preprocessorOptions: {
@@ -22,5 +28,9 @@ export default defineConfig({
         additionalData: `@import "./assets/main.css";`,
       },
     },
+  },
+  optimizeDeps: {
+    // Only preload what's needed immediately
+    entries: ["./src/main.js"],
   },
 });
