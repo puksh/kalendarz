@@ -803,6 +803,8 @@ export default {
 
 .calendar-table td {
   background: #113535;
+  min-width: 28px;
+  text-wrap: nowrap;
 }
 
 .calendar-table tr:nth-child(even) td {
