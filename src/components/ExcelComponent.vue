@@ -710,7 +710,6 @@ export default {
       this.generateMonthDays(); // Initialize local data first
       // Update syncedChanges and save to sessionStorage
       this.syncedChanges = containedSyncedChanges;
-      console.log("Updated syncedChanges:", this.syncedChanges);
 
       sessionStorage.setItem(
         "syncedChanges",
@@ -719,7 +718,6 @@ export default {
 
       // Clear synced changes after 5 seconds
       setTimeout(() => {
-        console.log("Clearing syncedChanges.");
         this.syncedChanges = {};
         sessionStorage.removeItem("syncedChanges");
       }, 5000);
