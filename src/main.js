@@ -1,7 +1,19 @@
 import "./assets/main.css";
-
 import { createApp } from "vue";
 import App from "./App.vue";
+
+// Add a global error handler for dynamic imports
+window.addEventListener("error", (event) => {
+  if (
+    event.error &&
+    (event.error.message.includes(
+      "Failed to fetch dynamically imported module",
+    ) ||
+      event.error.message.includes("Importing a module script failed"))
+  ) {
+    window.location.reload();
+  }
+});
 
 createApp(App).mount("#app");
 
