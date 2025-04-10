@@ -2,9 +2,6 @@
 
 [![GitHub Pages](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml/badge.svg)](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml)
 
-![image](https://github.com/user-attachments/assets/48a6fdfa-c5b4-431f-8b49-332e7926dae6)
-
-
 ## Overview
 
 This project is a calendar application built with Vue.js. It allows users to view and manage a harmonogram (schedule) for a team. The application supports both viewing and editing modes, with editing mode requiring a secure password for authorization.
