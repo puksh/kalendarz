@@ -23,7 +23,7 @@
         &#8249;
       </button>
       <span
-        style="font-weight: bold; width: 200px !important"
+        style="font-weight: bold; width: 144px !important"
         role="heading"
         aria-level="2"
       >

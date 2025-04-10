@@ -177,6 +177,8 @@ export default {
   align-self: center;
   margin: 10px 0;
   line-height: 1ch;
+  box-sizing: border-box;
+  contain: layout paint;
 }
 
 .person-lists {
@@ -194,19 +196,18 @@ export default {
 }
 /* Individual draggable people items */
 .person-item {
+  min-height: 8px;
+  min-width: 46px;
   padding: 1ch;
   width: auto 30%;
   color: var(--color-text-dark);
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   font-weight: bold;
   transition:
     transform 0.2s ease,
     border-radius 0.2s ease;
   user-select: none;
-  line-height: 2ch;
+  line-height: 1.5ch;
   touch-action: none; /* Prevents browser handling of touch events */
   user-select: none; /* Prevents text selection during touch */
 }
