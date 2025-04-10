@@ -29,9 +29,17 @@ export default defineConfig({
     target: "esnext",
     chunkSizeWarningLimit: 600,
     rollupOptions: {
-      // Disable automatic preloading
-      modulePreload: {
-        polyfill: false,
+      output: {
+        // Code splitting
+        manualChunks: {
+          "vue-vendor": ["vue"],
+          "crypto-vendor": ["crypto-js"],
+          utils: ["./src/utils/dataSync.js"],
+        },
+        // Disable automatic preloading
+        modulePreload: {
+          polyfill: false,
+        },
       },
     },
   },
