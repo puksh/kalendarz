@@ -35,22 +35,7 @@
         aria-label="Odśwież harmonogram"
         title="Odśwież harmonogram"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="refresh-icon"
-          style="width: 30px; height: 30px"
-        >
-          <path d="M23 4v6h-6"></path>
-          <path d="M1 20v-6h6"></path>
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
-          <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
-        </svg>
+        <refresh-icon :class="{ refreshing: isRefreshing }" />
       </button>
       <label
         class="top-right-buttons compact-toggle"
@@ -112,7 +97,7 @@
       />
       <ExcelComponent
         ref="excelComponent"
-        v-if="currentPage === 'ExcelComponent'"
+        v-else
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
@@ -126,11 +111,11 @@
         :isEditingMode="peopleListEditingMode"
       />
       <div
-        v-if="isEditingMode"
+        v-show="isEditingMode"
         style="display: flex; flex-direction: column; align-items: center"
       >
         <h1
-          v-if="currentPage === 'CalendarComponent'"
+          v-show="currentPage === 'CalendarComponent'"
           class="editing-mode-label"
         >
           Tryb edytowania
@@ -138,7 +123,10 @@
           Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na
           zajętą zmianę, aby ją wyczyścić.
         </h1>
-        <h1 v-if="currentPage === 'ExcelComponent'" class="editing-mode-label">
+        <h1
+          v-show="currentPage === 'ExcelComponent'"
+          class="editing-mode-label"
+        >
           Tryb edytowania
           <a style="color: #4caf50">Włączony</a><br />
           Kliknij na miejsce w tabeli, aby wybrać zmianę.
@@ -162,6 +150,7 @@ import { defineAsyncComponent } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 import { shallowRef } from "vue";
+import RefreshIcon from "./components/icons/RefreshIcon.vue";
 
 export default {
   name: "VueCalendar",
@@ -187,6 +176,7 @@ export default {
     ShiftCountWindow: defineAsyncComponent(
       () => import("./components/ShiftCountWindow.vue"),
     ),
+    RefreshIcon,
   },
   data() {
     return {
@@ -202,6 +192,7 @@ export default {
       localData: {},
       people: [],
       monthDays: [],
+      isRefreshing: false,
     };
   },
   setup() {
@@ -266,10 +257,14 @@ export default {
       }
     },
     async checkShiftDataSync() {
+      this.isRefreshing = true;
       this.syncedChanges = await checkShiftDataSync(() =>
         this.generateCurrentView(),
       );
       addNotification("Odświeżanie...", "blue");
+      setTimeout(() => {
+        this.isRefreshing = false;
+      }, 800);
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
