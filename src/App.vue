@@ -136,7 +136,8 @@
         </h1>
       </div>
       <ShiftCountWindow
-        v-if="monthDays.length > 0"
+        ref="shiftCountWindow"
+        v-if="monthDays.length > 0 && localData[1] !== null"
         :people="people"
         :monthDays="monthDays"
       />
@@ -149,7 +150,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent, shallowRef } from "vue";
+import { defineAsyncComponent } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 import RefreshIcon from "./components/icons/RefreshIcon.vue";
@@ -172,6 +173,9 @@ export default {
     ShiftCountWindow: defineAsyncComponent(
       () => import("./components/ShiftCountWindow.vue"),
     ),
+    NotificationMessage: defineAsyncComponent(
+      () => import("./components/NotificationMessage.vue"),
+    ),
     RefreshIcon,
   },
   data() {
@@ -186,29 +190,23 @@ export default {
       // Modal and Save state
       showPasswordModal: false,
       localData: {},
-      people: [],
+      people: [
+        { id: 1, name: "Milena", ratownik: false },
+        { id: 2, name: "Mikołaj", ratownik: false },
+        { id: 3, name: "Aleksandra", ratownik: false },
+        { id: 4, name: "Łukasz", ratownik: true },
+        { id: 5, name: "Joanna", ratownik: false },
+        { id: 6, name: "Natalia", ratownik: true },
+        { id: 7, name: "Marcin", ratownik: true },
+        { id: 8, name: "Alina", ratownik: false },
+        { id: 9, name: "Ewelina", ratownik: false },
+        { id: 10, name: "Teresa", ratownik: false },
+      ],
       monthDays: [],
       isRefreshing: false,
       ExcelComponent: null,
       AuthorizationModal: null,
     };
-  },
-  setup() {
-    // People list rarely changes, make it shallow reactive
-    const people = shallowRef([
-      { id: 1, name: "Milena", ratownik: false },
-      { id: 2, name: "Mikołaj", ratownik: false },
-      { id: 3, name: "Aleksandra", ratownik: false },
-      { id: 4, name: "Łukasz", ratownik: true },
-      { id: 5, name: "Joanna", ratownik: false },
-      { id: 6, name: "Natalia", ratownik: true },
-      { id: 7, name: "Marcin", ratownik: true },
-      { id: 8, name: "Alina", ratownik: false },
-      { id: 9, name: "Ewelina", ratownik: false },
-      { id: 10, name: "Teresa", ratownik: false },
-    ]);
-
-    return { people };
   },
   methods: {
     handleNavigation(section) {
@@ -313,6 +311,7 @@ export default {
   },
   async mounted() {
     this.discardChanges();
+    this.hasUnsavedChanges = false;
   },
 
   computed: {
