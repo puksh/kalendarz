@@ -159,10 +159,6 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
-import MonthSelector from "./components/MonthSelector.vue";
-import AuthorizationModal from "./components/AuthorizationModal.vue";
-import PeopleListWindow from "./components/PeopleListWindow.vue";
-import ShiftCountWindow from "./components/ShiftCountWindow.vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 
@@ -177,9 +173,6 @@ export default {
     ),
     SideBarComponent: defineAsyncComponent(
       () => import("./components/SideBarComponent.vue"),
-    ),
-    NotificationMessage: defineAsyncComponent(
-      () => import("./components/NotificationMessage.vue"),
     ),
     MonthSelector: defineAsyncComponent(
       () => import("./components/MonthSelector.vue"),
