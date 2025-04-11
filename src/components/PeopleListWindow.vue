@@ -62,6 +62,7 @@
 </template>
 
 <script>
+import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 export default {
   name: "PeopleListWindow",
@@ -74,6 +75,9 @@ export default {
       type: Boolean,
       required: true, // Ensure the parent always provides this prop
     },
+  },
+  components: {
+    NotificationMessage,
   },
   data() {
     return {

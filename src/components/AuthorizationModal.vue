@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 
 export default {
@@ -47,6 +48,9 @@ export default {
     },
   },
   emits: ["close", "authorized"],
+  components: {
+    NotificationMessage,
+  },
   data() {
     return {
       password: "",

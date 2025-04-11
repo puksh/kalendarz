@@ -182,15 +182,18 @@
 
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
-import { addNotification } from "./NotificationMessage.vue";
 import {
   checkShiftDataSync,
   resetSyncedChangesSessionStorage,
 } from "@/utils/dataSync.js";
-
+import NotificationMessage from "./NotificationMessage.vue";
+import { addNotification } from "./NotificationMessage.vue";
 export default {
   name: "CalendarComponent",
   emits: ["update-editing-mode", "has-changes", "month-days-updated"],
+  components: {
+    NotificationMessage,
+  },
   props: {
     isEditingMode: {
       type: Boolean,

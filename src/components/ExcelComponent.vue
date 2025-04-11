@@ -79,6 +79,7 @@
 
 <script>
 import { daysOfWeek } from "@/data/daysOfWeek.js";
+import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 import {
   checkShiftDataSync,
@@ -105,6 +106,9 @@ export default {
       type: Array,
       required: true,
     },
+  },
+  components: {
+    NotificationMessage,
   },
   data() {
     return {
