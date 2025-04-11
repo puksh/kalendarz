@@ -1,6 +1,8 @@
 <template>
   <div class="app-container">
-    <AuthorizationModal
+    <component
+      v-if="AuthorizationModal && showPasswordModal"
+      :is="AuthorizationModal"
       :show="showPasswordModal"
       @close="showPasswordModal = false"
       @authorized="handleAuthorization"
@@ -95,9 +97,10 @@
         @has-changes="updateUnsavedChanges"
         @month-days-updated="updateMonthDays"
       />
-      <ExcelComponent
+      <component
         ref="excelComponent"
         v-else
+        :is="ExcelComponent"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
@@ -146,10 +149,9 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from "vue";
+import { defineAsyncComponent, shallowRef } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
-import { shallowRef } from "vue";
 import RefreshIcon from "./components/icons/RefreshIcon.vue";
 
 export default {
@@ -158,17 +160,11 @@ export default {
     CalendarComponent: defineAsyncComponent(
       () => import("./components/CalendarComponent.vue"),
     ),
-    ExcelComponent: defineAsyncComponent(
-      () => import("./components/ExcelComponent.vue"),
-    ),
     SideBarComponent: defineAsyncComponent(
       () => import("./components/SideBarComponent.vue"),
     ),
     MonthSelector: defineAsyncComponent(
       () => import("./components/MonthSelector.vue"),
-    ),
-    AuthorizationModal: defineAsyncComponent(
-      () => import("./components/AuthorizationModal.vue"),
     ),
     PeopleListWindow: defineAsyncComponent(
       () => import("./components/PeopleListWindow.vue"),
@@ -193,6 +189,8 @@ export default {
       people: [],
       monthDays: [],
       isRefreshing: false,
+      ExcelComponent: null,
+      AuthorizationModal: null,
     };
   },
   setup() {
@@ -222,8 +220,22 @@ export default {
           return;
         }
       }
-      this.currentPage = section;
-      this.hasUnsavedChanges = false;
+      // Dynamic ExcelComponent import
+      if (section === "ExcelComponent" && !this.ExcelComponent) {
+        // Show loading indicator if needed
+        this.isLoading = true;
+
+        // Import only when user navigates to Excel view
+        import("./components/ExcelComponent.vue").then((module) => {
+          this.ExcelComponent = module.default;
+          this.currentPage = section;
+          this.hasUnsavedChanges = false;
+          this.isLoading = false;
+        });
+      } else {
+        this.currentPage = section;
+        this.hasUnsavedChanges = false;
+      }
     },
     handleMonthChange(delta) {
       // Just handle the month change logic
@@ -274,7 +286,16 @@ export default {
       this.hasUnsavedChanges = hasChanges;
     },
     showPasswordPrompt() {
-      this.showPasswordModal = true;
+      if (!this.AuthorizationModal) {
+        // Only import if not already loaded
+        import("./components/AuthorizationModal.vue").then((module) => {
+          this.AuthorizationModal = module.default;
+          this.showPasswordModal = true;
+        });
+      } else {
+        // If already loaded, just show it
+        this.showPasswordModal = true;
+      }
     },
     handleAuthorization() {
       this.showPasswordModal = false;
