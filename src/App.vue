@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from "vue";
+import { defineAsyncComponent, markRaw } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 import RefreshIcon from "./components/icons/RefreshIcon.vue";
@@ -225,7 +225,7 @@ export default {
 
         // Import only when user navigates to Excel view
         import("./components/ExcelComponent.vue").then((module) => {
-          this.ExcelComponent = module.default;
+          this.ExcelComponent = markRaw(module.default);
           this.currentPage = section;
           this.hasUnsavedChanges = false;
           this.isLoading = false;
@@ -287,7 +287,7 @@ export default {
       if (!this.AuthorizationModal) {
         // Only import if not already loaded
         import("./components/AuthorizationModal.vue").then((module) => {
-          this.AuthorizationModal = module.default;
+          this.AuthorizationModal = markRaw(module.default);
           this.showPasswordModal = true;
         });
       } else {
