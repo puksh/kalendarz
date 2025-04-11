@@ -161,6 +161,7 @@
 import { defineAsyncComponent } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
+import { shallowRef } from "vue";
 
 export default {
   name: "VueCalendar",
@@ -199,20 +200,26 @@ export default {
       // Modal and Save state
       showPasswordModal: false,
       localData: {},
-      people: [
-        { id: 1, name: "Milena", ratownik: false },
-        { id: 2, name: "Mikołaj", ratownik: false },
-        { id: 3, name: "Aleksandra", ratownik: false },
-        { id: 4, name: "Łukasz", ratownik: true },
-        { id: 5, name: "Joanna", ratownik: false },
-        { id: 6, name: "Natalia", ratownik: true },
-        { id: 7, name: "Marcin", ratownik: true },
-        { id: 8, name: "Alina", ratownik: false },
-        { id: 9, name: "Ewelina", ratownik: false },
-        { id: 10, name: "Teresa", ratownik: false },
-      ],
+      people: [],
       monthDays: [],
     };
+  },
+  setup() {
+    // People list rarely changes, make it shallow reactive
+    const people = shallowRef([
+      { id: 1, name: "Milena", ratownik: false },
+      { id: 2, name: "Mikołaj", ratownik: false },
+      { id: 3, name: "Aleksandra", ratownik: false },
+      { id: 4, name: "Łukasz", ratownik: true },
+      { id: 5, name: "Joanna", ratownik: false },
+      { id: 6, name: "Natalia", ratownik: true },
+      { id: 7, name: "Marcin", ratownik: true },
+      { id: 8, name: "Alina", ratownik: false },
+      { id: 9, name: "Ewelina", ratownik: false },
+      { id: 10, name: "Teresa", ratownik: false },
+    ]);
+
+    return { people };
   },
   methods: {
     handleNavigation(section) {
