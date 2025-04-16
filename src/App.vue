@@ -281,6 +281,7 @@ export default {
       this.syncedChanges = await checkShiftDataSync(() =>
         this.generateCurrentView(),
       );
+      this.hasUnsavedChanges = false;
       addNotification("Odświeżanie...", "blue");
       setTimeout(() => {
         this.isRefreshing = false;
