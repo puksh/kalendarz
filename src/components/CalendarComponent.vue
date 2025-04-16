@@ -69,6 +69,12 @@
                   <div class="assigned-person" v-if="day.dayShift1">
                     {{ day.dayShift1Name }}
                   </div>
+                  <div
+                    class="assigned-person deleted"
+                    v-else-if="day.dayShift1UserChanged"
+                  >
+                    Usunięto
+                  </div>
                   <div class="empty-slot" v-else>D</div>
                 </div>
                 <div
@@ -93,6 +99,12 @@
                 >
                   <div class="assigned-person" v-if="day.dayShift2">
                     {{ day.dayShift2Name }}
+                  </div>
+                  <div
+                    class="assigned-person deleted"
+                    v-else-if="day.dayShift2UserChanged"
+                  >
+                    Usunięto
                   </div>
                   <div class="empty-slot" v-else>D</div>
                 </div>
@@ -119,6 +131,12 @@
                   <div class="assigned-person" v-if="day.nightShift1">
                     {{ day.nightShift1Name }}
                   </div>
+                  <div
+                    class="assigned-person deleted"
+                    v-else-if="day.nightShift1UserChanged"
+                  >
+                    Usunięto
+                  </div>
                   <div class="empty-slot" v-else>N</div>
                 </div>
                 <div
@@ -144,6 +162,12 @@
                 >
                   <div class="assigned-person" v-if="day.nightShift2">
                     {{ day.nightShift2Name }}
+                  </div>
+                  <div
+                    class="assigned-person deleted"
+                    v-else-if="day.nightShift2UserChanged"
+                  >
+                    Usunięto
                   </div>
                   <div class="empty-slot" v-else>N</div>
                 </div>
@@ -285,8 +309,8 @@ export default {
         // Set the shift to empty
         day[shift] = null;
         day[shift + "Name"] = "Usunięto";
-        day[shift + "Ratownik"] = null; //Clear Ratownik data
-        day[shift + "UserChanged"] = true; //Clear Ratownik data
+        day[shift + "Ratownik"] = null;
+        day[shift + "UserChanged"] = true;
 
         // Save the updated day object in localStorage and in-memory data
         const updatedData = {
@@ -301,7 +325,6 @@ export default {
           day.date.toDateString(),
           JSON.stringify(updatedData),
         );
-        day[shift] = "Usunięto";
 
         this.madeChanges = true;
         this.$emit("has-changes", true);
@@ -406,23 +429,31 @@ export default {
     resetUserChanges() {
       // Clear user-made changes from localStorage
       for (const key in localStorage) {
+        if (key === "isEditingMode" || key === "currentPage") {
+          continue;
+        }
         if (localStorage.hasOwnProperty(key)) {
-          const savedData = JSON.parse(localStorage.getItem(key) || "{}");
-          if (
-            savedData.dayShift1UserChanged ||
-            savedData.dayShift2UserChanged ||
-            savedData.nightShift1UserChanged ||
-            savedData.nightShift2UserChanged
-          ) {
-            localStorage.removeItem(key); // Remove user-modified data
+          try {
+            const savedData = JSON.parse(localStorage.getItem(key) || "{}");
+            if (
+              savedData.dayShift1UserChanged ||
+              savedData.dayShift2UserChanged ||
+              savedData.nightShift1UserChanged ||
+              savedData.nightShift2UserChanged
+            ) {
+              localStorage.removeItem(key); // Remove user-modified data
+            }
+          } catch (error) {
+            // Skip invalid JSON items - they're probably not shift data anyway
+            continue;
           }
         }
       }
 
-      // Reset the localData object
       this.localData = {};
-      this.madeChanges = false; // Reset the madeChanges flag
-      this.$emit("has-changes", false);
+      this.madeChanges = false;
+      this.$emit("has-changes", this.madeChanges);
+      this.editedShifts = {};
     },
     handleScroll(event) {
       if (this.scrollContainer) {
@@ -642,5 +673,10 @@ export default {
   font-weight: bold;
   margin-top: 10px;
   cursor: pointer;
+}
+.assigned-person.deleted {
+  color: var(--color-text-secondary);
+  border: 2px solid var(--glass-border-color);
+  font-style: italic;
 }
 </style>

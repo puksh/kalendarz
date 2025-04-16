@@ -79,7 +79,7 @@ export default {
 
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
-          if (key !== "isEditingMode") {
+          if (key !== "isEditingMode" && key !== "currentPage") {
             try {
               collectedData[key] = JSON.parse(localStorage.getItem(key));
             } catch {}

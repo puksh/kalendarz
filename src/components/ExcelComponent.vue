@@ -449,15 +449,23 @@ export default {
     resetUserChanges() {
       // Clear user-made changes from localStorage
       for (const key in localStorage) {
+        if (key === "isEditingMode" || key === "currentPage") {
+          continue;
+        }
         if (localStorage.hasOwnProperty(key)) {
-          const savedData = JSON.parse(localStorage.getItem(key) || "{}");
-          if (
-            savedData.dayShift1UserChanged ||
-            savedData.dayShift2UserChanged ||
-            savedData.nightShift1UserChanged ||
-            savedData.nightShift2UserChanged
-          ) {
-            localStorage.removeItem(key); // Remove user-modified data
+          try {
+            const savedData = JSON.parse(localStorage.getItem(key) || "{}");
+            if (
+              savedData.dayShift1UserChanged ||
+              savedData.dayShift2UserChanged ||
+              savedData.nightShift1UserChanged ||
+              savedData.nightShift2UserChanged
+            ) {
+              localStorage.removeItem(key); // Remove user-modified data
+            }
+          } catch (error) {
+            // Skip invalid JSON items - they're probably not shift data anyway
+            continue;
           }
         }
       }

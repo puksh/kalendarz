@@ -86,9 +86,10 @@
       </label>
     </section>
     <main class="main-content">
-      <CalendarComponent
+      <component
         ref="calendarComponent"
         v-if="currentPage === 'CalendarComponent'"
+        :is="CalendarComponent"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
@@ -99,7 +100,7 @@
       />
       <component
         ref="excelComponent"
-        v-else
+        v-if="currentPage === 'ExcelComponent'"
         :is="ExcelComponent"
         :isEditingMode="isEditingMode"
         :selectedMonth="selectedMonth"
@@ -158,9 +159,6 @@ import RefreshIcon from "./components/icons/RefreshIcon.vue";
 export default {
   name: "VueCalendar",
   components: {
-    CalendarComponent: defineAsyncComponent(
-      () => import("./components/CalendarComponent.vue"),
-    ),
     SideBarComponent: defineAsyncComponent(
       () => import("./components/SideBarComponent.vue"),
     ),
@@ -180,7 +178,7 @@ export default {
   },
   data() {
     return {
-      currentPage: "CalendarComponent",
+      currentPage: "ExcelComponent",
       isEditingMode: JSON.parse(localStorage.getItem("isEditingMode")) || false, // Shared editing mode state
       //MonthSelector
       selectedMonth: new Date().getMonth(),
@@ -204,8 +202,10 @@ export default {
       ],
       monthDays: [],
       isRefreshing: false,
-      ExcelComponent: null,
       AuthorizationModal: null,
+      CalendarComponent: null,
+      ExcelComponent: null,
+      currentPage: localStorage.getItem("currentPage") || "ExcelComponent",
     };
   },
   methods: {
@@ -218,12 +218,25 @@ export default {
           return;
         }
       }
-      // Dynamic ExcelComponent import
-      if (section === "ExcelComponent" && !this.ExcelComponent) {
-        // Show loading indicator if needed
+
+      // Save to localStorage
+      localStorage.setItem("currentPage", section);
+
+      // Dynamic component loading
+      if (section === "CalendarComponent" && !this.CalendarComponent) {
+        // Show loading indicator
         this.isLoading = true;
 
-        // Import only when user navigates to Excel view
+        import("./components/CalendarComponent.vue").then((module) => {
+          this.CalendarComponent = markRaw(module.default);
+          this.currentPage = section;
+          this.hasUnsavedChanges = false;
+          this.isLoading = false;
+        });
+      } else if (section === "ExcelComponent" && !this.ExcelComponent) {
+        // Add ExcelComponent lazy loading too
+        this.isLoading = true;
+
         import("./components/ExcelComponent.vue").then((module) => {
           this.ExcelComponent = markRaw(module.default);
           this.currentPage = section;
@@ -254,16 +267,13 @@ export default {
     },
     generateCurrentView() {
       // Regenerate the current component's view
-      if (
+      if (this.currentPage === "ExcelComponent" && this.$refs.excelComponent) {
+        this.$refs.excelComponent.generateMonthDays();
+      } else if (
         this.currentPage === "CalendarComponent" &&
         this.$refs.calendarComponent
       ) {
         this.$refs.calendarComponent.generateMonthDays();
-      } else if (
-        this.currentPage === "ExcelComponent" &&
-        this.$refs.excelComponent
-      ) {
-        this.$refs.excelComponent.generateMonthDays();
       }
     },
     async checkShiftDataSync() {
@@ -310,6 +320,25 @@ export default {
     },
   },
   async mounted() {
+    // Add ExcelComponent to data
+    if (!this.ExcelComponent) {
+      this.ExcelComponent = markRaw(
+        (await import("./components/ExcelComponent.vue")).default,
+      );
+    }
+
+    // Load stored page
+    const savedPage = localStorage.getItem("currentPage");
+    if (savedPage) {
+      this.currentPage = savedPage;
+
+      // Pre-load the component that corresponds to the current page
+      if (savedPage === "CalendarComponent" && !this.CalendarComponent) {
+        import("./components/CalendarComponent.vue").then((module) => {
+          this.CalendarComponent = markRaw(module.default);
+        });
+      }
+    }
     this.discardChanges();
     this.hasUnsavedChanges = false;
   },
