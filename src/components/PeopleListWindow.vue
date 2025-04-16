@@ -20,12 +20,6 @@
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
           @dragend="handleDragEnd"
-          @pointerdown="
-            isEditingMode ? handlePointerDown($event, person) : null
-          "
-          @pointermove="isEditingMode ? handlePointerMove : null"
-          @pointerup="isEditingMode ? handlePointerUp : null"
-          @pointercancel="isEditingMode ? handlePointerCancel : null"
         >
           {{ person.name }}
         </div>
@@ -47,12 +41,6 @@
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
-          @pointerdown="
-            isEditingMode ? handlePointerDown($event, person) : null
-          "
-          @pointermove="isEditingMode ? handlePointerMove : null"
-          @pointerup="isEditingMode ? handlePointerUp : null"
-          @pointercancel="isEditingMode ? handlePointerCancel : null"
         >
           {{ person.name }}
         </div>
@@ -61,14 +49,14 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 export default {
   name: "PeopleListWindow",
   props: {
     people: {
-      type: Array,
+      type: Array as () => { id: number; name: string; ratownik: boolean }[],
       required: true,
     },
     isEditingMode: {
@@ -93,76 +81,6 @@ export default {
       localStorage.setItem("draggedPerson", JSON.stringify(person));
     },
     handleDragEnd() {
-      localStorage.removeItem("draggedPerson");
-    },
-    handlePointerDown(event, person) {
-      // Only handle touch events, not mouse
-      if (event.pointerType !== "touch") return;
-
-      // Start touch timer
-      this.touchStartTime = Date.now();
-
-      // Store which element and person we're working with
-      this.touchedElement = event.currentTarget;
-      this.touchedPerson = person;
-
-      // Capture all future pointer events (modern replacement for setCapture)
-      this.touchedElement.setPointerCapture(event.pointerId);
-
-      // Set timer for long press
-      this.touchTimer = setTimeout(() => {
-        this.isDragging = true;
-        localStorage.setItem("draggedPerson", JSON.stringify(person));
-
-        // Visual and haptic feedback
-        this.touchedElement.classList.add("being-touched");
-        if (navigator.vibrate) navigator.vibrate(50);
-
-        // Show toast notification
-        addNotification(`Przeciągnij ${person.name} na slot`, "green");
-      }, 500);
-    },
-
-    handlePointerMove(event) {
-      // Only handle touch events
-      if (event.pointerType !== "touch") return;
-
-      // If timer is still running, cancel it (user is scrolling)
-      if (this.touchTimer) {
-        clearTimeout(this.touchTimer);
-        this.touchTimer = null;
-      }
-
-      if (!this.isDragging || !this.touchedElement) return;
-
-      // Prevent default scrolling
-      event.preventDefault();
-    },
-
-    handlePointerUp(event) {
-      // Only handle touch events
-      if (event.pointerType !== "touch") return;
-
-      // Clean up
-      if (this.touchTimer) {
-        clearTimeout(this.touchTimer);
-        this.touchTimer = null;
-      }
-
-      if (this.touchedElement) {
-        // Release pointer capture (modern replacement for releaseCapture)
-        this.touchedElement.releasePointerCapture(event.pointerId);
-        this.touchedElement.classList.remove("being-touched");
-      }
-
-      this.isDragging = false;
-      this.touchedElement = null;
-      this.touchedPerson = null;
-    },
-
-    handlePointerCancel(event) {
-      // Similar to pointerUp but also clear localStorage
-      this.handlePointerUp(event);
       localStorage.removeItem("draggedPerson");
     },
   },

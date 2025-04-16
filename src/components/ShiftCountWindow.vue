@@ -30,12 +30,17 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: "ShiftCountWindow",
   props: {
     people: {
-      type: Array,
+      type: Array as () => {
+        id: number;
+        name: string;
+        ratownik: boolean;
+        shiftCount?: number;
+      }[],
       required: true,
     },
     monthDays: {

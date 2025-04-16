@@ -58,12 +58,6 @@
                   :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'dayShift1')"
-                  @pointerup.prevent="
-                    handlePointerUp($event, day.date, 'dayShift1')
-                  "
-                  @pointermove.prevent="
-                    handlePointerMove($event, day.date, 'dayShift1')
-                  "
                   @click="
                     isEditingMode && handleClickResetShift(day, 'dayShift1')
                   "
@@ -89,12 +83,6 @@
                   }"
                   :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
-                  @pointerup.prevent="
-                    handlePointerUp($event, day.date, 'dayShift2')
-                  "
-                  @pointermove.prevent="
-                    handlePointerMove($event, day.date, 'dayShift2')
-                  "
                   @click="
                     isEditingMode && handleClickResetShift(day, 'dayShift2')
                   "
@@ -120,12 +108,6 @@
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
-                  @pointerup.prevent="
-                    handlePointerUp($event, day.date, 'nightShift1')
-                  "
-                  @pointermove.prevent="
-                    handlePointerMove($event, day.date, 'nightShift1')
-                  "
                   @click="
                     isEditingMode && handleClickResetShift(day, 'nightShift1')
                   "
@@ -152,12 +134,6 @@
                   :clickable="isEditingMode"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift2')"
-                  @pointerup.prevent="
-                    handlePointerUp($event, day.date, 'nightShift2')
-                  "
-                  @pointermove.prevent="
-                    handlePointerMove($event, day.date, 'nightShift2')
-                  "
                   @click="
                     isEditingMode && handleClickResetShift(day, 'nightShift2')
                   "
@@ -180,8 +156,8 @@
   </div>
 </template>
 
-<script>
-import { daysOfWeek } from "@/data/daysOfWeek.js";
+<script lang="ts">
+import { daysOfWeek } from "@/data/daysOfWeek.ts";
 import {
   checkShiftDataSync,
   resetSyncedChangesSessionStorage,
@@ -295,23 +271,6 @@ export default {
       this.$emit("has-changes", true);
       localStorage.removeItem("draggedPerson");
     },
-    handlePointerMove(event, date, shiftType) {
-      // Update current drop target for visual feedback
-      this.currentDropTarget = { date, shiftType };
-      event.preventDefault(); // Prevent scrolling
-    },
-
-    handlePointerEnd(event, date, shiftType) {
-      // Check if we have a dragged person in localStorage
-      const draggedPerson = JSON.parse(localStorage.getItem("draggedPerson"));
-      if (draggedPerson) {
-        this.handleDrop(date, shiftType);
-
-        // Clear the drop target
-        this.currentDropTarget = { date: null, shiftType: null };
-      }
-    },
-
     isDropTarget(date, shiftType) {
       if (!this.currentDropTarget.date) return false;
 
@@ -511,7 +470,7 @@ export default {
     },
     checkMobilePlatform() {
       // Check if user is on mobile device (iOS or Android)
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const userAgent = navigator.userAgent || navigator.vendor;
       this.isMobileDevice = /android|iphone|ipad|ipod/i.test(
         userAgent.toLowerCase(),
       );
@@ -520,26 +479,6 @@ export default {
     handleMobileWarningClose() {
       this.showMobileWarning = false;
       this.emitEditingMode(false); // Disable editing mode
-    },
-    handlePointerUp(event) {
-      // Only handle touch events
-      if (event.pointerType !== "touch") return;
-
-      // Clean up
-      if (this.touchTimer) {
-        clearTimeout(this.touchTimer);
-        this.touchTimer = null;
-      }
-
-      if (this.touchedElement) {
-        // Release pointer capture (modern replacement for releaseCapture)
-        this.touchedElement.releasePointerCapture(event.pointerId);
-        this.touchedElement.classList.remove("being-touched");
-      }
-
-      this.isDragging = false;
-      this.touchedElement = null;
-      this.touchedPerson = null;
     },
   },
 

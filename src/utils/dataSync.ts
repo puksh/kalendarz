@@ -1,6 +1,9 @@
 import { addNotification } from "../components/NotificationMessage.vue";
+import type { DayData } from "../types/calendar";
 
-export async function fetchServerShiftData() {
+export async function fetchServerShiftData(
+  callback: () => void,
+): Promise<Record<string, DayData>> {
   try {
     const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
       method: "GET",
@@ -29,7 +32,7 @@ export async function checkShiftDataSync(generateMonthDays) {
   // Reset synced changes in sessionStorage
   resetSyncedChangesSessionStorage();
 
-  const remoteData = await fetchServerShiftData();
+  const remoteData = await fetchServerShiftData(() => {});
   if (!remoteData) {
     console.log("No remote data fetched.");
     return; // Exit if fetching fails

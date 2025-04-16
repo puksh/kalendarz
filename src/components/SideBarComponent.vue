@@ -49,14 +49,14 @@
   </aside>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: "SideBarComponent",
   props: {
     currentComponent: {
       type: String,
       required: true,
-      validator: (value) =>
+      validator: (value: string) =>
         ["CalendarComponent", "ExcelComponent"].includes(value),
     },
   },

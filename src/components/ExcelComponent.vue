@@ -77,14 +77,14 @@
   </div>
 </template>
 
-<script>
-import { daysOfWeek } from "@/data/daysOfWeek.js";
+<script lang="ts">
+import { daysOfWeek } from "@/data/daysOfWeek.ts";
 import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 import {
   checkShiftDataSync,
   resetSyncedChangesSessionStorage,
-} from "@/utils/dataSync.js";
+} from "@/utils/dataSync.ts";
 
 export default {
   name: "SpreadsheetView",
@@ -194,7 +194,10 @@ export default {
       const validValues = ["D", "N", "D N", ""];
 
       if (!validValues.includes(newValue)) {
-        addNotification("Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.");
+        addNotification(
+          "Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.",
+          "red",
+        );
         this.$nextTick(() => {
           this.editedShifts[key] = previousValue;
         });
@@ -274,6 +277,7 @@ export default {
           if (hasOtherRatownikDay) {
             addNotification(
               "Nie można przypisać dwóch ratowników na zmianę dzienną.",
+              "red",
             );
             delete this.editedShifts[key];
             return;
@@ -292,6 +296,7 @@ export default {
         } else {
           addNotification(
             "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
+            "red",
           );
           delete this.editedShifts[key];
           return;
@@ -313,6 +318,7 @@ export default {
           if (hasOtherRatownikNight) {
             addNotification(
               "Nie można przypisać dwóch ratowników na zmianę nocną.",
+              "red",
             );
             delete this.editedShifts[key];
             return;
@@ -331,6 +337,7 @@ export default {
         } else {
           addNotification(
             "Nie można przypisać więcej niż dwóch osób na zmianę nocną.",
+            "red",
           );
           delete this.editedShifts[key];
           return;

@@ -3,7 +3,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 
 // Add a global error handler for dynamic imports
-window.addEventListener("error", (event) => {
+window.addEventListener("error", (event: ErrorEvent) => {
   if (
     event.error &&
     (event.error.message.includes(
@@ -21,13 +21,13 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/service-worker.js")
-      .then((registration) => {
+      .then((registration: ServiceWorkerRegistration) => {
         console.log(
           "Service Worker registered with scope:",
           registration.scope,
         );
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.log("Service Worker registration failed:", error);
       });
   });

@@ -35,7 +35,7 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 
@@ -98,7 +98,8 @@ export default {
         const reader = new FileReader();
 
         const base64Data = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result.split(",")[1]);
+          reader.onloadend = () =>
+            resolve(reader.result.toString().split(",")[1]);
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });

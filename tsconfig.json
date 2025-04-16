@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"useDefineForClassFields": true,
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"strict": false, // change l8r
+		//"strict": true,
+		"jsx": "preserve",
+		"sourceMap": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		//"allowJs": true,
+		"skipLibCheck": true,
+		"lib": ["ESNext", "DOM"],
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		"noEmit": true,
+		"allowImportingTsExtensions": true
+	},
+	"include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.js"]
+}
