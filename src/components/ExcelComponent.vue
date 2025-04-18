@@ -21,6 +21,9 @@
                   daysOfWeek[
                     new Date(selectedYear, selectedMonth, day).getDay()
                   ] === 'Sob',
+                'today-column': isToday(
+                  new Date(selectedYear, selectedMonth, day),
+                ),
               }"
             >
               {{ day }}
@@ -50,6 +53,7 @@
                   daysOfWeek[
                     new Date(selectedYear, selectedMonth, day).getDay()
                   ] === 'Sob',
+                today: isToday(new Date(selectedYear, selectedMonth, day)),
               }"
               @click="editCell(person.id, day)"
               :aria-label="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
@@ -475,6 +479,14 @@ export default {
       this.$emit("has-changes", this.madeChanges);
       this.editedShifts = {};
     },
+    isToday(date: Date) {
+      const today = new Date();
+      return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      );
+    },
   },
   mounted() {
     this.resetUserChanges();
@@ -490,13 +502,13 @@ export default {
   max-width: 9999px;
   margin: 0 auto;
   overflow-x: auto;
+  margin-top: 70px;
 }
 /* General Table Styling */
 .calendar-table {
   width: 100%;
   min-width: 1160px;
   max-width: 9999px;
-  margin-top: 50px;
   border-spacing: 1px;
   table-layout: auto;
   background: #1a3c3c;
@@ -543,7 +555,6 @@ export default {
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-  position: sticky;
   background: #0a3c3c;
   font-weight: bold;
   text-align: left;
@@ -554,12 +565,9 @@ export default {
     background 0.3s ease;
   width: 24px;
   max-width: 24px;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-right: 2px solid #1e5e5e;
   z-index: 2;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
 }
 .calendar-table th:first-child {
   z-index: 3;
@@ -582,6 +590,31 @@ export default {
 
 .editable-cell select:focus {
   border-color: #27bebe;
-  box-shadow: 0 0 4px rgba(0, 200, 200, 0.5);
+  box-shadow: 0 0 4px rgba(0, 200, 200, 1);
+}
+/* Today's column highlighting */
+.today-column {
+  z-index: 5;
+  background-color: rgba(53, 255, 255, 0.3) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.6) !important;
+}
+.today-column::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
+}
+.today {
+  border-left: 2px solid rgba(255, 255, 255, 0.6) !important;
+  border-right: 2px solid rgba(255, 255, 255, 0.6) !important;
+}
+.today {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+.calendar-table th.today-column {
+  text-decoration: underline;
 }
 </style>

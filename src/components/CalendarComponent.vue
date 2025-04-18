@@ -8,7 +8,7 @@
       </p>
       <p>Proszę przejdź do widoku tabeli lub skorzystaj z komputera.</p>
       <button @click="handleMobileWarningClose" class="warning-button">
-        Ok :(
+        Ok ☹
       </button>
     </div>
   </div>
@@ -24,6 +24,7 @@
           v-for="(day, index) in monthDays"
           :key="index"
           class="day-column"
+          :class="{ 'today-column': isToday(day.date) }"
           @dragover.prevent
           @drop="handleDrop(day.date, 'day')"
         >
@@ -34,6 +35,7 @@
                 'current-month': day.isCurrentMonth,
                 'nd-color': daysOfWeek[day.date.getDay()] === 'Nd',
                 'sob-color': daysOfWeek[day.date.getDay()] === 'Sob',
+                today: isToday(day.date),
               }"
             >
               <div class="day-header">
@@ -511,6 +513,14 @@ export default {
       this.showMobileWarning = false;
       this.emitEditingMode(false); // Disable editing mode
     },
+    isToday(date: Date) {
+      const today = new Date();
+      return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      );
+    },
   },
 
   async mounted() {
@@ -678,5 +688,28 @@ export default {
   color: var(--color-text-secondary);
   border: 2px solid var(--glass-border-color);
   font-style: italic;
+}
+.today-column {
+  position: relative;
+  z-index: 2;
+}
+
+.today-column::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 43%;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
+}
+
+.day-cell.today {
+  border: 2px solid #fff !important;
+}
+
+.day-cell.today .day-date {
+  display: flex;
+  justify-content: center;
 }
 </style>
