@@ -2,7 +2,7 @@
   <section class="people-list">
     <!-- People List Section -->
     <h3 style="font-weight: bold">Zespół</h3>
-    <div>
+    <div class="people-list-content">
       <!-- Ratownik List -->
       <h4>Ratowniczki/cy</h4>
       <div class="person-lists">
@@ -84,7 +84,7 @@ export default {
 
 <style scoped>
 .people-list {
-  width: max(33%, 651px);
+  width: 405px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -107,11 +107,6 @@ export default {
   text-wrap: wrap;
   margin: var(--spacing-small) auto;
   color: var(--color-text);
-}
-@media (max-width: 768px) {
-  .people-list {
-    width: 90%;
-  }
 }
 /* Individual draggable people items */
 .person-item {
