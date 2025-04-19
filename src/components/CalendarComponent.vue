@@ -463,6 +463,42 @@ export default {
         this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
       }
     },
+    scrollToToday() {
+      // Wait for DOM to update
+      this.$nextTick(() => {
+        // Get today's date
+        const today = new Date();
+
+        // Only proceed if current month view includes today
+        if (
+          today.getMonth() === this.selectedMonth &&
+          today.getFullYear() === this.selectedYear
+        ) {
+          // Find today's column index
+          const todayIndex = this.monthDays.findIndex((day) =>
+            this.isToday(day.date),
+          );
+
+          if (todayIndex !== -1 && this.scrollContainer) {
+            // Get the column width (including margins)
+            const columnWidth =
+              (document.querySelector(".day-column") as HTMLElement)
+                ?.offsetWidth || 0;
+            const containerWidth = this.scrollContainer.offsetWidth;
+
+            // Calculate scroll position to center today's column
+            const scrollPosition =
+              columnWidth * todayIndex - containerWidth / 2 + columnWidth / 2;
+
+            // Smooth scroll to the position
+            this.scrollContainer.scrollTo({
+              left: Math.max(0, scrollPosition),
+              behavior: "smooth",
+            });
+          }
+        }
+      });
+    },
     getDayClass(dayIndex) {
       if (daysOfWeek[dayIndex] === "Nd") return "nd-color";
       if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
@@ -528,6 +564,7 @@ export default {
     this.resetUserChanges();
     await this.checkShiftDataSync(); // Then sync with remote data
     this.scrollContainer = this.$refs.scrollContainer;
+    this.scrollToToday();
     this.checkMobilePlatform();
   },
   watch: {
@@ -539,6 +576,7 @@ export default {
     },
     selectedMonth() {
       this.generateMonthDays();
+      this.scrollToToday();
     },
     selectedYear() {
       this.generateMonthDays();
