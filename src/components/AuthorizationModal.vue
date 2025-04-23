@@ -64,10 +64,20 @@ export default {
 
       try {
         // Password verification
-        const { default: MD5 } = await import("crypto-js/md5");
-        const hashedPassword = import.meta.env.VITE_AUTH_PASSWORD;
+        const CryptoJS = await import("crypto-js");
+        const password = this.password;
+        const salt = "static-salt-value-mixed-with-app";
 
-        if (MD5(this.password).toString() !== hashedPassword) {
+        const iterations = 100000;
+        const keySize = 256 / 32;
+        const derivedKey = CryptoJS.PBKDF2(password, salt, {
+          keySize: keySize,
+          iterations: iterations,
+        }).toString();
+
+        const storedHash = import.meta.env.VITE_AUTH_PASSWORD;
+
+        if (derivedKey !== storedHash) {
           addNotification("Nieprawidłowe hasło", "red");
           this.password = "";
           this.isAuthorizing = false;
