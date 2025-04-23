@@ -17,7 +17,6 @@ jobs:
     env:
       VITE_AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       VITE_AUTH_SALT: ${{ secrets.AUTH_SALT }}
-      VITE_API_URL: ${{ secrets.API_URL }}
 
     steps:
       - name: Checkout repository
