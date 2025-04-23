@@ -277,15 +277,32 @@ export default {
       }
     },
     async checkShiftDataSync() {
+      // Set a timeout to prevent infinite spinning (30 seconds max)
+      const refreshTimeout = setTimeout(() => {
+        if (this.isRefreshing) {
+          console.warn("Refresh operation timed out");
+          this.isRefreshing = false;
+          addNotification("Odświeżanie przerwane - timeout", "red");
+        }
+      }, 6000);
+
       this.isRefreshing = true;
-      this.syncedChanges = await checkShiftDataSync(() =>
-        this.generateCurrentView(),
-      );
-      this.hasUnsavedChanges = false;
-      addNotification("Odświeżanie...", "blue");
-      setTimeout(() => {
-        this.isRefreshing = false;
-      }, 800);
+
+      try {
+        this.syncedChanges = await checkShiftDataSync(() =>
+          this.generateCurrentView(),
+        );
+        this.hasUnsavedChanges = false;
+        addNotification("Odświeżanie...", "blue");
+      } catch (error) {
+        console.error("Error during refresh:", error);
+        addNotification("Błąd podczas odświeżania", "red");
+      } finally {
+        clearTimeout(refreshTimeout);
+        setTimeout(() => {
+          this.isRefreshing = false;
+        }, 800);
+      }
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
