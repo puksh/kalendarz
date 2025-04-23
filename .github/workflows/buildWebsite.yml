@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write # Needed for gh-pages deployment
+  pages: write # Needed for GitHub Pages
+  id-token: write # Needed for GitHub Pages authentication
+
 jobs:
   build:
     runs-on: ubuntu-latest
