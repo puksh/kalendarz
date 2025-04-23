@@ -28,7 +28,14 @@
           @click="cancel"
           :disabled="isAuthorizing"
         >
-          Anuluj
+          Anuluj</button
+        ><button
+          v-if="import.meta.env.MODE !== 'production'"
+          @click="debugEnvironment"
+          class="debug-button"
+          style="position: absolute; bottom: 10px; left: 10px; font-size: 10px"
+        >
+          Debug
         </button>
       </div>
     </div>
@@ -147,6 +154,15 @@ export default {
       if (!this.isAuthorizing) {
         this.closeModal();
       }
+    },
+    debugEnvironment() {
+      const debugInfo = {
+        salt: import.meta.env.VITE_AUTH_SALT || "Not set",
+        passwordHash: import.meta.env.VITE_AUTH_PASSWORD || "Not set",
+      };
+
+      console.table(debugInfo);
+      alert(`Salt: ${debugInfo.salt}\nHash: ${debugInfo.passwordHash}`);
     },
   },
 
