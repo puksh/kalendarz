@@ -2,16 +2,7 @@ import "./assets/main.css";
 import { createApp } from "vue";
 import App from "./App.vue";
 
-declare global {
-  interface Window {
-    debugEnv?: {
-      salt: string;
-      passwordHash: string;
-    };
-  }
-}
-
-// Add a global error handler for dynamic imports
+// Global error handler for dynamic imports
 window.addEventListener("error", (event: ErrorEvent) => {
   if (
     event.error &&
@@ -23,12 +14,7 @@ window.addEventListener("error", (event: ErrorEvent) => {
     window.location.reload();
   }
 });
-if (import.meta.env.MODE !== "production") {
-  window.debugEnv = {
-    salt: import.meta.env.VITE_AUTH_SALT,
-    passwordHash: import.meta.env.VITE_AUTH_PASSWORD,
-  };
-}
+
 createApp(App).mount("#app");
 
 if ("serviceWorker" in navigator) {

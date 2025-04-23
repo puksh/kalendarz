@@ -28,14 +28,7 @@
           @click="cancel"
           :disabled="isAuthorizing"
         >
-          Anuluj</button
-        ><button
-          v-if="import.meta.env.MODE !== 'production'"
-          @click="debugEnvironment"
-          class="debug-button"
-          style="position: absolute; bottom: 10px; left: 10px; font-size: 10px"
-        >
-          Debug
+          Anuluj
         </button>
       </div>
     </div>
@@ -72,12 +65,11 @@ export default {
       try {
         // Password verification
         const CryptoJS = await import("crypto-js");
-        const password = this.password;
         const salt = import.meta.env.VITE_AUTH_SALT.toString();
 
         const iterations = 100000;
         const keySize = 256 / 32;
-        const derivedKey = CryptoJS.PBKDF2(password, salt, {
+        const derivedKey = CryptoJS.PBKDF2(this.password, salt, {
           keySize: keySize,
           iterations: iterations,
         }).toString();
@@ -154,15 +146,6 @@ export default {
       if (!this.isAuthorizing) {
         this.closeModal();
       }
-    },
-    debugEnvironment() {
-      const debugInfo = {
-        salt: import.meta.env.VITE_AUTH_SALT || "Not set",
-        passwordHash: import.meta.env.VITE_AUTH_PASSWORD || "Not set",
-      };
-
-      console.table(debugInfo);
-      alert(`Salt: ${debugInfo.salt}\nHash: ${debugInfo.passwordHash}`);
     },
   },
 
