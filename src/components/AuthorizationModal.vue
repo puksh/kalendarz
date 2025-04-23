@@ -66,7 +66,7 @@ export default {
         // Password verification
         const CryptoJS = await import("crypto-js");
         const password = this.password;
-        const salt = "static-salt-value-mixed-with-app";
+        const salt = import.meta.env.VITE_AUTH_SALT;
 
         const iterations = 100000;
         const keySize = 256 / 32;
