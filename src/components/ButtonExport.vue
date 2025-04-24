@@ -153,33 +153,15 @@ export default {
 .export-button {
   position: relative;
   top: 8px;
-  right: 132px;
+  left: 132px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 10px;
-  background-color: var(--glass-bg-color);
-  border: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .export-icon {
-  color: var(--color-text);
   transition: transform 0.2s ease;
-}
-
-@media not all and (hover: none) {
-  .export-button:hover {
-    background-color: rgba(0, 200, 200, 0.3);
-  }
-
-  .export-button:hover .export-icon {
-    transform: translateY(2px);
-  }
 }
 
 @media (hover: none) {

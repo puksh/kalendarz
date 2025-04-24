@@ -92,27 +92,24 @@ export default {
   box-shadow: var(--glass-box-shadow);
 }
 
-.sidebar-button:hover {
-  background-color: #7fb9bd99;
-  border-color: #7fb6bd99;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
 @media not all and (hover: none) {
   .sidebar-button:active {
-    background-color: #2b717ab3;
-    border-color: #2b6a7ab3;
+    background-color: rgba(0, 200, 200, 0.3);
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
     transform: translateY(1px);
+  }
+  .sidebar-button:hover {
+    background-color: rgba(0, 200, 200, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar-button:hover svg {
+    transform: scale(1.1);
   }
 }
 
 .sidebar-button svg {
   transition: transform 0.2s ease;
-}
-
-.sidebar-button:hover svg {
-  transform: scale(1.1);
 }
 </style>

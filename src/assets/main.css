@@ -225,8 +225,7 @@ button svg {
 }
 @media not all and (hover: none) {
 	.top-right-buttons:hover {
-		background-color: #7fb9bd99;
-		border-color: #7fb6bd99;
+		background-color: rgba(0, 200, 200, 0.3);
 		transform: translateY(-2px);
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 	}
