@@ -2,7 +2,7 @@
 <template>
   <section class="monthChange">
     <button
-      class="buttonMonthChange"
+      class="buttonMonthChange prev-month"
       @click="handleMonthChange(-1)"
       aria-label="Poprzedni miesiąc"
       title="Idź do poprzedniego miesiąca"
@@ -13,7 +13,7 @@
       {{ formattedMonthYear }}
     </span>
     <button
-      class="buttonMonthChange"
+      class="buttonMonthChange next-month"
       @click="handleMonthChange(1)"
       aria-label="Następny miesiąc"
       title="Idź do następnego miesiąca"
@@ -143,15 +143,19 @@ export default {
   touch-action: manipulation;
 }
 
-.buttonMonthChange:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: scale(1.05);
-}
-
 @media not all and (hover: none) {
-  .buttonMonthChange:active {
-    transform: scale(0.95);
-    background-color: rgba(255, 255, 255, 0.2);
+  .buttonMonthChange.prev-month:active {
+    transform: translateX(-5px);
+  }
+  .buttonMonthChange.prev-month:hover {
+    transform: translateX(-3px);
+  }
+
+  .buttonMonthChange.next-month:active {
+    transform: translateX(5px);
+  }
+  .buttonMonthChange.next-month:hover {
+    transform: translateX(3px);
   }
 }
 .buttonMonthChange:focus-visible {
