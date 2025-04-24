@@ -91,26 +91,9 @@ body {
 		transform 0.2s ease,
 		box-shadow 0.2s ease;
 }
-.top-right-buttons:hover {
-	background-color: #7fb9bd99;
-	border-color: #7fb6bd99;
-	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.top-right-buttons:active {
-	background-color: #2b717ab3;
-	border-color: #2b6a7ab3;
-	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-	transform: translateY(1px);
-}
 
 .top-right-buttons svg {
 	transition: transform 0.2s ease;
-}
-
-.top-right-buttons:hover svg {
-	transform: scale(1.1);
 }
 .buttonRefresh {
 	top: 8px;
@@ -206,12 +189,6 @@ body {
 	transition: all 0.3s ease;
 	z-index: 1002;
 }
-
-.submit-button:hover:not(:disabled) {
-	background-color: rgba(0, 200, 200, 0.3); /* Lighter mint on hover */
-	transform: scale(1.1);
-}
-
 .submit-button:disabled {
 	background-color: var(--color-button-disabled-bg);
 	cursor: not-allowed;
@@ -245,6 +222,29 @@ button:disabled {
 .top-right-buttons svg,
 button svg {
 	pointer-events: none;
+}
+@media not all and (hover: none) {
+	.top-right-buttons:hover {
+		background-color: #7fb9bd99;
+		border-color: #7fb6bd99;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	}
+
+	.top-right-buttons:hover svg {
+		transform: scale(1.1);
+	}
+
+	.submit-button:hover:not(:disabled) {
+		background-color: rgba(0, 200, 200, 0.3); /* Lighter mint on hover */
+		transform: scale(1.1);
+	}
+	.top-right-buttons:active {
+		background-color: #2b717ab3;
+		border-color: #2b6a7ab3;
+		box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+		transform: translateY(1px);
+	}
 }
 /* Fix for sticky :active state on mobile */
 @media (hover: none) {
