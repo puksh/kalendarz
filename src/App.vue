@@ -82,8 +82,14 @@
               d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
             ></path>
           </svg>
-        </span>
-      </label>
+        </span> </label
+      ><ButtonExport
+        :people="people"
+        :monthDays="monthDays"
+        :selectedMonth="selectedMonth"
+        :selectedYear="selectedYear"
+        :currentPage="currentPage"
+      />
     </section>
     <main class="main-content">
       <div class="refresh-overlay" v-if="isRefreshing">
@@ -160,6 +166,7 @@ import { defineAsyncComponent, markRaw } from "vue";
 import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 import RefreshIcon from "./components/icons/RefreshIcon.vue";
+import ButtonExport from "./components/ButtonExport.vue";
 
 export default {
   name: "VueCalendar",
@@ -180,6 +187,7 @@ export default {
       () => import("./components/NotificationMessage.vue"),
     ),
     RefreshIcon,
+    ButtonExport,
   },
   data() {
     return {
