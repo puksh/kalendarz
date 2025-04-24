@@ -575,37 +575,30 @@ export default {
   padding: 8px;
   font-size: 14px;
   color: var(--color-text);
-  transition: background 0.2s ease;
-}
-
-.calendar-table th {
-  background: #0a3c3c;
-  color: #ffffff;
-  font-weight: bold;
-  text-transform: uppercase;
+  transition: background-color 0.2s ease;
 }
 
 .calendar-table td {
-  background: #113535;
+  background-color: #113535;
   min-width: 28px;
   text-wrap: nowrap;
 }
 
 .calendar-table tr:nth-child(even) td {
-  background: #163939;
+  background-color: #163939;
 }
 
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
-  background: #0a3c3c;
+  background-color: #0a3c3c;
   font-weight: bold;
   text-align: left;
   padding-left: 12px;
   transition:
     width 0.3s ease,
     max-width 0.3s ease,
-    background 0.3s ease;
+    background-color 0.3s ease;
   width: 24px;
   max-width: 24px;
   overflow: hidden;
@@ -629,9 +622,10 @@ export default {
 
 /* Lock button styling */
 .lock-column-button {
-  background: none;
+  background-color: none;
   border: none;
   color: rgba(255, 255, 255, 0.7);
+  background-color: #ffffff00;
   cursor: pointer;
   padding: 2px;
   border-radius: 4px;
@@ -643,14 +637,14 @@ export default {
 
 @media not all and (hover: none) {
   .calendar-table td:hover {
-    background: #1e5e5e;
-    z-index: 1;
+    filter: brightness(1.5);
+    z-index: 2;
   }
   /* First column hover - only apply when not locked */
   .calendar-table td:first-child:not(.column-locked):hover {
     width: 88px !important;
     max-width: 88px !important;
-    background: #1e5e5e !important;
+    filter: brightness(1.2);
   }
 
   .editable-cell select:hover {
@@ -661,7 +655,7 @@ export default {
   }
   .lock-column-button:hover {
     color: white;
-    background: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
   }
 }
@@ -671,7 +665,7 @@ export default {
 
 .editable-cell select {
   border: 1px solid #1e5e5e;
-  background: #0a3c3c;
+  background-color: #0a3c3c;
   color: var(--color-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
