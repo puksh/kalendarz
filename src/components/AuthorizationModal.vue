@@ -64,12 +64,12 @@ export default {
 
       try {
         // Password verification
-        const CryptoJS = await import("crypto-js");
+        const PBKDF2 = await import("crypto-js/pbkdf2");
         const salt = import.meta.env.VITE_AUTH_SALT.toString();
 
         const iterations = 100000;
         const keySize = 256 / 32;
-        const derivedKey = CryptoJS.PBKDF2(this.password, salt, {
+        const derivedKey = PBKDF2.default(this.password, salt, {
           keySize: keySize,
           iterations: iterations,
         }).toString();
