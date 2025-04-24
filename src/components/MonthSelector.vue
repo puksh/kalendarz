@@ -148,20 +148,10 @@ export default {
   transform: scale(1.05);
 }
 
-.buttonMonthChange:active {
-  transform: scale(0.95);
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-@media (hover: none) {
-  .buttonMonthChange {
-    padding: 10px; /* Larger touch area */
-  }
-
+@media not all and (hover: none) {
   .buttonMonthChange:active {
-    transform: scale(0.92);
-    background-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    transform: scale(0.95);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 .buttonMonthChange:focus-visible {

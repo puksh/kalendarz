@@ -285,7 +285,11 @@ button svg {
 
 	/* Apply a brief animation instead for touch feedback */
 	.top-right-buttons:active::after,
-	button:active::after {
+	button:active::after,
+	.primary-button:active::after,
+	.secondary-button:active::after,
+	.buttonMonthChange:active::after,
+	.sidebar-button:active::after {
 		content: "";
 		position: absolute;
 		top: 0;

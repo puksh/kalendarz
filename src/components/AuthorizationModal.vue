@@ -259,11 +259,12 @@ export default {
   transform: translateY(-2px);
 }
 
-.primary-button:active,
-.secondary-button:active {
-  transform: translateY(1px);
+@media not all and (hover: none) {
+  .primary-button:active,
+  .secondary-button:active {
+    transform: translateY(1px);
+  }
 }
-
 .primary-button:disabled,
 .secondary-button:disabled {
   opacity: 0.7;

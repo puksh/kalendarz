@@ -99,11 +99,13 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.sidebar-button:active {
-  background-color: #2b717ab3;
-  border-color: #2b6a7ab3;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-  transform: translateY(1px);
+@media not all and (hover: none) {
+  .sidebar-button:active {
+    background-color: #2b717ab3;
+    border-color: #2b6a7ab3;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+    transform: translateY(1px);
+  }
 }
 
 .sidebar-button svg {

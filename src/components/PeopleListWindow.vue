@@ -155,15 +155,4 @@ export default {
   z-index: 1000;
   font-size: 16px;
 }
-/* Add touch feedback styles */
-@media (hover: none) {
-  .person-item:active {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-
-  .shift-slot:active {
-    background-color: rgba(76, 175, 80, 0.2);
-  }
-}
 </style>
