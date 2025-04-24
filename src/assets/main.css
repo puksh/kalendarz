@@ -241,3 +241,45 @@ button:disabled {
 	cursor: not-allowed;
 	opacity: 0.6;
 }
+/* Fix for sticky :active state on mobile */
+@media (hover: none) {
+	.top-right-buttons:active,
+	button:active {
+		/* Reset active state immediately after touch */
+		transform: none !important;
+		background-color: var(--glass-bg-color) !important;
+		border-color: var(--glass-border-color) !important;
+		box-shadow: var(--glass-box-shadow) !important;
+	}
+
+	/* Disable tap highlight color on iOS */
+	.top-right-buttons,
+	button {
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Apply a brief animation instead for touch feedback */
+	.top-right-buttons:active::after,
+	button:active::after {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(255, 255, 255, 0.2);
+		border-radius: inherit;
+		opacity: 0;
+		animation: button-touch-feedback 0.3s ease-out;
+	}
+}
+
+/* Touch feedback animation */
+@keyframes button-touch-feedback {
+	0% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 0;
+	}
+}
