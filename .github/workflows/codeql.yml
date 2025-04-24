@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - language: javascript-typescript
-            build-mode: manual
+            build-mode: none
 
     steps:
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
       - name: Set environment variables
         run: |
           echo "VITE_AUTH_PASSWORD=${{ secrets.AUTH_PASSWORD || 'placeholder' }}" >> $GITHUB_ENV
-          echo "VITE_AUTH_SALT=${{ secrets.AUTH_SALT || 'placeholder' }}" >> $GITHUB_ENV\
+          echo "VITE_AUTH_SALT=${{ secrets.AUTH_SALT || 'placeholder' }}" >> $GITHUB_ENV
 
       # Build steps
       - name: Install dependencies
