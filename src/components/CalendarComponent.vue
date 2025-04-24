@@ -608,10 +608,6 @@ export default {
 .day-cell {
   border: 1px solid var(--glass-border-color);
   padding: 1ch 1ch 1ch 0.64ch;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
   width: var(--width-day-cell);
   background-color: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
