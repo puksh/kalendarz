@@ -1,11 +1,10 @@
 {
-	"name": "Harmonogram",
-	"short_name": "Harmonogram",
-	"description": "Calendar for my friends :)",
+	"name": "Kalendar",
+	"short_name": "Kal",
 	"start_url": "/",
 	"display": "standalone",
-	"background_color": "#ffffff",
-	"theme_color": "#42b983",
+	"background_color": "#356b85",
+	"theme_color": "#356b85",
 	"icons": [
 		{
 			"src": "/assets/icons/icon-192x192.png",

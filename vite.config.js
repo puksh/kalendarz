@@ -47,7 +47,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       css: {
-        additionalData: `@import "./assets/main.css";`,
+        additionalData: `@import "./assets/main.css";@import "./assets/iphone.css";`,
       },
     },
     postcss: {
