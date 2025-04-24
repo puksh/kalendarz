@@ -8,7 +8,37 @@
       <table class="calendar-table">
         <thead>
           <tr>
-            <th></th>
+            <th>
+              <button
+                class="lock-column-button"
+                @click="toggleColumnsLocked"
+                :title="
+                  isFirstColumnLocked
+                    ? 'Odblokuj szerokość'
+                    : 'Zablokuj szerokość'
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="white"
+                  stroke-width="2"
+                >
+                  <!-- Padlock body (always visible) -->
+                  <rect x="7" y="11" width="10" height="10" rx="1" />
+
+                  <!-- Padlock shackle -->
+                  <path
+                    v-if="isFirstColumnLocked"
+                    d="M12 3a4 4 0 0 0-4 4v4h8V7a4 4 0 0 0-4-4z"
+                  />
+                  <path v-else d="M8 11V7a4 4 0 0 1 8 0" />
+                </svg>
+              </button>
+            </th>
             <th
               v-for="day in daysInMonth"
               :key="day"
@@ -122,6 +152,7 @@ export default {
       daysOfWeek,
       madeChanges: false,
       scrollContainer: null,
+      isFirstColumnLocked: false,
     };
   },
   computed: {
@@ -487,6 +518,23 @@ export default {
         date.getFullYear() === today.getFullYear()
       );
     },
+    toggleColumnsLocked() {
+      this.isFirstColumnLocked = !this.isFirstColumnLocked;
+
+      // Apply the changes to all first column cells
+      this.$nextTick(() => {
+        const firstCells = document.querySelectorAll(
+          ".calendar-table th:first-child, .calendar-table td:first-child",
+        );
+        firstCells.forEach((cell) => {
+          if (this.isFirstColumnLocked) {
+            cell.classList.add("column-locked");
+          } else {
+            cell.classList.remove("column-locked");
+          }
+        });
+      });
+    },
   },
   mounted() {
     this.resetUserChanges();
@@ -547,11 +595,6 @@ export default {
   background: #163939;
 }
 
-.calendar-table td:hover {
-  background: #1e5e5e;
-  z-index: 1;
-}
-
 /* First Column Styling */
 .calendar-table th:first-child,
 .calendar-table td:first-child {
@@ -568,24 +611,69 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   z-index: 2;
-}
-.calendar-table th:first-child {
-  z-index: 3;
+  position: sticky;
+  left: 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
 }
 
-.calendar-table td:first-child:hover {
+/* Increased z-index for header */
+.calendar-table th:first-child {
+  z-index: 4;
+}
+
+/* Locked column state */
+.calendar-table .column-locked {
   width: 88px !important;
   max-width: 88px !important;
-  background: #1e5e5e !important;
 }
+
+/* Lock button styling */
+.lock-column-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+@media not all and (hover: none) {
+  .calendar-table td:hover {
+    background: #1e5e5e;
+    z-index: 1;
+  }
+  /* First column hover - only apply when not locked */
+  .calendar-table td:first-child:not(.column-locked):hover {
+    width: 88px !important;
+    max-width: 88px !important;
+    background: #1e5e5e !important;
+  }
+
+  .editable-cell select:hover {
+    border-color: #27bebe;
+  }
+  .lock-column-button:active svg {
+    transform: scale(0.9);
+  }
+  .lock-column-button:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+}
+.lock-column-button svg {
+  transition: transform 0.3s ease;
+}
+
 .editable-cell select {
   border: 1px solid #1e5e5e;
   background: #0a3c3c;
   color: var(--color-text);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-.editable-cell select:hover {
-  border-color: #27bebe;
 }
 
 .editable-cell select:focus {
