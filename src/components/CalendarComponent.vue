@@ -23,7 +23,6 @@
         <div
           v-for="(day, index) in monthDays"
           :key="index"
-          class="day-column"
           :class="{ 'today-column': isToday(day.date) }"
           @dragover.prevent
           @drop="handleDrop(day.date, 'day')"
@@ -482,7 +481,7 @@ export default {
           if (todayIndex !== -1 && this.scrollContainer) {
             // Get the column width (including margins)
             const columnWidth =
-              (document.querySelector(".day-column") as HTMLElement)
+              (document.querySelector(".day-cell") as HTMLElement)
                 ?.offsetWidth || 0;
             const containerWidth = this.scrollContainer.offsetWidth;
 
@@ -606,18 +605,19 @@ export default {
   color: var(--color-text);
 }
 
-.day-column {
-  scroll-snap-align: center;
-  margin: 0 1px 0 0;
-}
-
 .day-cell {
   border: 1px solid var(--glass-border-color);
-  padding: 1ch 1ch 1ch 0.5ch;
+  padding: 1ch 1ch 1ch 0.64ch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
   width: var(--width-day-cell);
   background-color: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  margin: 0 1px 0 0;
+  scroll-snap-align: center;
 }
 
 .day-date {
