@@ -241,21 +241,46 @@ button:disabled {
 	cursor: not-allowed;
 	opacity: 0.6;
 }
+
+.top-right-buttons svg,
+button svg {
+	pointer-events: none;
+}
 /* Fix for sticky :active state on mobile */
 @media (hover: none) {
-	.top-right-buttons:active,
-	button:active {
-		/* Reset active state immediately after touch */
+	.buttonRefresh:active,
+	.compact-toggle:active,
+	.buttonRefresh.active,
+	.compact-toggle.active,
+	.top-right-buttons:focus,
+	button[aria-label="Odśwież harmonogram"]:active,
+	button.buttonRefresh:active {
+		/* Forcefully reset all possible states */
 		transform: none !important;
 		background-color: var(--glass-bg-color) !important;
 		border-color: var(--glass-border-color) !important;
 		box-shadow: var(--glass-box-shadow) !important;
+		opacity: 1 !important;
+		filter: none !important;
+		-webkit-filter: none !important;
+	}
+	/* Reset SVG transforms inside buttons */
+	.buttonRefresh:active svg,
+	.compact-toggle:active svg,
+	.top-right-buttons:active svg {
+		transform: none !important;
+		transition: none !important;
 	}
 
 	/* Disable tap highlight color on iOS */
 	.top-right-buttons,
 	button {
 		-webkit-tap-highlight-color: transparent;
+	}
+
+	/* Prevent touch highlight & long press context menu */
+	* {
+		-webkit-touch-callout: none;
 	}
 
 	/* Apply a brief animation instead for touch feedback */
