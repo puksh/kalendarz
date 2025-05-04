@@ -123,7 +123,24 @@ button:disabled {
 .sob-color {
 	background-color: rgba(10, 88, 10, 0.35) !important;
 }
+/* Holiday styling - similar to Sunday but with reddish tint */
+.holiday-color {
+	background-color: rgba(255, 0, 0, 0.15) !important;
+	position: relative;
+}
 
+.calendar-table td.holiday-color {
+	background-color: rgba(255, 0, 0, 0.12) !important;
+}
+
+.calendar-table tr:nth-child(even) td.holiday-color {
+	background-color: rgba(255, 0, 0, 0.15) !important;
+}
+
+/* If it's both a Sunday and a holiday, make Sunday styling take precedence */
+.nd-color.holiday-color::after {
+	color: #ff9999;
+}
 /*Edit Mode Toggle */
 
 .compact-toggle {

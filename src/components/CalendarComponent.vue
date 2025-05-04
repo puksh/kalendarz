@@ -34,8 +34,10 @@
                 'current-month': day.isCurrentMonth,
                 'nd-color': daysOfWeek[day.date.getDay()] === 'Nd',
                 'sob-color': daysOfWeek[day.date.getDay()] === 'Sob',
+                'holiday-color': isHoliday(day.date).isHoliday,
                 today: isToday(day.date),
               }"
+              :title="isHoliday(day.date).name || ''"
             >
               <div class="day-header">
                 {{ daysOfWeek[day.date.getDay()] }}
@@ -179,6 +181,7 @@ import {
   checkShiftDataSync,
   resetSyncedChangesSessionStorage,
 } from "@/utils/dataSync.js";
+import { isPolishHoliday } from "@/utils/polishHolidays.ts";
 import NotificationMessage from "./NotificationMessage.vue";
 import { addNotification } from "./NotificationMessage.vue";
 export default {
@@ -544,6 +547,9 @@ export default {
         date.getMonth() === today.getMonth() &&
         date.getFullYear() === today.getFullYear()
       );
+    },
+    isHoliday(date) {
+      return isPolishHoliday(date);
     },
   },
 

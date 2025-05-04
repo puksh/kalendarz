@@ -51,10 +51,19 @@
                   daysOfWeek[
                     new Date(selectedYear, selectedMonth, day).getDay()
                   ] === 'Sob',
+                'holiday-color': isHoliday(
+                  new Date(selectedYear, selectedMonth, day),
+                ).isHoliday,
                 'today-column': isToday(
                   new Date(selectedYear, selectedMonth, day),
                 ),
               }"
+              :title="
+                isHoliday(new Date(selectedYear, selectedMonth, day)).name || ''
+              "
+              :aria-label="
+                isHoliday(new Date(selectedYear, selectedMonth, day)).name || ''
+              "
             >
               {{ day }}
             </th>
@@ -83,6 +92,9 @@
                   daysOfWeek[
                     new Date(selectedYear, selectedMonth, day).getDay()
                   ] === 'Sob',
+                'holiday-color': isHoliday(
+                  new Date(selectedYear, selectedMonth, day),
+                ).isHoliday,
                 today: isToday(new Date(selectedYear, selectedMonth, day)),
               }"
               @click="editCell(person.id, day)"
@@ -122,6 +134,7 @@ import {
   checkShiftDataSync,
   resetSyncedChangesSessionStorage,
 } from "@/utils/dataSync.ts";
+import { isPolishHoliday } from "@/utils/polishHolidays.ts";
 
 export default {
   name: "SpreadsheetView",
@@ -541,6 +554,9 @@ export default {
           }
         });
       });
+    },
+    isHoliday(date) {
+      return isPolishHoliday(date);
     },
   },
   mounted() {
