@@ -31,7 +31,9 @@ export async function fetchServerShiftData(
 export async function checkShiftDataSync(generateMonthDays) {
   try {
     // Fetch latest data from server
-    const remoteData = await fetchServerShiftData();
+    const remoteData = await fetchServerShiftData(() => {
+      console.log("Callback executed after fetching server shift data.");
+    });
     if (!remoteData) return null;
 
     // Get all localStorage keys except settings
