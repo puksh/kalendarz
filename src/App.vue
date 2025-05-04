@@ -91,7 +91,6 @@
         :currentPage="currentPage"
       />
       <ButtonImport
-        v-if="currentPage === 'ExcelComponent'"
         :isEditingMode="isEditingMode"
         :people="people"
         :monthDays="monthDays"
@@ -392,7 +391,10 @@ export default {
       }
     },
     handleImportedCells(importedCellKeys) {
-      // You can pass this to ExcelComponent if needed for styling
+      if (!this.ExcelComponent) {
+        console.error("ExcelComponent is not loaded yet.");
+        return;
+      }
       this.$refs.excelComponent.importedCells = new Set(importedCellKeys);
     },
   },

@@ -1,7 +1,10 @@
 <template>
   <button
-    v-if="currentPage === 'ExcelComponent'"
     class="export-button top-right-buttons"
+    :class="{
+      'excel-position': currentPage === 'ExcelComponent',
+      'calendar-position': currentPage === 'CalendarComponent',
+    }"
     @click="exportToCsv"
     title="Eksportuj do CSV"
     aria-label="Eksportuj harmonogram do pliku CSV"
@@ -153,13 +156,18 @@ export default {
 .export-button {
   position: relative;
   top: 12px;
-  left: 132px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 10px;
 }
+.excel-position {
+  left: 132px;
+}
 
+.calendar-position {
+  left: 108px;
+}
 .export-icon {
   transition: transform 0.2s ease;
 }

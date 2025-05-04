@@ -3,7 +3,8 @@
     class="top-right-buttons import-button"
     @click="showImportModal"
     :disabled="!isEditingMode"
-    title="Import data from CSV or Excel"
+    title="Importuj dane do CSV lub Excel"
+    aria-label="Importuj dane do CSV lub Excel"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
