@@ -30,7 +30,7 @@
       @change-month="handleMonthChange"
       @discard-changes="discardChanges"
     />
-    <section>
+    <section class="top-right-buttons-container">
       <button
         class="top-right-buttons buttonRefresh"
         @click="checkShiftDataSync()"
@@ -89,6 +89,14 @@
         :selectedMonth="selectedMonth"
         :selectedYear="selectedYear"
         :currentPage="currentPage"
+      />
+      <ButtonImport
+        v-if="currentPage === 'ExcelComponent'"
+        :isEditingMode="isEditingMode"
+        :people="people"
+        :monthDays="monthDays"
+        @has-changes="updateUnsavedChanges"
+        @cells-imported="handleImportedCells"
       />
     </section>
     <main class="main-content">
@@ -167,6 +175,7 @@ import { checkShiftDataSync } from "@/utils/dataSync.js";
 import { addNotification } from "./components/NotificationMessage.vue";
 import RefreshIcon from "./components/icons/RefreshIcon.vue";
 import ButtonExport from "./components/ButtonExport.vue";
+import ButtonImport from "./components/ButtonImport.vue";
 
 export default {
   name: "VueCalendar",
@@ -188,6 +197,7 @@ export default {
     ),
     RefreshIcon,
     ButtonExport,
+    ButtonImport,
   },
   data() {
     return {
@@ -301,12 +311,9 @@ export default {
       this.isRefreshing = true;
 
       try {
-        // Add a timeout to the sync operation
         const syncPromise = checkShiftDataSync(() =>
           this.generateCurrentView(),
         );
-
-        // Race the sync promise against a timeout
         this.syncedChanges = await Promise.race([
           syncPromise,
           new Promise((_, reject) =>
@@ -384,26 +391,9 @@ export default {
         return defaultValue;
       }
     },
-    refreshData() {
-      this.isRefreshing = true;
-
-      // Wait a moment to allow the UI to update
-      setTimeout(() => {
-        // Force refresh of calendar data
-        if (this.$refs.excelComponent) {
-          if (typeof this.$refs.excelComponent.fetchData === "function") {
-            this.$refs.excelComponent.fetchData();
-          }
-
-          if (
-            typeof this.$refs.excelComponent.generateMonthDays === "function"
-          ) {
-            this.$refs.excelComponent.generateMonthDays();
-          }
-        }
-
-        this.isRefreshing = false;
-      }, 300);
+    handleImportedCells(importedCellKeys) {
+      // You can pass this to ExcelComponent if needed for styling
+      this.$refs.excelComponent.importedCells = new Set(importedCellKeys);
     },
   },
   async mounted() {

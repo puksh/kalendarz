@@ -90,7 +90,10 @@
               :title="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
               role="gridcell"
             >
-              <span v-if="!isEditingMode || !isEditing(person.id, day)">
+              <span
+                v-if="!isEditingMode || !isEditing(person.id, day)"
+                :class="{ 'imported-cell': isImportedCell(person.id, day) }"
+              >
                 {{ getShiftForPersonAndDay(person.id, day) || "" }}
               </span>
               <select
@@ -153,6 +156,7 @@ export default {
       madeChanges: false,
       scrollContainer: null,
       isFirstColumnLocked: false,
+      importedCells: new Set(),
     };
   },
   computed: {
@@ -518,6 +522,9 @@ export default {
         date.getFullYear() === today.getFullYear()
       );
     },
+    isImportedCell(personId, day) {
+      return this.importedCells.has(`${personId}-${day}`);
+    },
     toggleColumnsLocked() {
       this.isFirstColumnLocked = !this.isFirstColumnLocked;
 
@@ -700,6 +707,10 @@ export default {
   text-decoration: underline;
 }
 
+.imported-cell {
+  color: var(--color-user-changed);
+  font-style: italic;
+}
 /* Ensure styling works in both odd and even rows */
 .calendar-table tr:nth-child(even) td .imported-cell {
   color: var(--color-user-changed);
