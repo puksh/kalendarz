@@ -376,9 +376,6 @@ export default {
       for (let i = 1; i <= 31; i++) {
         const date = new Date(year, month, i).toDateString();
 
-        // Skip if the date is in syncedChanges
-        if (this.syncedChanges[date]) continue;
-
         const savedStates = localStorage.getItem(date);
         if (savedStates) {
           try {
