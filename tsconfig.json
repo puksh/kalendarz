@@ -5,13 +5,11 @@
 		"module": "ESNext",
 		"moduleResolution": "Node",
 		"strict": false, // change l8r
-		//"strict": true,
 		"jsx": "preserve",
 		"sourceMap": true,
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"esModuleInterop": true,
-		//"allowJs": true,
 		"skipLibCheck": true,
 		"lib": ["ESNext", "DOM"],
 		"baseUrl": ".",

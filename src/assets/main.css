@@ -12,7 +12,6 @@
 	--color-button-disabled-bg: #ccc;
 	--color-label-bg: #e0e0e0;
 	--color-user-changed: yellow;
-	--color-synced-changed: greenyellow;
 
 	/* Font Sizes */
 	--font-size-small: 0.8em;
@@ -61,6 +60,10 @@ body {
 	width: 100%;
 }
 
+button:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
 .scrollable-container {
 	overflow-x: scroll;
 }
@@ -75,8 +78,8 @@ body {
 	border: none;
 	position: fixed !important;
 	z-index: 1000;
-	height: 44px;
-	width: 44px;
+	height: 36px;
+	width: 36px;
 	color: var(--color-text);
 	background-color: var(--glass-bg-color);
 	backdrop-filter: blur(var(--glass-blur));
@@ -96,8 +99,8 @@ body {
 	transition: transform 0.2s ease;
 }
 .buttonRefresh {
-	top: 8px;
-	right: 4px;
+	top: 12px;
+	right: 8px;
 }
 .buttonRefresh svg {
 	margin-top: 4px;
@@ -109,9 +112,6 @@ body {
 }
 .night {
 	background-color: var(--color-night);
-}
-.synced-changed {
-	color: var(--color-synced-changed) !important; /* Highlight server-synced changes */
 }
 .scrollable-container {
 	scroll-snap-type: x mandatory;
@@ -128,12 +128,12 @@ body {
 
 .compact-toggle {
 	display: inline-block;
-	width: 64px;
-	height: 44px;
+	width: 36px;
+	height: 36px;
 	z-index: 1000;
-	top: 8px;
-	right: 56px;
-	border-radius: 20px;
+	top: 12px;
+	right: 96px;
+	border-radius: 50%;
 }
 
 .compact-toggle input {
@@ -150,7 +150,7 @@ body {
 	right: 0;
 	bottom: 0;
 	transition: 0.2s;
-	border-radius: 20px;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -208,15 +208,6 @@ body {
 	box-shadow: var(--glass-box-shadow);
 	padding: var(--spacing-medium);
 	text-align: center;
-}
-.shift-slot[clickable="true"] {
-	cursor: pointer;
-}
-
-/* Improve visibility of disabled state */
-button:disabled {
-	cursor: not-allowed;
-	opacity: 0.6;
 }
 
 .top-right-buttons svg,

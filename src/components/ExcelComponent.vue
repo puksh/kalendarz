@@ -506,9 +506,9 @@ export default {
       }
 
       this.localData = {};
+      this.editedShifts = {};
       this.madeChanges = false;
       this.$emit("has-changes", this.madeChanges);
-      this.editedShifts = {};
     },
     isToday(date: Date) {
       const today = new Date();
@@ -698,5 +698,10 @@ export default {
 
 .calendar-table th.today-column {
   text-decoration: underline;
+}
+
+/* Ensure styling works in both odd and even rows */
+.calendar-table tr:nth-child(even) td .imported-cell {
+  color: var(--color-user-changed);
 }
 </style>

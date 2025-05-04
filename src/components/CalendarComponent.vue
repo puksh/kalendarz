@@ -49,8 +49,6 @@
                 <div
                   class="shift-slot day"
                   :class="{
-                    'synced-changed':
-                      syncedChanges[day.date.toDateString()]?.dayShift1,
                     ratownik: day.dayShift1Ratownik === true,
                     pielegniarka: day.dayShift1Ratownik === false,
                     userChanged: day.dayShift1UserChanged === true,
@@ -81,8 +79,6 @@
                 <div
                   class="shift-slot day"
                   :class="{
-                    'synced-changed':
-                      syncedChanges[day.date.toDateString()]?.dayShift2,
                     ratownik: day.dayShift2Ratownik === true,
                     pielegniarka: day.dayShift2Ratownik === false,
                     userChanged: day.dayShift2UserChanged === true,
@@ -112,8 +108,6 @@
                 <div
                   class="shift-slot night"
                   :class="{
-                    'synced-changed':
-                      syncedChanges[day.date.toDateString()]?.nightShift1,
                     ratownik: day.nightShift1Ratownik === true,
                     pielegniarka: day.nightShift1Ratownik === false,
                     userChanged: day.nightShift1UserChanged === true,
@@ -143,8 +137,6 @@
                 <div
                   class="shift-slot night"
                   :class="{
-                    'synced-changed':
-                      syncedChanges[day.date.toDateString()]?.nightShift2,
                     ratownik: day.nightShift2Ratownik === true,
                     pielegniarka: day.nightShift2Ratownik === false,
                     userChanged: day.nightShift2UserChanged === true,
@@ -633,6 +625,9 @@ export default {
   filter: saturate(0.3) opacity(0.7);
   border: 2px solid var(--color-empty-slot) !important;
   font-weight: 600;
+}
+.shift-slot[clickable="true"] {
+  cursor: pointer;
 }
 .empty-slot {
   color: var(--color-text);

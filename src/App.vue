@@ -357,6 +357,9 @@ export default {
       // Directly update the state instead of emitting an event
       this.updateEditingMode(newMode);
     },
+    enableEditingMode() {
+      this.isEditingMode = true;
+    },
     updateMonthDays(days) {
       this.monthDays = days;
     },
@@ -380,6 +383,27 @@ export default {
         console.warn(`Error reading ${key} from localStorage:`, e);
         return defaultValue;
       }
+    },
+    refreshData() {
+      this.isRefreshing = true;
+
+      // Wait a moment to allow the UI to update
+      setTimeout(() => {
+        // Force refresh of calendar data
+        if (this.$refs.excelComponent) {
+          if (typeof this.$refs.excelComponent.fetchData === "function") {
+            this.$refs.excelComponent.fetchData();
+          }
+
+          if (
+            typeof this.$refs.excelComponent.generateMonthDays === "function"
+          ) {
+            this.$refs.excelComponent.generateMonthDays();
+          }
+        }
+
+        this.isRefreshing = false;
+      }, 300);
     },
   },
   async mounted() {

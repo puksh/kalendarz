@@ -152,7 +152,7 @@ export default {
 <style scoped>
 .export-button {
   position: relative;
-  top: 8px;
+  top: 12px;
   left: 132px;
   display: flex;
   align-items: center;
