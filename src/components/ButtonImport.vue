@@ -330,22 +330,28 @@ export default {
 
     async parseExcelFile(file) {
       try {
-        const XLSX = await import("xlsx");
+        const ExcelJS = await import("exceljs");
+        const workbook = new ExcelJS.Workbook();
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
+        reader.onload = async (e) => {
+          const buffer = e.target.result;
+          await workbook.xlsx.load(buffer);
 
           // Get the first worksheet
-          const worksheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[worksheetName];
+          const worksheet = workbook.getWorksheet(1);
 
-          // Convert to CSV
-          const csvData = XLSX.utils.sheet_to_csv(worksheet);
+          // Convert to CSV format
+          let csvData = "";
+          worksheet.eachRow((row, rowNumber) => {
+            const rowValues = row.values.slice(1); // Remove the first undefined value
+            csvData += rowValues.join(",") + "\n";
+          });
+
           this.pastedData = csvData;
           this.parseImportedData();
         };
+
         reader.readAsArrayBuffer(file);
       } catch (error) {
         console.error("Error parsing Excel file:", error);
