@@ -17,6 +17,8 @@ jobs:
     env:
       VITE_AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       VITE_AUTH_SALT: ${{ secrets.AUTH_SALT }}
+      VITE_PDF_HEADER_TEXT: ${{ secrets.PDF_HEADER_TEXT }}
+      VITE_PDF_SUBHEADER_TEMPLATE: ${{ secrets.PDF_SUBHEADER_TEMPLATE }}
 
     steps:
       - name: Checkout repository
