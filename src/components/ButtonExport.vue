@@ -566,12 +566,12 @@ export default {
           }
         }
 
-        // Rest of your Excel export code...
         // Auto-size columns
         worksheet.columns.forEach((column) => {
           column.width = 12;
         });
-        worksheet.getColumn(1).width = 20; // Make name column wider
+        worksheet.getColumn(1).width = 20; // Name column width
+        worksheet.getColumn(1).alignment = { horizontal: "left" }; // Align name column to the left
 
         // Generate Excel file
         const buffer = await workbook.xlsx.writeBuffer();
