@@ -152,7 +152,7 @@ export default {
   color: var(--color-text);
   padding: 12px 24px;
   border-radius: 8px;
-  z-index: 1000;
+  z-index: var(--z-index-top-bar);
   font-size: 16px;
 }
 </style>

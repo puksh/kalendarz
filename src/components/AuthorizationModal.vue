@@ -200,7 +200,7 @@ export default {
 <style scoped>
 .modal {
   position: fixed;
-  z-index: 1111;
+  z-index: var(--z-index-front);
   top: 0;
   left: 0;
   width: 100%;
