@@ -373,7 +373,9 @@ export default {
     flex-direction: column;
     gap: 10px;
   }
-
+  .shift-count-item {
+    text-align: center !important;
+  }
   .column {
     flex: none;
   }
@@ -384,6 +386,9 @@ export default {
   .shift-counts-window {
     width: 95vw;
     padding: 8px;
+  }
+  .shift-count-item {
+    text-align: center !important;
   }
 
   .shift-counts-window.show-salaries {
