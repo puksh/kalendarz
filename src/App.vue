@@ -164,7 +164,9 @@
     </main>
   </div>
   <footer class="footer">
-    <p>© 2025 puksh - All rights reserved</p>
+    <a href="https://github.com/puksh/kalendar"
+      >© 2025 puksh - All rights reserved</a
+    >
   </footer>
 </template>
 
@@ -492,13 +494,15 @@ export default {
   line-height: 0.8ch;
 }
 
-.footer p {
+.footer a {
   margin: 2px;
   opacity: 0.8;
+  text-decoration: none;
+  color: var(--color-text);
   transition: opacity 0.2s ease;
 }
 
-.footer p:hover {
+.footer a:hover {
   opacity: 1;
 }
 .refresh-overlay {
