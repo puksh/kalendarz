@@ -286,7 +286,7 @@ export default {
 }
 
 .shift-counts-window {
-  width: max(350px);
+  width: max(390px);
   display: flex;
   flex-direction: column;
   align-items: center;
