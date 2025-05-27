@@ -8,6 +8,7 @@
       @authorized="handleAuthorization"
       aria-label="Zapisz zmiany"
       title="Zapisz zmiany w harmonogramie"
+      mode="save"
     />
     <button
       :disabled="!hasUnsavedChanges"
@@ -492,6 +493,7 @@ export default {
   color: var(--color-text, #e0e0e0);
   font-size: 12px;
   line-height: 0.8ch;
+  z-index: var(--z-index-footer, 1000);
 }
 
 .footer a {
@@ -514,7 +516,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9000;
+  z-index: var(--z-index-refresh-overlay, 1000);
   pointer-events: none; /* Allow clicks to pass through */
   background-color: rgba(0, 0, 0, 0.5);
 }

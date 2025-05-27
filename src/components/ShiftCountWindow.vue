@@ -1,31 +1,122 @@
 <template>
-  <section class="shift-counts-window">
+  <section
+    class="shift-counts-window"
+    :class="{ 'show-salaries': showSalaries }"
+  >
     <h3 style="margin: 8px">Ilość zmian</h3>
-    <div style="display: flex; flex-direction: row">
-      <div style="display: flex; flex-direction: column">
+
+    <!-- Toggle button for salary view -->
+    <button
+      @click="toggleSalaryView"
+      class="salary-toggle-btn"
+      :class="{ active: showSalaries }"
+    >
+      <svg
+        class="dollar-icon"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          x="2"
+          y="7"
+          width="20"
+          height="10"
+          rx="2"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+        <path
+          d="M12 10.5V13.5M10.5 12H13.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </svg>
+      {{ showSalaries ? "Ukryj wynagrodzenia" : "Pokaż wynagrodzenia" }}
+    </button>
+
+    <Teleport to="body">
+      <component
+        v-if="AuthorizationModal && showPasswordModal"
+        :is="AuthorizationModal"
+        :show="showPasswordModal"
+        @close="showPasswordModal = false"
+        @authorized="handleSalaryAuthorization"
+        aria-label="Autoryzuj dostęp do wynagrodzeń"
+        title="Wprowadź hasło aby zobaczyć wynagrodzenia"
+        mode="salary"
+      />
+    </Teleport>
+
+    <div class="columns-container">
+      <div class="column">
         <h4 style="margin: 8px">Ratowniczki/cy</h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => p.ratownik)"
             :key="person.id"
+            class="shift-count-item"
           >
             {{ person.name }}:
             <strong>{{ person.shiftCount || 0 }}</strong>
+            <span v-if="showSalaries" class="salary-info">
+              |
+              {{
+                formatCurrency(calculateBrutto(person.shiftCount || 0, true))
+              }}
+              zł brutto
+            </span>
           </li>
         </ul>
       </div>
-      <div style="display: flex; flex-direction: column">
+      <div class="column">
         <h4 style="margin: 8px">Pielęgniarki/rze</h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => !p.ratownik)"
             v-bind:key="person.id"
+            class="shift-count-item"
           >
             {{ person.name }}:
             <strong>{{ person.shiftCount || 0 }}</strong>
+            <span v-if="showSalaries" class="salary-info">
+              |
+              {{
+                formatCurrency(calculateBrutto(person.shiftCount || 0, true))
+              }}
+              zł brutto
+            </span>
           </li>
         </ul>
       </div>
+    </div>
+
+    <!-- Total summary when salaries are shown -->
+    <div v-if="showSalaries" class="salary-summary">
+      <h4>Podsumowanie miesięczne:</h4>
+      <p>
+        <strong
+          >Ratownicy łącznie: {{ formatCurrency(getTotalSalary(true)) }} zł
+          netto</strong
+        >
+      </p>
+      <p>
+        <strong
+          >Pielęgniarki łącznie: {{ formatCurrency(getTotalSalary(false)) }} zł
+          netto</strong
+        >
+      </p>
+      <p class="total-all">
+        <strong
+          >SUMA CAŁKOWITA:
+          {{ formatCurrency(getTotalSalary(true) + getTotalSalary(false)) }} zł
+          netto</strong
+        >
+      </p>
     </div>
   </section>
 </template>
@@ -47,6 +138,28 @@ export default {
       type: Array,
       required: true,
     },
+  },
+  data() {
+    return {
+      showSalaries: false,
+      showPasswordModal: false,
+      AuthorizationModal: null,
+      salaryRates: {
+        ratownik: 70,
+        nurse: 107,
+      },
+    };
+  },
+  async mounted() {
+    this.calculateAllShiftCounts();
+
+    // Dynamically import AuthorizationModal
+    try {
+      const module = await import("./AuthorizationModal.vue");
+      this.AuthorizationModal = module.default;
+    } catch (error) {
+      console.error("Failed to load AuthorizationModal:", error);
+    }
   },
   methods: {
     countShiftsForPerson(personId) {
@@ -74,16 +187,62 @@ export default {
         person.shiftCount = this.countShiftsForPerson(person.id);
       });
     },
+    calculateBrutto(totalShifts: number, isRatownik: boolean): number {
+      if (!this.showSalaries) return 0;
+
+      const personId = this.people.find(
+        (p) => p.shiftCount === totalShifts,
+      )?.id;
+      const shifts = this.countShiftsForPerson(personId);
+
+      let grossTotal = 0;
+
+      if (isRatownik) {
+        grossTotal = shifts * 12 * this.salaryRates.ratownik;
+      } else {
+        grossTotal = shifts * 12 * this.salaryRates.nurse;
+      }
+
+      return grossTotal;
+    },
+    getTotalSalary(isRatownik: boolean): number {
+      return this.people
+        .filter((p) => p.ratownik === isRatownik)
+        .reduce(
+          (total, person) =>
+            total + this.calculateBrutto(person.shiftCount || 0, isRatownik),
+          0,
+        );
+    },
+    formatCurrency(amount) {
+      return new Intl.NumberFormat("pl-PL", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      }).format(amount);
+    },
+
+    toggleSalaryView() {
+      if (!this.showSalaries) {
+        // Show password modal to authorize
+        this.showPasswordModal = true;
+      } else {
+        // Hide salaries immediately
+        this.showSalaries = false;
+      }
+    },
+
+    handleSalaryAuthorization() {
+      this.showSalaries = true;
+      this.showPasswordModal = false;
+    },
   },
-  mounted() {
-    this.calculateAllShiftCounts();
-  },
+
   watch: {
     monthDays: {
       handler() {
-        this.calculateAllShiftCounts(); // Recalculate shift counts when monthDays changes
+        this.calculateAllShiftCounts();
       },
-      deep: true, // Watch for deep changes in the monthDays array
+      deep: true,
     },
   },
 };
@@ -94,10 +253,38 @@ export default {
   flex-wrap: wrap;
   font-size: 16px;
   line-height: 2.4ch;
-  margin: 0 0 10px 0;
+  padding: 0;
+  margin: 0 0 8px 0;
   list-style: none;
   color: var(--color-text);
 }
+
+.shift-count-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  padding: 2px 4px;
+  margin-bottom: 0px;
+}
+
+.shift-counts-window.show-salaries .shift-count-item {
+  font-size: clamp(0.7rem, 1.5vw, 1rem);
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .shift-count-item {
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+  }
+}
+
+@media (max-width: 400px) {
+  .shift-count-item {
+    font-size: clamp(0.6rem, 4vw, 0.8rem);
+  }
+}
+
 .shift-counts-window {
   width: max(350px);
   display: flex;
@@ -111,5 +298,96 @@ export default {
   border-radius: 8px;
   align-self: center;
   color: var(--color-text);
+  margin: 0;
+  padding: 0px;
+}
+
+.shift-counts-window.show-salaries {
+  width: clamp(520px, 80vw, 900px);
+}
+
+.salary-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px;
+  padding: 8px 16px;
+  background-color: var(--glass-bg-color);
+  border: 1px solid var(--glass-border-color) !important;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.salary-info {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.salary-summary {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.salary-summary h4 {
+  margin: 0 0 12px 0;
+  color: var(--color-text);
+}
+
+.salary-summary p {
+  margin: 8px 0;
+  color: var(--color-text);
+}
+
+.total-all {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 2px solid var(--color-success);
+  color: var(--color-success) !important;
+  font-size: 1.1em;
+}
+
+.columns-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+  padding: 0 8px;
+  min-width: 0;
+}
+@media (max-width: 768px) {
+  .columns-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .column {
+    flex: none;
+  }
+}
+
+/* Even smaller screens */
+@media (max-width: 500px) {
+  .shift-counts-window {
+    width: 95vw;
+    padding: 8px;
+  }
+
+  .shift-counts-window.show-salaries {
+    width: 95vw;
+  }
 }
 </style>

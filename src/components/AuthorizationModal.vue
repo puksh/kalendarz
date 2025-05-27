@@ -2,7 +2,13 @@
   <section v-if="show" class="modal">
     <div class="modal-content">
       <h3>Autoryzacja</h3>
-      <p>Wpisz hasło aby zapisać zmiany:</p>
+      <p>
+        {{
+          mode === "salary"
+            ? "Wpisz hasło aby wyświetlić wynagrodzenie:"
+            : "Wpisz hasło aby zapisać zmiany:"
+        }}
+      </p>
       <div class="input-container">
         <input
           :type="showPassword ? 'text' : 'password'"
@@ -55,7 +61,7 @@
           @click="authorize"
           :disabled="isAuthorizing"
         >
-          <span>{{ isAuthorizing ? "Weryfikacja..." : "Zapisz" }}</span>
+          <span>{{ getButtonText() }}</span>
           <span v-if="isAuthorizing" class="spinner"></span>
         </button>
         <button
@@ -81,6 +87,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    mode: {
+      type: String,
+      default: "save", // 'save' or 'salary'
+      validator: (value: string) => ["save", "salary"].includes(value),
+    },
   },
   emits: ["close", "authorized"],
   components: {
@@ -94,83 +105,110 @@ export default {
     };
   },
   methods: {
+    getButtonText() {
+      if (this.isAuthorizing) {
+        return "Weryfikacja...";
+      }
+      return this.mode === "salary"
+        ? "Wyświetl wynagrodzenie"
+        : "Zapisz zmiany";
+    },
+
     async authorize() {
       if (this.isAuthorizing) return;
       this.isAuthorizing = true;
       this.showPassword = false;
 
       try {
-        // Password verification
-        const PBKDF2 = await import("crypto-js/pbkdf2");
-        const salt = import.meta.env.VITE_AUTH_SALT.toString();
+        const isValidPassword = await this.verifyPassword();
 
-        const iterations = 100000;
-        const keySize = 256 / 32;
-        const derivedKey = PBKDF2.default(this.password, salt, {
-          keySize: keySize,
-          iterations: iterations,
-        }).toString();
-
-        const storedHash = import.meta.env.VITE_AUTH_PASSWORD;
-
-        if (derivedKey !== storedHash) {
+        if (!isValidPassword) {
           addNotification("Nieprawidłowe hasło", "red");
           this.password = "";
-          this.isAuthorizing = false;
           return;
         }
 
-        // Collect all data from localStorage except isEditingMode
-        const collectedData = {};
-
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key !== "isEditingMode" && key !== "currentPage") {
-            try {
-              collectedData[key] = JSON.parse(localStorage.getItem(key));
-            } catch {}
-          }
+        if (this.mode === "salary") {
+          this.handleSalaryMode();
+        } else {
+          await this.handleSaveMode();
         }
-
-        if (Object.keys(collectedData).length === 0) {
-          addNotification("Brak zmian do zapisania", "yellow");
-          this.isAuthorizing = false;
-          return;
-        }
-
-        // Encode and send to server
-        const jsonString = JSON.stringify(collectedData);
-        const blob = new Blob([jsonString], { type: "application/json" });
-        const reader = new FileReader();
-
-        const base64Data = await new Promise((resolve, reject) => {
-          reader.onloadend = () =>
-            resolve(reader.result.toString().split(",")[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-
-        const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key: "shiftData",
-            value: base64Data,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-
-        addNotification("Zmiany zapisano pomyślnie!", "green");
-        this.$emit("authorized");
-        this.closeModal();
       } catch (error) {
         console.error(error);
-        addNotification("Nie udało się zaktualizować danych", "red");
+        addNotification("Wystąpił błąd podczas autoryzacji", "red");
       } finally {
         this.isAuthorizing = false;
+      }
+    },
+
+    async verifyPassword() {
+      const PBKDF2 = await import("crypto-js/pbkdf2");
+      const salt = import.meta.env.VITE_AUTH_SALT.toString();
+      const iterations = 100000;
+      const keySize = 256 / 32;
+
+      const derivedKey = PBKDF2.default(this.password, salt, {
+        keySize: keySize,
+        iterations: iterations,
+      }).toString();
+
+      const storedHash = import.meta.env.VITE_AUTH_PASSWORD;
+      return derivedKey === storedHash;
+    },
+
+    handleSalaryMode() {
+      addNotification("Dostęp przyznany", "green");
+      this.$emit("authorized");
+      this.closeModal();
+    },
+
+    async handleSaveMode() {
+      const dataToSave = this.collectLocalStorageData();
+
+      if (Object.keys(dataToSave).length === 0) {
+        addNotification("Brak zmian do zapisania", "yellow");
+        return;
+      }
+
+      await this.saveDataToServer(dataToSave);
+      addNotification("Zmiany zapisano pomyślnie!", "green");
+      this.$emit("authorized");
+      this.closeModal();
+    },
+
+    collectLocalStorageData() {
+      const collectedData = {};
+      const excludedKeys = ["isEditingMode", "currentPage"];
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && !excludedKeys.includes(key)) {
+          try {
+            collectedData[key] = JSON.parse(localStorage.getItem(key));
+          } catch {
+            // Skip invalid JSON
+          }
+        }
+      }
+
+      return collectedData;
+    },
+
+    async saveDataToServer(data) {
+      const jsonString = JSON.stringify(data);
+      const base64Data = btoa(jsonString);
+
+      const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "shiftData",
+          value: base64Data,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
       }
     },
 
@@ -184,6 +222,7 @@ export default {
         this.closeModal();
       }
     },
+
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
@@ -200,7 +239,7 @@ export default {
 <style scoped>
 .modal {
   position: fixed;
-  z-index: var(--z-index-front);
+  z-index: var(--z-index-modal);
   top: 0;
   left: 0;
   width: 100%;
@@ -216,6 +255,7 @@ export default {
 .modal-content {
   background-color: var(--glass-bg-color, rgba(255, 255, 255, 0.15));
   backdrop-filter: blur(var(--glass-blur, 12px));
+  z-index: var(--z-index-modal) + 1;
   -webkit-backdrop-filter: blur(var(--glass-blur, 12px));
   border: 1px solid var(--glass-border-color, rgba(255, 255, 255, 0.2));
   box-shadow: var(--glass-box-shadow, 0 4px 30px rgba(0, 0, 0, 0.1));
