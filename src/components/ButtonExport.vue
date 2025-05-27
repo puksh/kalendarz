@@ -729,7 +729,7 @@ export default {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   width: 180px;
-  z-index: 9999;
+  z-index: var(--z-index-front);
   overflow: hidden;
   animation: stretchFromTop 0.25s ease;
   transform-origin: top center;

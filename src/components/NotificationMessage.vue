@@ -61,7 +61,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  z-index: 2000;
+  z-index: var(--z-index-top-bar);
   gap: 6px;
   max-width: 90%;
   width: 280px;

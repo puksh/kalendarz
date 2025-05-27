@@ -68,7 +68,6 @@ export default {
   position: absolute;
   left: 10px;
   top: 12px;
-  z-index: 1001;
 }
 
 /* Sidebar button with glass effects */
@@ -90,6 +89,7 @@ export default {
   transition: all 0.3s ease;
   font-weight: bold;
   box-shadow: var(--glass-box-shadow);
+  z-index: var(--z-index-top-bar);
 }
 
 @media not all and (hover: none) {
