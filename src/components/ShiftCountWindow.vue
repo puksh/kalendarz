@@ -86,7 +86,7 @@
             <span v-if="showSalaries" class="salary-info">
               |
               {{
-                formatCurrency(calculateBrutto(person.shiftCount || 0, true))
+                formatCurrency(calculateBrutto(person.shiftCount || 0, false))
               }}
               zł brutto
             </span>
@@ -190,17 +190,12 @@ export default {
     calculateBrutto(totalShifts: number, isRatownik: boolean): number {
       if (!this.showSalaries) return 0;
 
-      const personId = this.people.find(
-        (p) => p.shiftCount === totalShifts,
-      )?.id;
-      const shifts = this.countShiftsForPerson(personId);
-
       let grossTotal = 0;
 
       if (isRatownik) {
-        grossTotal = shifts * 12 * this.salaryRates.ratownik;
+        grossTotal = totalShifts * 12 * this.salaryRates.ratownik;
       } else {
-        grossTotal = shifts * 12 * this.salaryRates.nurse;
+        grossTotal = totalShifts * 12 * this.salaryRates.nurse;
       }
 
       return grossTotal;
