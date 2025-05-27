@@ -66,7 +66,7 @@ export default {
 <style scoped>
 .sidebar {
   position: absolute;
-  left: 10px;
+  left: 4px;
   top: 12px;
 }
 
@@ -89,7 +89,7 @@ export default {
   transition: all 0.3s ease;
   font-weight: bold;
   box-shadow: var(--glass-box-shadow);
-  z-index: var(--z-index-top-bar);
+  z-index: var(--z-index-sidebar);
 }
 
 @media not all and (hover: none) {

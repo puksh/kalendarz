@@ -29,7 +29,14 @@
     </button>
 
     <!-- Export Menu -->
-    <div v-if="showExportMenu" class="export-menu">
+    <div
+      v-if="showExportMenu"
+      class="export-menu"
+      :class="{
+        'excel-position': currentPage === 'ExcelComponent',
+        'calendar-position': currentPage === 'CalendarComponent',
+      }"
+    >
       <button @click="exportToCsv" class="export-option">
         <svg
           width="16"
@@ -708,11 +715,11 @@ export default {
 }
 
 .excel-position {
-  left: 132px;
+  left: 128px;
 }
 
 .calendar-position {
-  left: 108px;
+  left: 102px;
 }
 
 .export-icon {
@@ -723,13 +730,12 @@ export default {
 .export-menu {
   position: absolute;
   top: calc(100% + 52px);
-  left: 108px;
   background-color: #0a3c3c;
   border: 1px solid #1e5e5e;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   width: 180px;
-  z-index: var(--z-index-front);
+  z-index: var(--z-index-modal);
   overflow: hidden;
   animation: stretchFromTop 0.25s ease;
   transform-origin: top center;

@@ -101,7 +101,7 @@ export default {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--glass-border-color);
   box-shadow: var(--glass-box-shadow);
-  z-index: 10;
+  z-index: var(--z-index-month-selector);
   height: 44px;
 }
 .monthChange span {

@@ -681,7 +681,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: var(--z-index-front);
+  z-index: var(--z-index-modal);
 }
 
 .mobile-warning {
