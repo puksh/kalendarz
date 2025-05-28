@@ -64,6 +64,7 @@
         >
           Ratowniczki/cy
           <p v-if="showSalaries" style="color: var(--color-success) !important">
+            |
             {{ salaryRates.ratownik }} / godz.
           </p>
         </h4>
@@ -94,6 +95,7 @@
         >
           Pielęgniarki/rze
           <p v-if="showSalaries" style="color: var(--color-success) !important">
+            |
             {{ salaryRates.nurse }} / godz.
           </p>
         </h4>
