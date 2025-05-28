@@ -622,8 +622,8 @@ export default {
     width 0.3s ease,
     max-width 0.3s ease,
     background-color 0.3s ease;
-  width: 24px;
-  max-width: 24px;
+  width: 40px;
+  max-width: 40px;
   overflow: hidden;
   text-overflow: ellipsis;
   z-index: 2;

@@ -1,13 +1,13 @@
 {
-	"name": "vuecalendar",
-	"version": "1.2.0",
+	"name": "@puksh/kalendarz",
+	"version": "1.2.1",
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"build": "vite build",
-		"preview": "vite preview",
-		"lint": "eslint . --fix"
+		"dev": "bun run vite",
+		"build": "bun run vite build",
+		"preview": "bun run vite preview",
+		"lint": "bun run eslint . --fix"
 	},
 	"dependencies": {
 		"vue": "^3.5.15"
@@ -16,7 +16,6 @@
 		"@eslint/js": "^9.27.0",
 		"@vitejs/plugin-vue": "^5.2.4",
 		"autoprefixer": "^10.4.21",
-		"crypto-js": "^4.2.0",
 		"eslint": "^9.27.0",
 		"eslint-plugin-prettier": "^5.4.0",
 		"eslint-plugin-vue": "^10.1.0",

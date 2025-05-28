@@ -2,16 +2,15 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "vuecalendar",
+      "name": "kalendarz",
       "dependencies": {
-        "vue": "^3.5.13",
+        "vue": "^3.5.15",
       },
       "devDependencies": {
-        "@eslint/js": "^9.26.0",
+        "@eslint/js": "^9.27.0",
         "@vitejs/plugin-vue": "^5.2.4",
         "autoprefixer": "^10.4.21",
-        "crypto-js": "^4.2.0",
-        "eslint": "^9.26.0",
+        "eslint": "^9.27.0",
         "eslint-plugin-prettier": "^5.4.0",
         "eslint-plugin-vue": "^10.1.0",
         "exceljs": "^4.4.0",
@@ -269,8 +268,6 @@
     "crc32-stream": ["crc32-stream@4.0.3", "", { "dependencies": { "crc-32": "^1.2.0", "readable-stream": "^3.4.0" } }, "sha512-NT7w2JVU7DFroFdYkeq8cywxrgjPHWkdX1wjpRQXPX5Asews3tA+Ght6lddQO5Mkumffp3X7GEqku3epj2toIw=="],
 
     "cross-spawn": ["cross-spawn@7.0.6", "", { "dependencies": { "path-key": "^3.1.0", "shebang-command": "^2.0.0", "which": "^2.0.1" } }, "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="],
-
-    "crypto-js": ["crypto-js@4.2.0", "", {}, "sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q=="],
 
     "css-line-break": ["css-line-break@2.1.0", "", { "dependencies": { "utrie": "^1.0.2" } }, "sha512-FHcKFCZcAha3LwfVBhCQbW2nCNbkZXn7KVUJcsT5/P8YmfsVja0FMPJr0B903j/E69HUphKiV9iQArX8SDYA4w=="],
 

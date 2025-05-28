@@ -142,18 +142,39 @@ export default {
     },
 
     async verifyPassword() {
-      const PBKDF2 = await import("crypto-js/pbkdf2");
-      const salt = import.meta.env.VITE_AUTH_SALT.toString();
+      const salt = new TextEncoder().encode(
+        import.meta.env.VITE_AUTH_SALT.toString(),
+      );
       const iterations = 100000;
-      const keySize = 256 / 32;
+      const keyLength = 32; // 256 bits
 
-      const derivedKey = PBKDF2.default(this.password, salt, {
-        keySize: keySize,
-        iterations: iterations,
-      }).toString();
+      const enc = new TextEncoder();
+      const passwordKey = await window.crypto.subtle.importKey(
+        "raw",
+        enc.encode(this.password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"],
+      );
+
+      const derivedBits = await window.crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: iterations,
+          hash: "SHA-256",
+        },
+        passwordKey,
+        keyLength * 8,
+      );
+
+      // Convert derivedBits to hex string
+      const derivedKeyHex = Array.from(new Uint8Array(derivedBits))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
 
       const storedHash = import.meta.env.VITE_AUTH_PASSWORD;
-      return derivedKey === storedHash;
+      return derivedKeyHex === storedHash;
     },
 
     handleSalaryMode() {

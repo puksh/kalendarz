@@ -1,0 +1,11 @@
+{
+	"name": "@puksh/kalendarz",
+	"version": "1.2.0",
+	"exports": {
+		".": "./src/main.ts",
+		"./components/*": "./src/components/*.vue"
+	},
+	"publish": {
+		"exclude": ["node_modules", ".git", "dist", "*.log"]
+	}
+}

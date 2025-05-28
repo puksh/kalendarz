@@ -1,0 +1,11 @@
+[install]
+# Prefer JSR packages
+registry = "https://jsr.io/"
+fallback = "https://registry.npmjs.org/"
+
+[install.scopes]
+# Use JSR for std packages
+"@std" = "https://jsr.io/"
+
+[build]
+target = "browser"
