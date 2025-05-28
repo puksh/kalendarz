@@ -54,7 +54,19 @@
 
     <div class="columns-container">
       <div class="column">
-        <h4 style="margin: 8px">Ratowniczki/cy</h4>
+        <h4
+          style="
+            margin: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          "
+        >
+          Ratowniczki/cy
+          <p v-if="showSalaries" style="color: var(--color-success) !important">
+            {{ salaryRates.ratownik }} / godz.
+          </p>
+        </h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => p.ratownik)"
@@ -65,16 +77,26 @@
             <strong>{{ person.shiftCount || 0 }}</strong>
             <span v-if="showSalaries" class="salary-info">
               |
-              {{
-                formatCurrency(calculateBrutto(person.shiftCount || 0, true))
-              }}
-              zł brutto
+              {{ formatCurrency(calculateNetto(person.shiftCount || 0, true)) }}
+              zł netto
             </span>
           </li>
         </ul>
       </div>
       <div class="column">
-        <h4 style="margin: 8px">Pielęgniarki/rze</h4>
+        <h4
+          style="
+            margin: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          "
+        >
+          Pielęgniarki/rze
+          <p v-if="showSalaries" style="color: var(--color-success) !important">
+            {{ salaryRates.nurse }} / godz.
+          </p>
+        </h4>
         <ul class="shift-counts">
           <li
             v-for="person in people.filter((p) => !p.ratownik)"
@@ -86,9 +108,9 @@
             <span v-if="showSalaries" class="salary-info">
               |
               {{
-                formatCurrency(calculateBrutto(person.shiftCount || 0, false))
+                formatCurrency(calculateNetto(person.shiftCount || 0, false))
               }}
-              zł brutto
+              zł netto
             </span>
           </li>
         </ul>
@@ -145,8 +167,8 @@ export default {
       showPasswordModal: false,
       AuthorizationModal: null,
       salaryRates: {
-        ratownik: 70,
-        nurse: 107,
+        ratownik: 90,
+        nurse: 97,
       },
     };
   },
@@ -187,7 +209,7 @@ export default {
         person.shiftCount = this.countShiftsForPerson(person.id);
       });
     },
-    calculateBrutto(totalShifts: number, isRatownik: boolean): number {
+    calculateNetto(totalShifts: number, isRatownik: boolean): number {
       if (!this.showSalaries) return 0;
 
       let grossTotal = 0;
@@ -205,7 +227,7 @@ export default {
         .filter((p) => p.ratownik === isRatownik)
         .reduce(
           (total, person) =>
-            total + this.calculateBrutto(person.shiftCount || 0, isRatownik),
+            total + this.calculateNetto(person.shiftCount || 0, isRatownik),
           0,
         );
     },
@@ -265,7 +287,6 @@ export default {
 
 .shift-counts-window.show-salaries .shift-count-item {
   font-size: clamp(0.7rem, 1.5vw, 1rem);
-  text-align: left;
 }
 
 @media (max-width: 600px) {
