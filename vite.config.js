@@ -33,7 +33,6 @@ export default defineConfig({
         // Code splitting
         manualChunks: {
           "vue-vendor": ["vue"],
-          "crypto-vendor": ["crypto-js"],
           utils: ["./src/utils/dataSync.js"],
         },
         // Disable automatic preloading
