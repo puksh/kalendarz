@@ -1,7 +1,5 @@
 [install]
-# Prefer JSR packages
-registry = "https://jsr.io/"
-fallback = "https://registry.npmjs.org/"
+registry = "https://registry.npmjs.org/"
 
 [install.scopes]
 # Use JSR for std packages
