@@ -326,7 +326,7 @@ export default {
         this.$emit("has-changes", true);
       }
     },
-    resolvePersonName(id) {
+    resolvePersonName(id: number) {
       const person = this.people.find((person) => person.id === id);
       return person
         ? { name: person.name, isRatownik: person.ratownik }

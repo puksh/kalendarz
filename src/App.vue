@@ -273,17 +273,11 @@ export default {
       }
     },
     handleMonthChange(delta) {
-      // Just handle the month change logic
-      this.selectedMonth += delta;
+      const currentDate = new Date(this.selectedYear, this.selectedMonth, 1);
+      currentDate.setMonth(currentDate.getMonth() + delta);
 
-      // Handle year change if needed
-      if (this.selectedMonth > 11) {
-        this.selectedMonth = 0;
-        this.selectedYear += 1;
-      } else if (this.selectedMonth < 0) {
-        this.selectedMonth = 11;
-        this.selectedYear -= 1;
-      }
+      this.selectedMonth = currentDate.getMonth();
+      this.selectedYear = currentDate.getFullYear();
     },
     discardChanges() {
       this.hasUnsavedChanges = false;

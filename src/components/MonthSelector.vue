@@ -59,7 +59,60 @@ export default {
         .toUpperCase();
     },
   },
+  mounted() {
+    // Add keyboard event listener when component mounts
+    document.addEventListener("keydown", this.handleKeyDown);
+  },
+  beforeUnmount() {
+    // Remove keyboard event listener when component unmounts
+    document.removeEventListener("keydown", this.handleKeyDown);
+  },
   methods: {
+    handleKeyDown(event) {
+      // Check if user is typing in an input field
+      const activeElement = document.activeElement;
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          (activeElement as HTMLElement).isContentEditable)
+      ) {
+        return; // Don't handle keyboard shortcuts when typing
+      }
+
+      switch (event.key) {
+        case "ArrowLeft":
+        case "<":
+          event.preventDefault();
+          this.handleMonthChange(-1);
+          break;
+        case "ArrowRight":
+        case ">":
+          event.preventDefault();
+          this.handleMonthChange(1);
+          break;
+        case "PageUp":
+          event.preventDefault();
+          this.handleMonthChange(-1);
+          break;
+        case "PageDown":
+          event.preventDefault();
+          this.handleMonthChange(1);
+          break;
+        case "ArrowUp":
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            this.handleMonthChange(12); // Previous year
+          }
+          break;
+        case "ArrowDown":
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            this.handleMonthChange(-12); // Next year
+          }
+          break;
+      }
+    },
     handleMonthChange(delta) {
       if (this.hasUnsavedChanges) {
         const confirmSwitch = confirm(
