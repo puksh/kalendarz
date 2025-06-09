@@ -12,11 +12,7 @@
               <button
                 class="lock-column-button"
                 @click="toggleColumnsLocked"
-                :title="
-                  isFirstColumnLocked
-                    ? 'Odblokuj szerokość'
-                    : 'Zablokuj szerokość'
-                "
+                :title="lockButtonTooltip"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -27,10 +23,7 @@
                   stroke="white"
                   stroke-width="2"
                 >
-                  <!-- Padlock body (always visible) -->
                   <rect x="7" y="11" width="10" height="10" rx="1" />
-
-                  <!-- Padlock shackle -->
                   <path
                     v-if="isFirstColumnLocked"
                     d="M12 3a4 4 0 0 0-4 4v4h8V7a4 4 0 0 0-4-4z"
@@ -42,28 +35,9 @@
             <th
               v-for="day in daysInMonth"
               :key="day"
-              :class="{
-                'nd-color':
-                  daysOfWeek[
-                    new Date(selectedYear, selectedMonth, day).getDay()
-                  ] === 'Nd',
-                'sob-color':
-                  daysOfWeek[
-                    new Date(selectedYear, selectedMonth, day).getDay()
-                  ] === 'Sob',
-                'holiday-color': isHoliday(
-                  new Date(selectedYear, selectedMonth, day),
-                ).isHoliday,
-                'today-column': isToday(
-                  new Date(selectedYear, selectedMonth, day),
-                ),
-              }"
-              :title="
-                isHoliday(new Date(selectedYear, selectedMonth, day)).name || ''
-              "
-              :aria-label="
-                isHoliday(new Date(selectedYear, selectedMonth, day)).name || ''
-              "
+              :class="getHeaderCellClasses(day)"
+              :title="getHolidayTooltip(day)"
+              :aria-label="getHolidayTooltip(day)"
             >
               {{ day }}
             </th>
@@ -71,52 +45,37 @@
         </thead>
         <tbody>
           <tr v-for="person in orderedPeople" :key="person.id">
-            <td
-              :class="{
-                ratownik: person.ratownik,
-                pielegniarka: !person.ratownik,
-              }"
-            >
+            <td :class="getPersonCellClasses(person)">
               {{ person.name }}
             </td>
             <td
               v-for="day in daysInMonth"
               :key="day"
               class="editable-cell"
-              :class="{
-                'nd-color':
-                  daysOfWeek[
-                    new Date(selectedYear, selectedMonth, day).getDay()
-                  ] === 'Nd',
-                'sob-color':
-                  daysOfWeek[
-                    new Date(selectedYear, selectedMonth, day).getDay()
-                  ] === 'Sob',
-                'holiday-color': isHoliday(
-                  new Date(selectedYear, selectedMonth, day),
-                ).isHoliday,
-                today: isToday(new Date(selectedYear, selectedMonth, day)),
-              }"
+              :class="getDataCellClasses(day)"
               @click="editCell(person.id, day)"
-              :aria-label="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
-              :title="isEditingMode ? 'Kliknij aby edytować zmianę' : ''"
+              :aria-label="editCellAriaLabel"
+              :title="editCellTitle"
               role="gridcell"
             >
               <span
                 v-if="!isEditingMode || !isEditing(person.id, day)"
                 :class="{ 'imported-cell': isImportedCell(person.id, day) }"
               >
-                {{ getShiftForPersonAndDay(person.id, day) || "" }}
+                {{ getShiftForPersonAndDay(person.id, day) || '' }}
               </span>
               <select
                 v-else
                 v-model="editedShifts[`${person.id}-${day}`]"
                 @change="saveShift(person.id, day)"
               >
-                <option value=""></option>
-                <option value="D">D</option>
-                <option value="N">N</option>
-                <option value="D N">D N</option>
+                <option
+                  v-for="option in SHIFT_OPTIONS"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
               </select>
             </td>
           </tr>
@@ -127,38 +86,81 @@
 </template>
 
 <script lang="ts">
-import { daysOfWeek } from "@/data/daysOfWeek.ts";
-import NotificationMessage from "./NotificationMessage.vue";
-import { addNotification } from "./NotificationMessage.vue";
+import { daysOfWeek } from '@/data/daysOfWeek.ts';
+import NotificationMessage from './NotificationMessage.vue';
+import { addNotification } from './NotificationMessage.vue';
 import {
   checkShiftDataSync,
-  resetSyncedChangesSessionStorage,
-} from "@/utils/dataSync.ts";
-import { isPolishHoliday } from "@/utils/polishHolidays.ts";
+  resetSyncedChangesSessionStorage
+} from '@/utils/dataSync.ts';
+import { isPolishHoliday } from '@/utils/polishHolidays.ts';
+import { ShiftType } from '@/types/calendar';
+
+// Constants
+const MESSAGES = {
+  UNLOCK_WIDTH: 'Odblokuj szerokość',
+  LOCK_WIDTH: 'Zablokuj szerokość',
+  CLICK_TO_EDIT: 'Kliknij aby edytować zmianę',
+  INVALID_VALUE: "Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.",
+  TWO_RATOWNIK_DAY: 'Nie można przypisać dwóch ratowników na zmianę dzienną.',
+  TWO_RATOWNIK_NIGHT: 'Nie można przypisać dwóch ratowników na zmianę nocną.',
+  MAX_DAY_PEOPLE:
+    'Nie można przypisać więcej niż dwóch osób na zmianę dzienną.',
+  MAX_NIGHT_PEOPLE:
+    'Nie można przypisać więcej niż dwóch osób na zmianę nocną.',
+  LOAD_ERROR: 'Nie udało się załadować danych lokalnych. Sprawdź konsolę.',
+  NOT_ASSIGNED: 'Not assigned'
+} as const;
+
+const SHIFT_OPTIONS = [
+  { value: '', label: '' },
+  { value: 'D', label: 'D' },
+  { value: 'N', label: 'N' },
+  { value: 'D N', label: 'D N' }
+] as const;
+
+const VALID_SHIFT_VALUES = ['D', 'N', 'D N', ''] as const;
+const MAX_DAYS_IN_MONTH = 31;
+const SHIFT_TYPES: ShiftType[] = [
+  'dayShift1',
+  'dayShift2',
+  'nightShift1',
+  'nightShift2'
+];
+
+const PEOPLE_ORDER = [
+  'Milena',
+  'Mikołaj',
+  'Aleksandra',
+  'Joanna',
+  'Łukasz',
+  'Natalia',
+  'Marcin'
+] as const;
 
 export default {
-  name: "SpreadsheetView",
-  emits: ["update-editing-mode", "has-changes", "month-days-updated"],
+  name: 'SpreadsheetView',
+  emits: ['update-editing-mode', 'has-changes', 'month-days-updated'],
   props: {
     isEditingMode: {
       type: Boolean,
-      required: true,
+      required: true
     },
     selectedMonth: {
       type: Number,
-      required: true,
+      required: true
     },
     selectedYear: {
       type: Number,
-      required: true,
+      required: true
     },
     people: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
   components: {
-    NotificationMessage,
+    NotificationMessage
   },
   data() {
     return {
@@ -170,6 +172,8 @@ export default {
       scrollContainer: null,
       isFirstColumnLocked: false,
       importedCells: new Set(),
+      SHIFT_OPTIONS,
+      MESSAGES
     };
   },
   computed: {
@@ -177,21 +181,23 @@ export default {
       return this.monthDays.map((day) => day.date.getDate());
     },
     orderedPeople() {
-      const order = [
-        "Milena",
-        "Mikołaj",
-        "Aleksandra",
-        "Joanna",
-        "Łukasz",
-        "Natalia",
-        "Marcin",
-      ];
       return this.people
-        .filter((person) => order.includes(person.name))
-        .sort((a, b) => {
-          return order.indexOf(a.name) - order.indexOf(b.name);
-        });
+        .filter((person) => PEOPLE_ORDER.includes(person.name))
+        .sort(
+          (a, b) => PEOPLE_ORDER.indexOf(a.name) - PEOPLE_ORDER.indexOf(b.name)
+        );
     },
+    lockButtonTooltip() {
+      return this.isFirstColumnLocked
+        ? MESSAGES.UNLOCK_WIDTH
+        : MESSAGES.LOCK_WIDTH;
+    },
+    editCellAriaLabel() {
+      return this.isEditingMode ? MESSAGES.CLICK_TO_EDIT : '';
+    },
+    editCellTitle() {
+      return this.isEditingMode ? MESSAGES.CLICK_TO_EDIT : '';
+    }
   },
   watch: {
     selectedMonth() {
@@ -199,7 +205,7 @@ export default {
     },
     selectedYear() {
       this.generateMonthDays();
-    },
+    }
   },
   methods: {
     isEditing(personId, day) {
@@ -219,93 +225,142 @@ export default {
           parsedData.dayShift1 === personId ||
           parsedData.dayShift2 === personId
         ) {
-          shifts.push("D"); // Day shift
+          shifts.push('D'); // Day shift
         }
         if (
           parsedData.nightShift1 === personId ||
           parsedData.nightShift2 === personId
         ) {
-          shifts.push("N"); // Night shift
+          shifts.push('N'); // Night shift
         }
 
-        return shifts.join(" "); // Combine shifts (e.g., "D N" if both)
+        return shifts.join(' '); // Combine shifts (e.g., "D N" if both)
       }
       return null;
     },
     editCell(personId, day) {
       if (this.isEditingMode) {
         const key = `${personId}-${day}`;
-        const currentValue = this.getShiftForPersonAndDay(personId, day) || ""; // Get the current value
+        const currentValue = this.getShiftForPersonAndDay(personId, day) || ''; // Get the current value
         this.editedShifts[key] = currentValue; // Initialize the editedShifts object with the current value
       }
     },
+    validateShiftValue(value) {
+      const trimmedValue = value?.trim().toUpperCase() || '';
+      return VALID_SHIFT_VALUES.includes(trimmedValue) ? trimmedValue : null;
+    },
+    clearPersonFromAllShifts(dayData, personId) {
+      SHIFT_TYPES.forEach((shiftType) => {
+        if (dayData[shiftType] === personId) {
+          dayData[shiftType] = null;
+          dayData[shiftType + 'Name'] = MESSAGES.NOT_ASSIGNED;
+          dayData[shiftType + 'UserChanged'] = true;
+        }
+      });
+    },
+    validateRatownikAssignment(dayData, personId, shiftValue) {
+      const person = this.people.find((p) => p.id === personId);
+      if (!person?.ratownik) return true;
+
+      if (shiftValue.includes('D')) {
+        const dayShiftPeople = [dayData.dayShift1, dayData.dayShift2].filter(
+          Boolean
+        );
+        const hasOtherRatownikDay = dayShiftPeople.some((id) => {
+          const shiftPerson = this.people.find((p) => p.id === id);
+          return shiftPerson?.ratownik && id !== personId;
+        });
+        if (hasOtherRatownikDay) {
+          addNotification(MESSAGES.TWO_RATOWNIK_DAY, 'red');
+          return false;
+        }
+      }
+
+      if (shiftValue.includes('N')) {
+        const nightShiftPeople = [
+          dayData.nightShift1,
+          dayData.nightShift2
+        ].filter(Boolean);
+        const hasOtherRatownikNight = nightShiftPeople.some((id) => {
+          const shiftPerson = this.people.find((p) => p.id === id);
+          return shiftPerson?.ratownik && id !== personId;
+        });
+        if (hasOtherRatownikNight) {
+          addNotification(MESSAGES.TWO_RATOWNIK_NIGHT, 'red');
+          return false;
+        }
+      }
+
+      return true;
+    },
+    assignPersonToShift(dayData, personId, shiftType) {
+      const person = this.people.find((p) => p.id === personId);
+      if (!dayData[shiftType]) {
+        dayData[shiftType] = personId;
+        dayData[shiftType + 'Name'] = person.name;
+        dayData[shiftType + 'UserChanged'] = true;
+        return true;
+      }
+      return false;
+    },
+    assignDayShift(dayData, personId) {
+      if (this.assignPersonToShift(dayData, personId, 'dayShift1')) return true;
+      if (this.assignPersonToShift(dayData, personId, 'dayShift2')) return true;
+
+      addNotification(MESSAGES.MAX_DAY_PEOPLE, 'red');
+      return false;
+    },
+    assignNightShift(dayData, personId) {
+      if (this.assignPersonToShift(dayData, personId, 'nightShift1'))
+        return true;
+      if (this.assignPersonToShift(dayData, personId, 'nightShift2'))
+        return true;
+
+      addNotification(MESSAGES.MAX_NIGHT_PEOPLE, 'red');
+      return false;
+    },
+    saveShiftData(dayData, date) {
+      const updatedData = {
+        dayShift1: dayData.dayShift1,
+        dayShift2: dayData.dayShift2,
+        nightShift1: dayData.nightShift1,
+        nightShift2: dayData.nightShift2,
+        dayShift1Name: dayData.dayShift1Name,
+        dayShift2Name: dayData.dayShift2Name,
+        nightShift1Name: dayData.nightShift1Name,
+        nightShift2Name: dayData.nightShift2Name
+      };
+
+      this.localData[date] = updatedData;
+      localStorage.setItem(date, JSON.stringify(updatedData));
+      this.madeChanges = true;
+      this.$emit('has-changes', this.madeChanges);
+    },
     saveShift(personId, day) {
       const key = `${personId}-${day}`;
-      const newValue = this.editedShifts[key]?.trim().toUpperCase() || "";
-      const previousValue = this.getShiftForPersonAndDay(personId, day) || "";
-      const validValues = ["D", "N", "D N", ""];
+      const newValue = this.validateShiftValue(this.editedShifts[key]);
+      const previousValue = this.getShiftForPersonAndDay(personId, day) || '';
 
-      if (!validValues.includes(newValue)) {
-        addNotification(
-          "Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.",
-          "red",
-        );
+      if (newValue === null) {
+        addNotification(MESSAGES.INVALID_VALUE, 'red');
         this.$nextTick(() => {
           this.editedShifts[key] = previousValue;
         });
         return;
       }
 
-      const date = this.monthDays
-        .find((d) => d.date.getDate() === day)
-        ?.date.toDateString();
-      if (!date || !this.monthDays) return;
+      const date = this.getDateString(day);
+      if (!date) return;
 
-      const dayData = this.monthDays.find(
-        (d) => d.date.toDateString() === date,
-      );
+      const dayData = this.findDayByDate(date);
       if (!dayData) return;
 
-      // First, CLEAR ALL existing assignments for this person on this day
-      // This prevents the issue of shifts being combined when they shouldn't be
-      if (dayData.dayShift1 === personId) {
-        dayData.dayShift1 = null;
-        dayData.dayShift1Name = "Not assigned";
-        dayData.dayShift1UserChanged = true;
-      }
-      if (dayData.dayShift2 === personId) {
-        dayData.dayShift2 = null;
-        dayData.dayShift2Name = "Not assigned";
-        dayData.dayShift2UserChanged = true;
-      }
-      if (dayData.nightShift1 === personId) {
-        dayData.nightShift1 = null;
-        dayData.nightShift1Name = "Not assigned";
-        dayData.nightShift1UserChanged = true;
-      }
-      if (dayData.nightShift2 === personId) {
-        dayData.nightShift2 = null;
-        dayData.nightShift2Name = "Not assigned";
-        dayData.nightShift2UserChanged = true;
-      }
+      // Clear existing assignments for this person
+      this.clearPersonFromAllShifts(dayData, personId);
 
-      // If the new value is empty, we've already cleared everything
-      if (newValue === "") {
-        const updatedData = {
-          dayShift1: dayData.dayShift1,
-          dayShift2: dayData.dayShift2,
-          nightShift1: dayData.nightShift1,
-          nightShift2: dayData.nightShift2,
-          dayShift1Name: dayData.dayShift1Name,
-          dayShift2Name: dayData.dayShift2Name,
-          nightShift1Name: dayData.nightShift1Name,
-          nightShift2Name: dayData.nightShift2Name,
-        };
-
-        this.localData[date] = updatedData;
-        localStorage.setItem(date, JSON.stringify(updatedData));
-        this.madeChanges = true;
-        this.$emit("has-changes", this.madeChanges);
+      // Handle empty value - already cleared above
+      if (newValue === '') {
+        this.saveShiftData(dayData, date);
         this.$nextTick(() => {
           delete this.editedShifts[key];
           this.$forceUpdate();
@@ -313,102 +368,29 @@ export default {
         return;
       }
 
-      const draggedPerson = this.people.find((p) => p.id === personId);
-
-      // Now assign the new shifts based on the selected value
-      if (newValue.includes("D")) {
-        // If the dragged person is a ratownik, check only the day shift columns.
-        if (draggedPerson?.ratownik) {
-          const dayShiftPeople = [dayData.dayShift1, dayData.dayShift2].filter(
-            Boolean,
-          );
-          const hasOtherRatownikDay = dayShiftPeople.some((id) => {
-            const person = this.people.find((p) => p.id === id);
-            return person?.ratownik && id !== personId;
-          });
-          if (hasOtherRatownikDay) {
-            addNotification(
-              "Nie można przypisać dwóch ratowników na zmianę dzienną.",
-              "red",
-            );
-            delete this.editedShifts[key];
-            return;
-          }
-        }
-
-        // For day shift (either D alone or D N), assign to dayShift1 or dayShift2
-        if (!dayData.dayShift1) {
-          dayData.dayShift1 = personId;
-          dayData.dayShift1Name = draggedPerson.name;
-          dayData.dayShift1UserChanged = true;
-        } else if (!dayData.dayShift2) {
-          dayData.dayShift2 = personId;
-          dayData.dayShift2Name = draggedPerson.name;
-          dayData.dayShift2UserChanged = true;
-        } else {
-          addNotification(
-            "Nie można przypisać więcej niż dwóch osób na zmianę dzienną.",
-            "red",
-          );
-          delete this.editedShifts[key];
-          return;
-        }
+      // Validate ratownik assignments
+      if (!this.validateRatownikAssignment(dayData, personId, newValue)) {
+        delete this.editedShifts[key];
+        return;
       }
 
-      // Handle night shift assignment
-      if (newValue.includes("N")) {
-        // If the dragged person is a ratownik, check only the night shift columns.
-        if (draggedPerson?.ratownik) {
-          const nightShiftPeople = [
-            dayData.nightShift1,
-            dayData.nightShift2,
-          ].filter(Boolean);
-          const hasOtherRatownikNight = nightShiftPeople.some((id) => {
-            const person = this.people.find((p) => p.id === id);
-            return person?.ratownik && id !== personId;
-          });
-          if (hasOtherRatownikNight) {
-            addNotification(
-              "Nie można przypisać dwóch ratowników na zmianę nocną.",
-              "red",
-            );
-            delete this.editedShifts[key];
-            return;
-          }
-        }
+      // Assign new shifts
+      let assignmentSuccess = true;
 
-        // For night shift (either N alone or D N), assign to nightShift1 or nightShift2
-        if (!dayData.nightShift1) {
-          dayData.nightShift1 = personId;
-          dayData.nightShift1Name = draggedPerson.name;
-          dayData.nightShift1UserChanged = true;
-        } else if (!dayData.nightShift2) {
-          dayData.nightShift2 = personId;
-          dayData.nightShift2Name = draggedPerson.name;
-          dayData.nightShift2UserChanged = true;
-        } else {
-          addNotification(
-            "Nie można przypisać więcej niż dwóch osób na zmianę nocną.",
-            "red",
-          );
-          delete this.editedShifts[key];
-          return;
-        }
+      if (newValue.includes('D')) {
+        assignmentSuccess = this.assignDayShift(dayData, personId);
       }
 
-      // Save the updated data
-      const updatedData = {
-        dayShift1: dayData.dayShift1,
-        dayShift2: dayData.dayShift2,
-        nightShift1: dayData.nightShift1,
-        nightShift2: dayData.nightShift2,
-      };
+      if (assignmentSuccess && newValue.includes('N')) {
+        assignmentSuccess = this.assignNightShift(dayData, personId);
+      }
 
-      this.localData[date] = updatedData;
-      this.madeChanges = true;
-      this.$emit("has-changes", this.madeChanges);
-      localStorage.setItem(date, JSON.stringify(updatedData));
+      if (!assignmentSuccess) {
+        delete this.editedShifts[key];
+        return;
+      }
 
+      this.saveShiftData(dayData, date);
       delete this.editedShifts[key];
     },
     generateMonthDays() {
@@ -425,107 +407,86 @@ export default {
           dayShift2: null,
           nightShift1: null,
           nightShift2: null,
-          dayShift1Name: "Not assigned",
-          dayShift2Name: "Not assigned",
-          nightShift1Name: "Not assigned",
-          nightShift2Name: "Not assigned",
-          isCurrentMonth: true,
+          dayShift1Name: 'Not assigned',
+          dayShift2Name: 'Not assigned',
+          nightShift1Name: 'Not assigned',
+          nightShift2Name: 'Not assigned',
+          isCurrentMonth: true
         });
       }
 
       this.loadFromLocalStorage();
-      this.$emit("month-days-updated", this.monthDays);
+      this.$emit('month-days-updated', this.monthDays);
     },
     updateChanges(hasChanges) {
       this.madeChanges = hasChanges;
-      this.$emit("has-changes", this.madeChanges);
+      this.$emit('has-changes', this.madeChanges);
     },
     loadFromLocalStorage() {
-      const year = this.selectedYear;
-      const month = this.selectedMonth;
+      const { year, month } = {
+        year: this.selectedYear,
+        month: this.selectedMonth
+      };
 
-      for (let i = 1; i <= 31; i++) {
-        const date = new Date(year, month, i).toDateString();
-        const savedStates = localStorage.getItem(date);
-        if (savedStates) {
-          try {
-            const parsedStates = JSON.parse(savedStates);
-            const day = this.monthDays.find(
-              (day) => day.date.toDateString() === date,
-            );
+      for (let dayNum = 1; dayNum <= MAX_DAYS_IN_MONTH; dayNum++) {
+        this.loadDayFromStorage(year, month, dayNum);
+      }
+    },
+    loadDayFromStorage(year, month, dayNum) {
+      const date = new Date(year, month, dayNum).toDateString();
+      const savedStates = localStorage.getItem(date);
 
-            if (day) {
-              day.dayShift1 = parsedStates.dayShift1;
-              day.dayShift2 = parsedStates.dayShift2;
-              day.nightShift1 = parsedStates.nightShift1;
-              day.nightShift2 = parsedStates.nightShift2;
+      if (!savedStates) return;
 
-              day.dayShift1Name = parsedStates.dayShift1Name || "Not assigned";
-              day.dayShift2Name = parsedStates.dayShift2Name || "Not assigned";
-              day.nightShift1Name =
-                parsedStates.nightShift1Name || "Not assigned";
-              day.nightShift2Name =
-                parsedStates.nightShift2Name || "Not assigned";
-            }
-          } catch (error) {
-            console.error("Failed to load local data:", error);
-            addNotification(
-              "Nie udało się załadować danych lokalnych. Sprawdź konsolę.",
-              "red",
-            );
-          }
+      try {
+        const parsedStates = JSON.parse(savedStates);
+        const day = this.findDayByDate(date);
+
+        if (day) {
+          this.applyStoredStatesToDay(day, parsedStates);
         }
+      } catch (error) {
+        console.error('Failed to load local data:', error);
+        addNotification(MESSAGES.LOAD_ERROR, 'red');
       }
     },
-    resolvePersonName(id) {
-      const person = this.people.find((person) => person.id === id);
-      return person
-        ? { name: person.name, isRatownik: person.ratownik }
-        : { name: undefined, isRatownik: false };
-    },
-
-    async checkShiftDataSync() {
-      this.syncedChanges = await checkShiftDataSync(() =>
-        this.generateMonthDays(),
-      );
-    },
-    resetSyncedChangesSessionStorage() {
-      this.syncedChanges = resetSyncedChangesSessionStorage();
-    },
-    handleScroll(event) {
-      if (this.scrollContainer) {
-        event.preventDefault(); // Prevent default vertical scrolling
-        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
-      }
+    applyStoredStatesToDay(day, parsedStates) {
+      SHIFT_TYPES.forEach((shiftType) => {
+        day[shiftType] = parsedStates[shiftType];
+        day[shiftType + 'Name'] =
+          parsedStates[shiftType + 'Name'] || MESSAGES.NOT_ASSIGNED;
+      });
     },
     resetUserChanges() {
-      // Clear user-made changes from localStorage
+      this.clearUserChangesFromStorage();
+      this.localData = {};
+      this.editedShifts = {};
+      this.madeChanges = false;
+      this.$emit('has-changes', this.madeChanges);
+    },
+    clearUserChangesFromStorage() {
+      const keysToRemove = [];
+
       for (const key in localStorage) {
-        if (key === "isEditingMode" || key === "currentPage") {
-          continue;
-        }
+        if (key === 'isEditingMode' || key === 'currentPage') continue;
+
         if (localStorage.hasOwnProperty(key)) {
           try {
-            const savedData = JSON.parse(localStorage.getItem(key) || "{}");
-            if (
-              savedData.dayShift1UserChanged ||
-              savedData.dayShift2UserChanged ||
-              savedData.nightShift1UserChanged ||
-              savedData.nightShift2UserChanged
-            ) {
-              localStorage.removeItem(key); // Remove user-modified data
+            const savedData = JSON.parse(localStorage.getItem(key) || '{}');
+            const hasUserChanges = SHIFT_TYPES.some(
+              (shiftType) => savedData[shiftType + 'UserChanged']
+            );
+
+            if (hasUserChanges) {
+              keysToRemove.push(key);
             }
           } catch (error) {
-            // Skip invalid JSON items - they're probably not shift data anyway
             continue;
           }
         }
       }
 
-      this.localData = {};
-      this.editedShifts = {};
-      this.madeChanges = false;
-      this.$emit("has-changes", this.madeChanges);
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     },
     isToday(date: Date) {
       const today = new Date();
@@ -544,13 +505,13 @@ export default {
       // Apply the changes to all first column cells
       this.$nextTick(() => {
         const firstCells = document.querySelectorAll(
-          ".calendar-table th:first-child, .calendar-table td:first-child",
+          '.calendar-table th:first-child, .calendar-table td:first-child'
         );
         firstCells.forEach((cell) => {
           if (this.isFirstColumnLocked) {
-            cell.classList.add("column-locked");
+            cell.classList.add('column-locked');
           } else {
-            cell.classList.remove("column-locked");
+            cell.classList.remove('column-locked');
           }
         });
       });
@@ -558,12 +519,59 @@ export default {
     isHoliday(date) {
       return isPolishHoliday(date);
     },
+    getHeaderCellClasses(day) {
+      const date = new Date(this.selectedYear, this.selectedMonth, day);
+      return {
+        'nd-color': daysOfWeek[date.getDay()] === 'Nd',
+        'sob-color': daysOfWeek[date.getDay()] === 'Sob',
+        'holiday-color': isPolishHoliday(date).isHoliday,
+        'today-column': this.isToday(date)
+      };
+    },
+
+    getPersonCellClasses(person) {
+      return {
+        ratownik: person.ratownik,
+        pielegniarka: !person.ratownik
+      };
+    },
+
+    getDataCellClasses(day) {
+      const date = new Date(this.selectedYear, this.selectedMonth, day);
+      return {
+        'nd-color': daysOfWeek[date.getDay()] === 'Nd',
+        'sob-color': daysOfWeek[date.getDay()] === 'Sob',
+        'holiday-color': isPolishHoliday(date).isHoliday,
+        today: this.isToday(date)
+      };
+    },
+
+    getHolidayTooltip(day) {
+      const date = new Date(this.selectedYear, this.selectedMonth, day);
+      return isPolishHoliday(date).name || '';
+    },
+
+    findDayByDate(date) {
+      return this.monthDays.find((d) => d.date.toDateString() === date);
+    },
+
+    getDateString(day) {
+      return this.monthDays
+        .find((d) => d.date.getDate() === day)
+        ?.date.toDateString();
+    },
+    handleScroll(event) {
+      if (this.scrollContainer) {
+        event.preventDefault(); // Prevent default vertical scrolling
+        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
+      }
+    }
   },
   mounted() {
     this.resetUserChanges();
     this.generateMonthDays();
     this.scrollContainer = this.$refs.scrollContainer;
-  },
+  }
 };
 </script>
 
@@ -704,7 +712,7 @@ export default {
   border-bottom: 2px solid rgba(255, 255, 255, 0.6) !important;
 }
 .today-column::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   border-left: 8px solid transparent;
