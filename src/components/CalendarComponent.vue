@@ -35,7 +35,7 @@
                 'nd-color': daysOfWeek[day.date.getDay()] === 'Nd',
                 'sob-color': daysOfWeek[day.date.getDay()] === 'Sob',
                 'holiday-color': isHoliday(day.date).isHoliday,
-                today: isToday(day.date),
+                today: isToday(day.date)
               }"
               :title="isHoliday(day.date).name || ''"
             >
@@ -54,7 +54,7 @@
                     ratownik: day.dayShift1Ratownik === true,
                     pielegniarka: day.dayShift1Ratownik === false,
                     userChanged: day.dayShift1UserChanged === true,
-                    clickable: isEditingMode,
+                    clickable: isEditingMode
                   }"
                   :clickable="isEditingMode"
                   @dragover.prevent
@@ -84,7 +84,7 @@
                     ratownik: day.dayShift2Ratownik === true,
                     pielegniarka: day.dayShift2Ratownik === false,
                     userChanged: day.dayShift2UserChanged === true,
-                    clickable: isEditingMode,
+                    clickable: isEditingMode
                   }"
                   :clickable="isEditingMode"
                   @drop="handleDrop(day.date, 'dayShift2')"
@@ -113,7 +113,7 @@
                     ratownik: day.nightShift1Ratownik === true,
                     pielegniarka: day.nightShift1Ratownik === false,
                     userChanged: day.nightShift1UserChanged === true,
-                    clickable: isEditingMode,
+                    clickable: isEditingMode
                   }"
                   @dragover.prevent
                   @drop="handleDrop(day.date, 'nightShift1')"
@@ -142,7 +142,7 @@
                     ratownik: day.nightShift2Ratownik === true,
                     pielegniarka: day.nightShift2Ratownik === false,
                     userChanged: day.nightShift2UserChanged === true,
-                    clickable: isEditingMode,
+                    clickable: isEditingMode
                   }"
                   :clickable="isEditingMode"
                   @dragover.prevent
@@ -176,37 +176,48 @@
 </template>
 
 <script lang="ts">
-import { daysOfWeek } from "@/data/daysOfWeek.ts";
+import { daysOfWeek } from '@/data/daysOfWeek.ts';
 import {
   checkShiftDataSync,
-  resetSyncedChangesSessionStorage,
-} from "@/utils/dataSync.js";
-import { isPolishHoliday } from "@/utils/polishHolidays.ts";
-import NotificationMessage from "./NotificationMessage.vue";
-import { addNotification } from "./NotificationMessage.vue";
+  resetSyncedChangesSessionStorage
+} from '@/utils/dataSync.js';
+import { isPolishHoliday as utilIsPolishHoliday } from '@/utils/polishHolidays.ts'; // Aliased to avoid conflict if isPolishHoliday is used directly elsewhere
+import NotificationMessage from './NotificationMessage.vue';
+import { addNotification } from './NotificationMessage.vue';
+import {
+  generateMonthDays as utilGenerateMonthDays,
+  resolvePersonName as utilResolvePersonName,
+  hasOtherRatownik as utilHasOtherRatownik,
+  assignShift as utilAssignShift,
+  saveDayToLocalStorage as utilSaveDayToLocalStorage,
+  isDuplicateShift as utilIsDuplicateShift,
+  resetUserChanges as utilResetUserChanges,
+  isToday as utilIsToday
+} from '@/utils/calendarChecks.ts';
+
 export default {
-  name: "CalendarComponent",
-  emits: ["update-editing-mode", "has-changes", "month-days-updated"],
+  name: 'CalendarComponent',
+  emits: ['update-editing-mode', 'has-changes', 'month-days-updated'],
   components: {
-    NotificationMessage,
+    NotificationMessage
   },
   props: {
     isEditingMode: {
       type: Boolean,
-      required: true,
+      required: true
     },
     selectedMonth: {
       type: Number,
-      required: true,
+      required: true
     },
     selectedYear: {
       type: Number,
-      required: true,
+      required: true
     },
     people: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
@@ -219,77 +230,38 @@ export default {
       scrollContainer: null,
       currentDropTarget: { date: null, shiftType: null },
       showMobileWarning: false,
-      isMobileDevice: false,
+      isMobileDevice: false
     };
   },
   methods: {
     handleDrop(date, shiftType) {
-      const draggedPerson = JSON.parse(localStorage.getItem("draggedPerson"));
-      // Is user actually dragging a person
+      const draggedPerson = JSON.parse(localStorage.getItem('draggedPerson'));
       if (!draggedPerson) return;
       const day = this.monthDays.find(
-        (day) => day.date.toDateString() === date.toDateString(),
+        (day) => day.date.toDateString() === date.toDateString()
       );
 
-      // Temporarily update to test uniqueness
-      const tempShifts = { ...day, [shiftType]: draggedPerson.id };
-      if (
-        (tempShifts.dayShift1 != null &&
-          tempShifts.dayShift2 != null &&
-          tempShifts.dayShift1 === tempShifts.dayShift2) ||
-        (tempShifts.nightShift1 != null &&
-          tempShifts.nightShift2 != null &&
-          tempShifts.nightShift1 === tempShifts.nightShift2)
-      ) {
-        addNotification("Ta sama osoba na obydwu zmianach.", "red");
+      if (utilIsDuplicateShift(day, shiftType, draggedPerson.id)) {
+        addNotification('Ta sama osoba na obydwu zmianach.', 'red');
         return;
       }
 
       const isDraggedRatownik = draggedPerson.ratownik;
-
-      // Check if another ratownik is already assigned to the same shift type
-      let hasOtherRatownik = false;
-
-      switch (shiftType) {
-        case "dayShift1":
-          hasOtherRatownik = day.dayShift2Ratownik;
-          break;
-        case "dayShift2":
-          hasOtherRatownik = day.dayShift1Ratownik;
-          break;
-        case "nightShift1":
-          hasOtherRatownik = day.nightShift2Ratownik;
-          break;
-        case "nightShift2":
-          hasOtherRatownik = day.nightShift1Ratownik;
-          break;
-      }
-      if (isDraggedRatownik && hasOtherRatownik) {
+      if (isDraggedRatownik && utilHasOtherRatownik(day, shiftType)) {
         addNotification(
-          "Nie można przypisać dwóch ratowników na jedną zmianę.",
-          "red",
+          'Nie można przypisać dwóch ratowników na jedną zmianę.',
+          'red'
         );
         return;
       }
 
-      day[shiftType] = draggedPerson.id;
-      day[`${shiftType}Name`] = draggedPerson.name;
-      day[`${shiftType}Ratownik`] = draggedPerson.ratownik;
-      day[`${shiftType}UserChanged`] = true;
-
-      const updatedData = {
-        dayShift1: day.dayShift1,
-        dayShift2: day.dayShift2,
-        nightShift1: day.nightShift1,
-        nightShift2: day.nightShift2,
-      };
-
-      this.localData[date.toDateString()] = updatedData;
-      localStorage.setItem(date.toDateString(), JSON.stringify(updatedData));
+      utilAssignShift(day, shiftType, draggedPerson);
+      // .call(this) is used because utilSaveDayToLocalStorage uses this.localData
+      utilSaveDayToLocalStorage.call(this, day);
 
       this.madeChanges = true;
-      this.$emit("has-changes", true);
-      localStorage.removeItem("draggedPerson");
+      this.$emit('has-changes', true);
+      localStorage.removeItem('draggedPerson');
     },
     isDropTarget(date, shiftType) {
       if (!this.currentDropTarget.date) return false;
@@ -300,76 +272,44 @@ export default {
       );
     },
     handleClickResetShift(day, shift) {
-      // Check if the shift is assigned
       if (day[shift] !== null) {
-        // Set the shift to empty
         day[shift] = null;
-        day[shift + "Name"] = "Usunięto";
-        day[shift + "Ratownik"] = null;
-        day[shift + "UserChanged"] = true;
+        day[shift + 'Name'] = 'Usunięto';
+        day[shift + 'Ratownik'] = null;
+        day[shift + 'UserChanged'] = true;
 
-        // Save the updated day object in localStorage and in-memory data
-        const updatedData = {
-          dayShift1: day.dayShift1,
-          dayShift2: day.dayShift2,
-          nightShift1: day.nightShift1,
-          nightShift2: day.nightShift2,
-        };
-
-        this.localData[day.date.toDateString()] = updatedData;
-        localStorage.setItem(
-          day.date.toDateString(),
-          JSON.stringify(updatedData),
-        );
+        // .call(this) is used because utilSaveDayToLocalStorage uses this.localData
+        utilSaveDayToLocalStorage.call(this, day);
 
         this.madeChanges = true;
-        this.$emit("has-changes", true);
+        this.$emit('has-changes', true);
       }
     },
     resolvePersonName(id: number) {
-      const person = this.people.find((person) => person.id === id);
-      return person
-        ? { name: person.name, isRatownik: person.ratownik }
-        : { name: undefined, isRatownik: false };
+      // .call(this) is used because utilResolvePersonName uses this.people
+      return utilResolvePersonName.call(this, id);
     },
 
     generateMonthDays() {
-      const year = this.selectedYear;
-      const month = this.selectedMonth;
-      const lastDay = new Date(year, month + 1, 0).getDate();
-
-      this.monthDays = [];
-      for (let i = 1; i <= lastDay; i++) {
-        this.monthDays.push({
-          date: new Date(year, month, i),
-          dayShift1: null,
-          dayShift2: null,
-          nightShift1: null,
-          nightShift2: null,
-          dayShift1Name: "Not assigned",
-          dayShift2Name: "Not assigned",
-          nightShift1Name: "Not assigned",
-          nightShift2Name: "Not assigned",
-          isCurrentMonth: true,
-        });
-      }
-
+      this.monthDays = utilGenerateMonthDays(
+        this.selectedYear,
+        this.selectedMonth
+      );
       this.loadFromLocalStorage();
-
-      // Emit the updated monthDays to App.vue
-      this.$emit("month-days-updated", this.monthDays);
+      this.$emit('month-days-updated', this.monthDays);
     },
+
     updateChanges(hasChanges) {
       this.madeChanges = hasChanges;
-      this.$emit("has-changes", hasChanges);
+      this.$emit('has-changes', hasChanges);
     },
     emitEditingMode(newMode) {
-      this.$emit("update-editing-mode", newMode); // Notify parent of the change
+      this.$emit('update-editing-mode', newMode);
     },
     async checkShiftDataSync() {
       this.resetUserChanges();
       this.syncedChanges = await checkShiftDataSync(() =>
-        this.generateMonthDays(),
+        this.generateMonthDays()
       );
     },
     loadFromLocalStorage() {
@@ -378,13 +318,12 @@ export default {
 
       for (let i = 1; i <= 31; i++) {
         const date = new Date(year, month, i).toDateString();
-
         const savedStates = localStorage.getItem(date);
         if (savedStates) {
           try {
             const parsedStates = JSON.parse(savedStates);
             const day = this.monthDays.find(
-              (day) => day.date.toDateString() === date,
+              (day) => day.date.toDateString() === date
             );
 
             if (day) {
@@ -393,7 +332,6 @@ export default {
               day.nightShift1 = parsedStates.nightShift1;
               day.nightShift2 = parsedStates.nightShift2;
 
-              // Resolve names with ratownik data
               const dayShift1Data = this.resolvePersonName(day.dayShift1);
               day.dayShift1Name = dayShift1Data.name;
               day.dayShift1Ratownik = dayShift1Data.isRatownik;
@@ -411,7 +349,7 @@ export default {
               day.nightShift2Ratownik = nightShift2Data.isRatownik;
             }
           } catch (error) {
-            addNotification("Failed to load local data: " + error, "red");
+            addNotification('Failed to load local data: ' + error, 'red');
           }
         }
       }
@@ -420,33 +358,10 @@ export default {
       this.syncedChanges = resetSyncedChangesSessionStorage();
     },
     resetUserChanges() {
-      // Clear user-made changes from localStorage
-      for (const key in localStorage) {
-        if (key === "isEditingMode" || key === "currentPage") {
-          continue;
-        }
-        if (localStorage.hasOwnProperty(key)) {
-          try {
-            const savedData = JSON.parse(localStorage.getItem(key) || "{}");
-            if (
-              savedData.dayShift1UserChanged ||
-              savedData.dayShift2UserChanged ||
-              savedData.nightShift1UserChanged ||
-              savedData.nightShift2UserChanged
-            ) {
-              localStorage.removeItem(key); // Remove user-modified data
-            }
-          } catch (error) {
-            // Skip invalid JSON items - they're probably not shift data anyway
-            continue;
-          }
-        }
-      }
-
-      this.localData = {};
-      this.madeChanges = false;
-      this.$emit("has-changes", this.madeChanges);
-      this.editedShifts = {};
+      const result = utilResetUserChanges();
+      this.localData = result.localData;
+      this.madeChanges = result.madeChanges;
+      this.$emit('has-changes', this.madeChanges);
     },
     handleScroll(event) {
       if (this.scrollContainer) {
@@ -455,25 +370,20 @@ export default {
       }
     },
     scrollToToday() {
-      // Wait for DOM to update
       this.$nextTick(() => {
-        // Get today's date
         const today = new Date();
-
-        // Only proceed if current month view includes today
         if (
           today.getMonth() === this.selectedMonth &&
           today.getFullYear() === this.selectedYear
         ) {
-          // Find today's column index
           const todayIndex = this.monthDays.findIndex((day) =>
-            this.isToday(day.date),
+            utilIsToday(day.date)
           );
 
           if (todayIndex !== -1 && this.scrollContainer) {
             // Get the column width (including margins)
             const columnWidth =
-              (document.querySelector(".day-cell") as HTMLElement)
+              (document.querySelector('.day-cell') as HTMLElement)
                 ?.offsetWidth || 0;
             const containerWidth = this.scrollContainer.offsetWidth;
 
@@ -484,22 +394,22 @@ export default {
             // Smooth scroll to the position
             this.scrollContainer.scrollTo({
               left: Math.max(0, scrollPosition),
-              behavior: "smooth",
+              behavior: 'smooth'
             });
           }
         }
       });
     },
     getDayClass(dayIndex) {
-      if (daysOfWeek[dayIndex] === "Nd") return "nd-color";
-      if (daysOfWeek[dayIndex] === "Sob") return "sob-color";
-      return "normal-color";
+      if (daysOfWeek[dayIndex] === 'Nd') return 'nd-color';
+      if (daysOfWeek[dayIndex] === 'Sob') return 'sob-color';
+      return 'normal-color';
     },
     getShiftAriaLabel(day, shiftType) {
       const shift = day[shiftType];
-      const shiftName = shiftType.includes("day")
-        ? "Zmiana dzienna"
-        : "Zmiana nocna";
+      const shiftName = shiftType.includes('day')
+        ? 'Zmiana dzienna'
+        : 'Zmiana nocna';
       const personName = day[`${shiftType}Name`];
       if (this.isEditingMode) {
         return shift
@@ -514,9 +424,9 @@ export default {
 
     getShiftTooltip(day, shiftType) {
       const shift = day[shiftType];
-      const shiftName = shiftType.includes("day")
-        ? "Zmiana dzienna"
-        : "Zmiana nocna";
+      const shiftName = shiftType.includes('day')
+        ? 'Zmiana dzienna'
+        : 'Zmiana nocna';
 
       if (this.isEditingMode) {
         return shift
@@ -532,38 +442,32 @@ export default {
       // Check if user is on mobile device (iOS or Android)
       const userAgent = navigator.userAgent || navigator.vendor;
       this.isMobileDevice = /android|iphone|ipad|ipod/i.test(
-        userAgent.toLowerCase(),
+        userAgent.toLowerCase()
       );
     },
 
     handleMobileWarningClose() {
       this.showMobileWarning = false;
-      this.emitEditingMode(false); // Disable editing mode
+      this.emitEditingMode(false);
     },
     isToday(date: Date) {
-      const today = new Date();
-      return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
+      return utilIsToday(date);
     },
     isHoliday(date) {
-      return isPolishHoliday(date);
-    },
+      return utilIsPolishHoliday(date);
+    }
   },
 
   async mounted() {
-    // Clear user-made changes on refresh
     this.resetUserChanges();
-    await this.checkShiftDataSync(); // Then sync with remote data
+    await this.checkShiftDataSync();
     this.scrollContainer = this.$refs.scrollContainer;
     this.scrollToToday();
     this.checkMobilePlatform();
   },
   watch: {
     isEditingMode(newValue) {
-      localStorage.setItem("isEditingMode", JSON.stringify(newValue)); // Save to localStorage
+      localStorage.setItem('isEditingMode', JSON.stringify(newValue));
       if (newValue && this.isMobileDevice) {
         this.showMobileWarning = true;
       }
@@ -574,8 +478,8 @@ export default {
     },
     selectedYear() {
       this.generateMonthDays();
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -629,7 +533,7 @@ export default {
   border: 2px solid var(--color-empty-slot) !important;
   font-weight: 600;
 }
-.shift-slot[clickable="true"] {
+.shift-slot[clickable='true'] {
   cursor: pointer;
 }
 .empty-slot {
@@ -727,7 +631,7 @@ export default {
 }
 
 .today-column::before {
-  content: "";
+  content: '';
   position: absolute;
   top: -15px;
   left: 43%;

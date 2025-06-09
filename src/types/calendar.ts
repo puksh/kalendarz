@@ -1,10 +1,16 @@
-export interface Person {
+export type Person = {
   id: number;
   name: string;
   ratownik: boolean;
-}
+};
 
-export interface DayData {
+export type ShiftType =
+  | "dayShift1"
+  | "dayShift2"
+  | "nightShift1"
+  | "nightShift2";
+
+export type DayData = {
   date: Date;
   dayShift1: number | null;
   dayShift2: number | null;
@@ -23,4 +29,4 @@ export interface DayData {
   nightShift1UserChanged?: boolean;
   nightShift2UserChanged?: boolean;
   isCurrentMonth?: boolean;
-}
+};

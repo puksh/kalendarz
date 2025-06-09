@@ -172,54 +172,54 @@
 </template>
 
 <script>
-import { defineAsyncComponent, markRaw } from "vue";
-import { checkShiftDataSync } from "@/utils/dataSync.js";
-import { addNotification } from "./components/NotificationMessage.vue";
-import RefreshIcon from "./components/icons/RefreshIcon.vue";
-import ButtonExport from "./components/ButtonExport.vue";
-import ButtonImport from "./components/ButtonImport.vue";
+import { defineAsyncComponent, markRaw } from 'vue';
+import { checkShiftDataSync } from '@/utils/dataSync.js';
+import { addNotification } from './components/NotificationMessage.vue';
+import RefreshIcon from './components/icons/RefreshIcon.vue';
+import ButtonExport from './components/ButtonExport.vue';
+import ButtonImport from './components/ButtonImport.vue';
 
 export default {
-  name: "VueCalendar",
+  name: 'VueCalendar',
   components: {
     SideBarComponent: defineAsyncComponent(
-      () => import("./components/SideBarComponent.vue"),
+      () => import('./components/SideBarComponent.vue')
     ),
     MonthSelector: defineAsyncComponent(
-      () => import("./components/MonthSelector.vue"),
+      () => import('./components/MonthSelector.vue')
     ),
     PeopleListWindow: defineAsyncComponent(
-      () => import("./components/PeopleListWindow.vue"),
+      () => import('./components/PeopleListWindow.vue')
     ),
     ShiftCountWindow: defineAsyncComponent(
-      () => import("./components/ShiftCountWindow.vue"),
+      () => import('./components/ShiftCountWindow.vue')
     ),
     NotificationMessage: defineAsyncComponent(
-      () => import("./components/NotificationMessage.vue"),
+      () => import('./components/NotificationMessage.vue')
     ),
     RefreshIcon,
     ButtonExport,
-    ButtonImport,
+    ButtonImport
   },
   data() {
     return {
-      isEditingMode: this.safeGetFromStorage("isEditingMode", false), // Shared Edit state
+      isEditingMode: this.safeGetFromStorage('isEditingMode', false), // Shared Edit state
       //MonthSelector
       selectedMonth: new Date().getMonth(),
       selectedYear: new Date().getFullYear(),
-      locale: "pl",
+      locale: 'pl',
       hasUnsavedChanges: false,
       // Modal and Save state
       showPasswordModal: false,
       localData: {},
       people: [
-        { id: 1, name: "Milena", ratownik: false },
-        { id: 2, name: "Mikołaj", ratownik: false },
-        { id: 3, name: "Aleksandra", ratownik: false },
-        { id: 4, name: "Łukasz", ratownik: true },
-        { id: 5, name: "Joanna", ratownik: false },
-        { id: 6, name: "Natalia", ratownik: true },
-        { id: 7, name: "Marcin", ratownik: true },
+        { id: 1, name: 'Milena', ratownik: false },
+        { id: 2, name: 'Mikołaj', ratownik: false },
+        { id: 3, name: 'Aleksandra', ratownik: false },
+        { id: 4, name: 'Łukasz', ratownik: true },
+        { id: 5, name: 'Joanna', ratownik: false },
+        { id: 6, name: 'Natalia', ratownik: true },
+        { id: 7, name: 'Marcin', ratownik: true }
         //{ id: 8, name: "Alina", ratownik: false },
         //{ id: 9, name: "Ewelina", ratownik: false },
         //{ id: 10, name: "Teresa", ratownik: false },
@@ -229,14 +229,14 @@ export default {
       AuthorizationModal: null,
       CalendarComponent: null,
       ExcelComponent: null,
-      currentPage: localStorage.getItem("currentPage") || "ExcelComponent",
+      currentPage: localStorage.getItem('currentPage') || 'ExcelComponent'
     };
   },
   methods: {
     handleNavigation(section) {
       if (this.hasUnsavedChanges) {
         const confirmSwitch = confirm(
-          "Masz niezapisane zmiany. Czy na pewno chcesz zmienić widok? Twoje zmiany zostaną utracone.",
+          'Masz niezapisane zmiany. Czy na pewno chcesz zmienić widok? Twoje zmiany zostaną utracone.'
         );
         if (!confirmSwitch) {
           return;
@@ -244,24 +244,24 @@ export default {
       }
 
       // Save to localStorage
-      localStorage.setItem("currentPage", section);
+      localStorage.setItem('currentPage', section);
 
       // Dynamic component loading
-      if (section === "CalendarComponent" && !this.CalendarComponent) {
+      if (section === 'CalendarComponent' && !this.CalendarComponent) {
         // Show loading indicator
         this.isLoading = true;
 
-        import("./components/CalendarComponent.vue").then((module) => {
+        import('./components/CalendarComponent.vue').then((module) => {
           this.CalendarComponent = markRaw(module.default);
           this.currentPage = section;
           this.hasUnsavedChanges = false;
           this.isLoading = false;
         });
-      } else if (section === "ExcelComponent" && !this.ExcelComponent) {
+      } else if (section === 'ExcelComponent' && !this.ExcelComponent) {
         // Add ExcelComponent lazy loading too
         this.isLoading = true;
 
-        import("./components/ExcelComponent.vue").then((module) => {
+        import('./components/ExcelComponent.vue').then((module) => {
           this.ExcelComponent = markRaw(module.default);
           this.currentPage = section;
           this.hasUnsavedChanges = false;
@@ -284,11 +284,8 @@ export default {
       this.checkShiftDataSync();
     },
     generateCurrentView() {
-      // Regenerate the current component's view
-      if (this.currentPage === "ExcelComponent" && this.$refs.excelComponent) {
-        this.$refs.excelComponent.generateMonthDays();
-      } else if (
-        this.currentPage === "CalendarComponent" &&
+      if (
+        this.currentPage === 'CalendarComponent' &&
         this.$refs.calendarComponent
       ) {
         this.$refs.calendarComponent.generateMonthDays();
@@ -298,9 +295,9 @@ export default {
       // Set a timeout to prevent infinite spinning
       const refreshTimeout = setTimeout(() => {
         if (this.isRefreshing) {
-          console.warn("Refresh operation timed out");
+          console.warn('Refresh operation timed out');
           this.isRefreshing = false;
-          addNotification("Odświeżanie przerwane - timeout", "red");
+          addNotification('Odświeżanie przerwane - timeout', 'red');
         }
       }, 6000);
 
@@ -308,21 +305,21 @@ export default {
 
       try {
         const syncPromise = checkShiftDataSync(() =>
-          this.generateCurrentView(),
+          this.generateCurrentView()
         );
         this.syncedChanges = await Promise.race([
           syncPromise,
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Sync timeout")), 5000),
-          ),
+            setTimeout(() => reject(new Error('Sync timeout')), 5000)
+          )
         ]);
 
         this.hasUnsavedChanges = false;
       } catch (error) {
-        console.error("Error during refresh:", error);
+        console.error('Error during refresh:', error);
         addNotification(
-          `Błąd podczas odświeżania: ${error.message || "Unknown error"}`,
-          "red",
+          `Błąd podczas odświeżania: ${error.message || 'Unknown error'}`,
+          'red'
         );
       } finally {
         clearTimeout(refreshTimeout);
@@ -333,7 +330,7 @@ export default {
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
-      localStorage.setItem("isEditingMode", JSON.stringify(newMode)); // Persist state
+      localStorage.setItem('isEditingMode', JSON.stringify(newMode)); // Persist state
     },
     updateUnsavedChanges(hasChanges) {
       this.hasUnsavedChanges = hasChanges;
@@ -341,7 +338,7 @@ export default {
     showPasswordPrompt() {
       if (!this.AuthorizationModal) {
         // Only import if not already loaded
-        import("./components/AuthorizationModal.vue").then((module) => {
+        import('./components/AuthorizationModal.vue').then((module) => {
           this.AuthorizationModal = markRaw(module.default);
           this.showPasswordModal = true;
         });
@@ -371,8 +368,8 @@ export default {
       this.isRefreshing = false;
 
       // Force reload component if needed
-      if (this.currentPage === "ExcelComponent" && !this.$refs.excelComponent) {
-        this.handleNavigation("ExcelComponent");
+      if (this.currentPage === 'ExcelComponent' && !this.$refs.excelComponent) {
+        this.handleNavigation('ExcelComponent');
       }
 
       // Clear any stuck flags
@@ -389,11 +386,11 @@ export default {
     },
     handleImportedCells(importedCellKeys) {
       if (!this.ExcelComponent) {
-        console.error("ExcelComponent is not loaded yet.");
+        console.error('ExcelComponent is not loaded yet.');
         return;
       }
       this.$refs.excelComponent.importedCells = new Set(importedCellKeys);
-    },
+    }
   },
   async mounted() {
     try {
@@ -404,45 +401,45 @@ export default {
       if (!this.ExcelComponent) {
         try {
           this.ExcelComponent = markRaw(
-            (await import("./components/ExcelComponent.vue")).default,
+            (await import('./components/ExcelComponent.vue')).default
           );
         } catch (error) {
-          console.error("Failed to load Excel component:", error);
-          addNotification("Błąd ładowania Tabeli", "red");
+          console.error('Failed to load Excel component:', error);
+          addNotification('Błąd ładowania Tabeli', 'red');
         }
       }
 
       // Load stored page with error handling
-      const savedPage = localStorage.getItem("currentPage");
-      if (savedPage === "CalendarComponent" && !this.CalendarComponent) {
+      const savedPage = localStorage.getItem('currentPage');
+      if (savedPage === 'CalendarComponent' && !this.CalendarComponent) {
         try {
-          const module = await import("./components/CalendarComponent.vue");
+          const module = await import('./components/CalendarComponent.vue');
           this.CalendarComponent = markRaw(module.default);
         } catch (error) {
-          console.error("Failed to load Calendar component:", error);
-          addNotification("Błąd ładowania Kalendarza", "red");
+          console.error('Failed to load Calendar component:', error);
+          addNotification('Błąd ładowania Kalendarza', 'red');
 
           // Fallback to ExcelComponent if Calendar fails to load
-          this.currentPage = "ExcelComponent";
-          localStorage.setItem("currentPage", "ExcelComponent");
+          this.currentPage = 'ExcelComponent';
+          localStorage.setItem('currentPage', 'ExcelComponent');
         }
       }
 
       this.discardChanges();
       this.hasUnsavedChanges = false;
     } catch (error) {
-      console.error("Error during application initialization:", error);
-      addNotification("Błąd inicjalizacji aplikacji", "red");
+      console.error('Error during application initialization:', error);
+      addNotification('Błąd inicjalizacji aplikacji', 'red');
     }
     // Global error handler
-    window.addEventListener("error", (event) => {
-      console.error("Global error caught:", event.error);
+    window.addEventListener('error', (event) => {
+      console.error('Global error caught:', event.error);
       this.recoverFromError();
     });
 
     // Unhandled promise rejection handler
-    window.addEventListener("unhandledrejection", (event) => {
-      console.error("Unhandled promise rejection:", event.reason);
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
       this.recoverFromError();
     });
   },
@@ -450,15 +447,15 @@ export default {
   computed: {
     peopleListEditingMode() {
       switch (this.currentPage) {
-        case "CalendarComponent":
+        case 'CalendarComponent':
           return this.isEditingMode;
-        case "ExcelComponent":
+        case 'ExcelComponent':
           return false;
         default:
           return false;
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
