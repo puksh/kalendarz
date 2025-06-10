@@ -101,16 +101,13 @@
         :people="people"
         :isEditingMode="peopleListEditingMode"
       />
-      <div
-        v-show="isEditingMode"
-        style="display: flex; flex-direction: column; align-items: center"
-      >
+      <div v-show="isEditingMode" class="editing-mode-container">
         <h1
           v-show="currentPage === 'CalendarComponent'"
           class="editing-mode-label"
         >
           Tryb edytowania
-          <a style="color: #4caf50">Włączony</a><br />
+          <a class="editing-mode-status">Włączony</a><br />
           Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na
           zajętą zmianę, aby ją wyczyścić.
         </h1>
@@ -119,7 +116,7 @@
           class="editing-mode-label"
         >
           Tryb edytowania
-          <a style="color: #4caf50">Włączony</a><br />
+          <a class="editing-mode-status">Włączony</a><br />
           Kliknij na miejsce w tabeli, aby wybrać zmianę.
         </h1>
       </div>
@@ -311,7 +308,7 @@ export default {
     updateMonthDays(days) {
       this.monthDays = days;
     },
-    recoverFromError() {
+    globalErrorHandler() {
       this.isRefreshing = false;
       if (this.currentPage === 'ExcelComponent' && !this.$refs.excelComponent) {
         this.handleNavigation('ExcelComponent');
@@ -338,22 +335,19 @@ export default {
   async mounted() {
     try {
       this.isRefreshing = false;
-      try {
-        await this.loadPageComponent('ExcelComponent');
-      } catch (error) {
+      await this.loadPageComponent('ExcelComponent').catch((error) => {
         console.error('Failed to load Excel component:', error);
         addNotification('Błąd ładowania Tabeli', 'red');
-      }
+      });
+
       const savedPage = localStorage.getItem('currentPage');
       if (savedPage === 'CalendarComponent') {
-        try {
-          await this.loadPageComponent('CalendarComponent');
-        } catch (error) {
+        await this.loadPageComponent('CalendarComponent').catch((error) => {
           console.error('Failed to load Calendar component:', error);
           addNotification('Błąd ładowania Kalendarza', 'red');
           this.currentPage = 'ExcelComponent';
           localStorage.setItem('currentPage', 'ExcelComponent');
-        }
+        });
       }
       this.discardChanges();
       this.hasUnsavedChanges = false;
@@ -362,7 +356,7 @@ export default {
       addNotification('Błąd inicjalizacji aplikacji', 'red');
     }
     ['error', 'unhandledrejection'].forEach((evt) =>
-      window.addEventListener(evt, () => this.recoverFromError())
+      window.addEventListener(evt, () => this.globalErrorHandler())
     );
   }
 };
@@ -425,5 +419,19 @@ export default {
   width: 60px;
   height: 60px;
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
+}
+
+.editing-mode-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.editing-mode-label {
+  /* Styles for the label */
+}
+
+.editing-mode-status {
+  color: #4caf50;
 }
 </style>
