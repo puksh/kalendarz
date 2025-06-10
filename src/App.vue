@@ -11,7 +11,7 @@
       mode="save"
     />
     <button
-      :disabled="!hasUnsavedChanges"
+      :disabled="!canSave"
       @click="showPasswordPrompt"
       class="submit-button"
       aria-label="Zapisz zmiany"
@@ -173,13 +173,12 @@ export default {
   },
   data() {
     return {
-      isEditingMode: this.safeGetFromStorage('isEditingMode', false), // Shared Edit state
-      //MonthSelector
+      isLoading: false,
+      isEditingMode: this.safeGetFromStorage('isEditingMode', false),
       selectedMonth: new Date().getMonth(),
       selectedYear: new Date().getFullYear(),
       locale: 'pl',
       hasUnsavedChanges: false,
-      // Modal and Save state
       showPasswordModal: false,
       localData: {},
       people: [
@@ -199,53 +198,70 @@ export default {
       AuthorizationModal: null,
       CalendarComponent: null,
       ExcelComponent: null,
-      currentPage: localStorage.getItem('currentPage') || 'ExcelComponent'
+      currentPage: this.safeGetFromStorage('currentPage', 'ExcelComponent')
     };
   },
+  computed: {
+    canSave() {
+      return this.hasUnsavedChanges;
+    },
+    peopleListEditingMode() {
+      return this.currentPage === 'CalendarComponent' && this.isEditingMode;
+    },
+    activeComponentRef() {
+      return this.currentPage === 'CalendarComponent'
+        ? this.$refs.calendarComponent
+        : this.$refs.excelComponent;
+    }
+  },
   methods: {
+    showPasswordPrompt() {
+      if (this.AuthorizationModal) {
+        this.showPasswordModal = true;
+        return;
+      }
+      import('./components/AuthorizationModal.vue').then((m) => {
+        this.AuthorizationModal = markRaw(m.default);
+        this.showPasswordModal = true;
+      });
+    },
+    handleAuthorization() {
+      this.showPasswordModal = false;
+      this.hasUnsavedChanges = false;
+      this.activeComponentRef?.handleChangesSaved();
+    },
+    loadPageComponent(name) {
+      const loaders = {
+        CalendarComponent: () => import('./components/CalendarComponent.vue'),
+        ExcelComponent: () => import('./components/ExcelComponent.vue')
+      };
+      const loader = loaders[name];
+      if (!loader || this[name]) return Promise.resolve();
+      this.isLoading = true;
+      return loader()
+        .then((module) => {
+          this[name] = markRaw(module.default);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
     handleNavigation(section) {
       if (this.hasUnsavedChanges) {
         const confirmSwitch = confirm(
-          'Masz niezapisane zmiany. Czy na pewno chcesz zmienić widok? Twoje zmiany zostaną utracone.'
+          'Masz niezapisane zmiany. Czy na pewno chcesz zmienić widok?'
         );
-        if (!confirmSwitch) {
-          return;
-        }
+        if (!confirmSwitch) return;
       }
-
-      // Save to localStorage
       localStorage.setItem('currentPage', section);
-
-      // Dynamic component loading
-      if (section === 'CalendarComponent' && !this.CalendarComponent) {
-        // Show loading indicator
-        this.isLoading = true;
-
-        import('./components/CalendarComponent.vue').then((module) => {
-          this.CalendarComponent = markRaw(module.default);
-          this.currentPage = section;
-          this.hasUnsavedChanges = false;
-          this.isLoading = false;
-        });
-      } else if (section === 'ExcelComponent' && !this.ExcelComponent) {
-        // Add ExcelComponent lazy loading too
-        this.isLoading = true;
-
-        import('./components/ExcelComponent.vue').then((module) => {
-          this.ExcelComponent = markRaw(module.default);
-          this.currentPage = section;
-          this.hasUnsavedChanges = false;
-          this.isLoading = false;
-        });
-      } else {
+      this.loadPageComponent(section).then(() => {
         this.currentPage = section;
         this.hasUnsavedChanges = false;
-      }
+      });
     },
     handleMonthChange(delta) {
       const currentDate = new Date(this.selectedYear, this.selectedMonth, 1);
       currentDate.setMonth(currentDate.getMonth() + delta);
-
       this.selectedMonth = currentDate.getMonth();
       this.selectedYear = currentDate.getFullYear();
     },
@@ -262,69 +278,31 @@ export default {
       }
     },
     async checkShiftDataSync() {
-      // Set a timeout to prevent infinite spinning
-      const refreshTimeout = setTimeout(() => {
-        if (this.isRefreshing) {
-          console.warn('Refresh operation timed out');
-          this.isRefreshing = false;
-          addNotification('Odświeżanie przerwane - timeout', 'red');
-        }
-      }, 6000);
-
+      const timeoutError = new Error('Sync timeout');
       this.isRefreshing = true;
-
       try {
-        const syncPromise = checkShiftDataSync(() =>
-          this.generateCurrentView()
-        );
-        this.syncedChanges = await Promise.race([
-          syncPromise,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Sync timeout')), 5000)
-          )
+        await Promise.race([
+          checkShiftDataSync(() =>
+            this.activeComponentRef?.generateMonthDays()
+          ),
+          new Promise((_, r) => setTimeout(() => r(timeoutError), 5000))
         ]);
-
         this.hasUnsavedChanges = false;
-      } catch (error) {
-        console.error('Error during refresh:', error);
-        addNotification(
-          `Błąd podczas odświeżania: ${error.message || 'Unknown error'}`,
-          'red'
-        );
+      } catch (e) {
+        console.error(e);
+        addNotification(`Błąd podczas odświeżania: ${e.message}`, 'red');
       } finally {
-        clearTimeout(refreshTimeout);
-        setTimeout(() => {
-          this.isRefreshing = false;
-        }, 800);
+        setTimeout(() => (this.isRefreshing = false), 800);
       }
     },
     updateEditingMode(newMode) {
       this.isEditingMode = newMode;
-      localStorage.setItem('isEditingMode', JSON.stringify(newMode)); // Persist state
+      localStorage.setItem('isEditingMode', JSON.stringify(newMode));
     },
     updateUnsavedChanges(hasChanges) {
       this.hasUnsavedChanges = hasChanges;
     },
-    showPasswordPrompt() {
-      if (!this.AuthorizationModal) {
-        // Only import if not already loaded
-        import('./components/AuthorizationModal.vue').then((module) => {
-          this.AuthorizationModal = markRaw(module.default);
-          this.showPasswordModal = true;
-        });
-      } else {
-        // If already loaded, just show it
-        this.showPasswordModal = true;
-      }
-    },
-    handleAuthorization() {
-      this.showPasswordModal = false;
-      this.hasUnsavedChanges = false;
-      // Notify active component that changes were saved
-      this.$refs.activeComponent?.handleChangesSaved();
-    },
     emitEditingMode(newMode) {
-      // Directly update the state instead of emitting an event
       this.updateEditingMode(newMode);
     },
     enableEditingMode() {
@@ -334,15 +312,10 @@ export default {
       this.monthDays = days;
     },
     recoverFromError() {
-      // Reset critical state
       this.isRefreshing = false;
-
-      // Force reload component if needed
       if (this.currentPage === 'ExcelComponent' && !this.$refs.excelComponent) {
         this.handleNavigation('ExcelComponent');
       }
-
-      // Clear any stuck flags
       this.isLoading = false;
     },
     safeGetFromStorage(key, defaultValue) {
@@ -364,67 +337,33 @@ export default {
   },
   async mounted() {
     try {
-      // Reset any stuck state from previous sessions
       this.isRefreshing = false;
-
-      // Wrap in try-catch to handle component loading failures
-      if (!this.ExcelComponent) {
-        try {
-          this.ExcelComponent = markRaw(
-            (await import('./components/ExcelComponent.vue')).default
-          );
-        } catch (error) {
-          console.error('Failed to load Excel component:', error);
-          addNotification('Błąd ładowania Tabeli', 'red');
-        }
+      try {
+        await this.loadPageComponent('ExcelComponent');
+      } catch (error) {
+        console.error('Failed to load Excel component:', error);
+        addNotification('Błąd ładowania Tabeli', 'red');
       }
-
-      // Load stored page with error handling
       const savedPage = localStorage.getItem('currentPage');
-      if (savedPage === 'CalendarComponent' && !this.CalendarComponent) {
+      if (savedPage === 'CalendarComponent') {
         try {
-          const module = await import('./components/CalendarComponent.vue');
-          this.CalendarComponent = markRaw(module.default);
+          await this.loadPageComponent('CalendarComponent');
         } catch (error) {
           console.error('Failed to load Calendar component:', error);
           addNotification('Błąd ładowania Kalendarza', 'red');
-
-          // Fallback to ExcelComponent if Calendar fails to load
           this.currentPage = 'ExcelComponent';
           localStorage.setItem('currentPage', 'ExcelComponent');
         }
       }
-
       this.discardChanges();
       this.hasUnsavedChanges = false;
     } catch (error) {
       console.error('Error during application initialization:', error);
       addNotification('Błąd inicjalizacji aplikacji', 'red');
     }
-    // Global error handler
-    window.addEventListener('error', (event) => {
-      console.error('Global error caught:', event.error);
-      this.recoverFromError();
-    });
-
-    // Unhandled promise rejection handler
-    window.addEventListener('unhandledrejection', (event) => {
-      console.error('Unhandled promise rejection:', event.reason);
-      this.recoverFromError();
-    });
-  },
-
-  computed: {
-    peopleListEditingMode() {
-      switch (this.currentPage) {
-        case 'CalendarComponent':
-          return this.isEditingMode;
-        case 'ExcelComponent':
-          return false;
-        default:
-          return false;
-      }
-    }
+    ['error', 'unhandledrejection'].forEach((evt) =>
+      window.addEventListener(evt, () => this.recoverFromError())
+    );
   }
 };
 </script>
