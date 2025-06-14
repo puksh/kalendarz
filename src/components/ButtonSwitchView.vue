@@ -70,8 +70,6 @@ export default {
   top: 12px;
   gap: 6px;
   background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   color: var(--color-text);
   height: 36px;
@@ -81,7 +79,6 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
-  box-shadow: var(--glass-box-shadow);
   z-index: var(--z-index-button-switch-view);
 }
 

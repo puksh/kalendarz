@@ -25,47 +25,47 @@
 
 <script lang="ts">
 export default {
-  name: "MonthSelector",
+  name: 'MonthSelector',
   props: {
     currentMonth: {
       type: Number,
-      required: true,
+      required: true
     },
     currentYear: {
       type: Number,
-      required: true,
+      required: true
     },
     locale: {
       type: String,
-      default: "pl",
+      default: 'pl'
     },
     hasUnsavedChanges: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
-      isChanging: false,
+      isChanging: false
     };
   },
   computed: {
     formattedMonthYear() {
       return new Date(this.currentYear, this.currentMonth)
         .toLocaleString(this.locale, {
-          month: "long",
-          year: "numeric",
+          month: 'long',
+          year: 'numeric'
         })
         .toUpperCase();
-    },
+    }
   },
   mounted() {
     // Add keyboard event listener when component mounts
-    document.addEventListener("keydown", this.handleKeyDown);
+    document.addEventListener('keydown', this.handleKeyDown);
   },
   beforeUnmount() {
     // Remove keyboard event listener when component unmounts
-    document.removeEventListener("keydown", this.handleKeyDown);
+    document.removeEventListener('keydown', this.handleKeyDown);
   },
   methods: {
     handleKeyDown(event) {
@@ -73,39 +73,39 @@ export default {
       const activeElement = document.activeElement;
       if (
         activeElement &&
-        (activeElement.tagName === "INPUT" ||
-          activeElement.tagName === "TEXTAREA" ||
+        (activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA' ||
           (activeElement as HTMLElement).isContentEditable)
       ) {
         return; // Don't handle keyboard shortcuts when typing
       }
 
       switch (event.key) {
-        case "ArrowLeft":
-        case "<":
+        case 'ArrowLeft':
+        case '<':
           event.preventDefault();
           this.handleMonthChange(-1);
           break;
-        case "ArrowRight":
-        case ">":
+        case 'ArrowRight':
+        case '>':
           event.preventDefault();
           this.handleMonthChange(1);
           break;
-        case "PageUp":
+        case 'PageUp':
           event.preventDefault();
           this.handleMonthChange(-1);
           break;
-        case "PageDown":
+        case 'PageDown':
           event.preventDefault();
           this.handleMonthChange(1);
           break;
-        case "ArrowUp":
+        case 'ArrowUp':
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             this.handleMonthChange(12); // Previous year
           }
           break;
-        case "ArrowDown":
+        case 'ArrowDown':
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             this.handleMonthChange(-12); // Next year
@@ -116,7 +116,7 @@ export default {
     handleMonthChange(delta) {
       if (this.hasUnsavedChanges) {
         const confirmSwitch = confirm(
-          "Masz niezapisane zmiany. Czy na pewno chcesz zmienić miesiąc? Twoje zmiany zostaną utracone.",
+          'Masz niezapisane zmiany. Czy na pewno chcesz zmienić miesiąc? Twoje zmiany zostaną utracone.'
         );
 
         if (!confirmSwitch) {
@@ -124,7 +124,7 @@ export default {
         }
 
         // User confirmed discarding changes
-        this.$emit("discard-changes"); // Signal parent to discard changes
+        this.$emit('discard-changes'); // Signal parent to discard changes
       }
       this.isChanging = true;
       setTimeout(() => {
@@ -132,9 +132,9 @@ export default {
       }, 300); // Match animation duration
 
       // Emit the month change event with delta
-      this.$emit("change-month", delta);
-    },
-  },
+      this.$emit('change-month', delta);
+    }
+  }
 };
 </script>
 
@@ -142,18 +142,13 @@ export default {
 .monthChange {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 1ch 0;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 100%;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-bottom: 1px solid var(--glass-border-color);
-  box-shadow: var(--glass-box-shadow);
   z-index: var(--z-index-month-selector);
   height: 44px;
 }

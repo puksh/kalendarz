@@ -32,10 +32,16 @@
     <div
       v-if="showExportMenu"
       class="export-menu"
-      :class="{
-        'excel-position': currentPage === 'ExcelComponent',
-        'calendar-position': currentPage === 'CalendarComponent'
-      }"
+      :class="[
+        {
+          'excel-position': currentPage === 'ExcelComponent',
+          'calendar-position': currentPage === 'CalendarComponent'
+        },
+        {
+          'mobile-excel': currentPage === 'ExcelComponent' && isMobileView,
+          'mobile-calendar': currentPage === 'CalendarComponent' && isMobileView
+        }
+      ]"
     >
       <button @click="exportToCsv" class="export-option">
         <svg
@@ -136,15 +142,19 @@ export default {
   },
   data() {
     return {
-      showExportMenu: false
+      showExportMenu: false,
+      isMobileView: false
     };
   },
   mounted() {
     // Close the menu when clicking outside
     document.addEventListener('click', this.handleOutsideClick);
+    this.checkMobileView();
+    window.addEventListener('resize', this.checkMobileView);
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleOutsideClick);
+    window.removeEventListener('resize', this.checkMobileView);
   },
   methods: {
     toggleExportMenu(event) {
@@ -614,6 +624,10 @@ export default {
     isWeekendOrHoliday(day) {
       const date = new Date(this.selectedYear, this.selectedMonth, day);
       return isWeekendOrHoliday(date);
+    },
+
+    checkMobileView() {
+      this.isMobileView = window.innerWidth <= 768;
     }
   }
 };
@@ -633,12 +647,24 @@ export default {
   margin-left: 10px;
 }
 
+/* Desktop positions for opened menu */
 .excel-position {
   left: 128px;
 }
 
 .calendar-position {
   left: 102px;
+}
+
+/* Mobile positions for opened menu */
+@media (max-width: 768px) {
+  .mobile-excel {
+    left: 118px;
+  }
+
+  .mobile-calendar {
+    left: 92px;
+  }
 }
 
 .export-icon {
@@ -717,7 +743,6 @@ export default {
   }
 }
 
-/* Add this to your global styles or keep it here */
 .exporting {
   background-color: white !important;
   color: #333 !important;
@@ -729,7 +754,6 @@ export default {
   border-color: #ccc !important;
 }
 
-/* Ensure proper printing/export styling */
 .exporting-in-progress {
   overflow: hidden !important;
 }
@@ -742,7 +766,6 @@ export default {
   background-color: white !important;
   color: #333 !important;
   border-color: #ccc !important;
-  font-family: Arial, sans-serif !important; /* Universal font for better compatibility */
 }
 
 .exporting th,

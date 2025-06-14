@@ -10,63 +10,28 @@
       title="Zapisz zmiany w harmonogramie"
       mode="save"
     />
-    <button
-      :disabled="!canSave"
-      @click="showPasswordPrompt"
-      class="submit-button"
-      aria-label="Zapisz zmiany"
-      title="Zapisz zmiany w harmonogramie"
-    >
-      Zapisz
-    </button>
-    <ButtonSwitchView
+
+    <ButtonsTopBar
+      :canSave="canSave"
       :currentComponent="currentPage"
-      @navigate="handleNavigation"
-    />
-    <MonthSelector
       :currentMonth="selectedMonth"
       :currentYear="selectedYear"
       :locale="locale"
       :hasUnsavedChanges="hasUnsavedChanges"
+      :isEditingMode="isEditingMode"
+      :isRefreshing="isRefreshing"
+      :people="people"
+      :monthDays="monthDays"
+      @save="showPasswordPrompt"
+      @navigate="handleNavigation"
       @change-month="handleMonthChange"
       @discard-changes="discardChanges"
+      @refresh="checkShiftDataSync"
+      @toggle-edit="emitEditingMode"
+      @has-changes="updateUnsavedChanges"
+      @cells-imported="handleImportedCells"
     />
-    <section class="top-right-buttons-container">
-      <button
-        class="top-right-buttons buttonRefresh"
-        @click="checkShiftDataSync()"
-        aria-label="Odśwież harmonogram"
-        title="Odśwież harmonogram"
-      >
-        <refresh-icon :class="{ refreshing: isRefreshing }" />
-      </button>
-      <label
-        class="top-right-buttons compact-toggle"
-        title="Przełącz tryb edytowania"
-      >
-        <input
-          type="checkbox"
-          :checked="isEditingMode"
-          @change="emitEditingMode($event.target.checked)"
-          aria-label="Przełącz tryb edytowania"
-        />
-        <PencilIcon :isEditing="isEditingMode" />
-      </label>
-      <ButtonExport
-        :people="people"
-        :monthDays="monthDays"
-        :selectedMonth="selectedMonth"
-        :selectedYear="selectedYear"
-        :currentPage="currentPage"
-      />
-      <ButtonImport
-        :isEditingMode="isEditingMode"
-        :people="people"
-        :monthDays="monthDays"
-        @has-changes="updateUnsavedChanges"
-        @cells-imported="handleImportedCells"
-      />
-    </section>
+
     <main class="main-content">
       <div class="refresh-overlay" v-if="isRefreshing">
         <RefreshIcon class="centered-refresh-icon refreshing" />
@@ -141,6 +106,7 @@
 
 <script>
 import { defineAsyncComponent, markRaw } from 'vue';
+import ButtonsTopBar from './components/ButtonsTopBar.vue';
 import PencilIcon from './components/PencilIcon.vue';
 import ButtonSwitchView from './components/ButtonSwitchView.vue';
 import { checkShiftDataSync } from '@/utils/dataSync.js';
@@ -152,6 +118,7 @@ import ButtonImport from './components/ButtonImport.vue';
 export default {
   name: 'VueCalendar',
   components: {
+    ButtonsTopBar,
     ButtonSwitchView,
     MonthSelector: defineAsyncComponent(
       () => import('./components/MonthSelector.vue')
@@ -372,7 +339,7 @@ export default {
 }
 
 .main-content {
-  padding-top: 20px;
+  padding-top: 70px;
   max-width: 100%;
   text-align: center;
   display: flex;
@@ -380,6 +347,8 @@ export default {
   justify-content: flex-start;
   margin-bottom: 40px !important;
   min-height: calc(100vh - 200px); /* Account for header and footer */
+  position: relative;
+  z-index: var(--z-index-main-content);
 }
 
 .footer {

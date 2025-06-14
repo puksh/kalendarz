@@ -44,12 +44,15 @@
   font-display: swap;
 
   /*z-indexes */
-  --z-index-modal: 1001;
-  --z-index-refresh-overlay: 1001;
-  --z-index-top-bar: 1000;
-  --z-index-button-switch-view: 1000;
+  --z-index-modal: 2000;
+  --z-index-refresh-overlay: 1900;
+  --z-index-hamburger: 1800;
+  --z-index-topbar: 1700;
+  --z-index-mobile-menu: 1600;
+  --z-index-main-content: 1000;
+  --z-index-button-switch-view: 1200;
   --z-index-footer: 1000;
-  --z-index-month-selector: 999;
+  --z-index-month-selector: 1200;
 }
 * {
   font-family: 'IBMPlexMono', monospace;
@@ -101,6 +104,7 @@ button:disabled {
     border-color 0.3s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .top-right-buttons svg {
