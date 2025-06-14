@@ -4,7 +4,7 @@
       class="export-button top-right-buttons"
       :class="{
         'excel-position': currentPage === 'ExcelComponent',
-        'calendar-position': currentPage === 'CalendarComponent',
+        'calendar-position': currentPage === 'CalendarComponent'
       }"
       @click="toggleExportMenu"
       title="Eksportuj harmonogram"
@@ -34,7 +34,7 @@
       class="export-menu"
       :class="{
         'excel-position': currentPage === 'ExcelComponent',
-        'calendar-position': currentPage === 'CalendarComponent',
+        'calendar-position': currentPage === 'CalendarComponent'
       }"
     >
       <button @click="exportToCsv" class="export-option">
@@ -100,44 +100,51 @@
 </template>
 
 <script lang="ts">
-import { addNotification } from "./NotificationMessage.vue";
-import { isPolishHoliday } from "../utils/polishHolidays";
+import { addNotification } from './NotificationMessage.vue';
+import {
+  getMonthName,
+  getExcelColumnLetter,
+  getFormattedShift,
+  isWeekendOrHoliday
+} from '../utils/exportUtils';
+import { downloadFile, arrayBufferToBase64 } from '../utils/fileUtils';
+import { isPolishHoliday } from '../utils/polishHolidays';
 
 export default {
-  name: "ButtonExport",
+  name: 'ButtonExport',
   props: {
     people: {
       type: Array,
-      required: true,
+      required: true
     },
     monthDays: {
       type: Array,
-      required: true,
+      required: true
     },
     selectedMonth: {
       type: Number,
-      required: true,
+      required: true
     },
     selectedYear: {
       type: Number,
-      required: true,
+      required: true
     },
     currentPage: {
       type: String,
-      default: "ExcelComponent",
-    },
+      default: 'ExcelComponent'
+    }
   },
   data() {
     return {
-      showExportMenu: false,
+      showExportMenu: false
     };
   },
   mounted() {
     // Close the menu when clicking outside
-    document.addEventListener("click", this.handleOutsideClick);
+    document.addEventListener('click', this.handleOutsideClick);
   },
   beforeUnmount() {
-    document.removeEventListener("click", this.handleOutsideClick);
+    document.removeEventListener('click', this.handleOutsideClick);
   },
   methods: {
     toggleExportMenu(event) {
@@ -146,27 +153,13 @@ export default {
     },
 
     handleOutsideClick(event) {
-      if (this.showExportMenu && !event.target.closest(".export-container")) {
+      if (this.showExportMenu && !event.target.closest('.export-container')) {
         this.showExportMenu = false;
       }
     },
 
     getMonthName() {
-      const monthNames = [
-        "Styczeń",
-        "Luty",
-        "Marzec",
-        "Kwiecień",
-        "Maj",
-        "Czerwiec",
-        "Lipiec",
-        "Sierpień",
-        "Wrzesień",
-        "Październik",
-        "Listopad",
-        "Grudzień",
-      ];
-      return monthNames[this.selectedMonth];
+      return getMonthName(this.selectedMonth);
     },
 
     getFilename(extension) {
@@ -175,14 +168,14 @@ export default {
 
     exportToCsv() {
       // Add UTF-8 BOM to ensure Excel recognizes encoding correctly
-      let csvContent = "\ufeff";
+      let csvContent = '\ufeff';
 
       // Create CSV header row with dates
-      csvContent += "Imię";
+      csvContent += 'Imię';
       for (let day = 1; day <= this.getDaysInMonth(); day++) {
         csvContent += `;${day}`; // Using semicolon as separator for better Excel compatibility
       }
-      csvContent += "\r\n"; // Windows-style line endings for Excel
+      csvContent += '\r\n'; // Windows-style line endings for Excel
 
       // Add data for each person
       for (const person of this.people) {
@@ -191,52 +184,52 @@ export default {
 
         // Add shift data for each day
         for (let day = 1; day <= this.getDaysInMonth(); day++) {
-          csvContent += `;${this.getFormattedShift(person.id, day, " ") || ""}`; // Use semicolons as separators
+          csvContent += `;${this.getFormattedShift(person.id, day, ' ') || ''}`; // Use semicolons as separators
         }
-        csvContent += "\r\n";
+        csvContent += '\r\n';
       }
 
       // Create a Blob with the CSV content
       const blob = new Blob([csvContent], {
-        type: "text/csv;charset=utf-8",
+        type: 'text/csv;charset=utf-8'
       });
 
-      this.downloadFile(blob, this.getFilename("csv"));
+      downloadFile(blob, this.getFilename('csv'));
       this.showExportMenu = false;
     },
 
     async exportToPdf() {
       try {
-        const { jsPDF } = await import("jspdf");
-        const { autoTable } = await import("jspdf-autotable");
+        const { jsPDF } = await import('jspdf');
+        const { autoTable } = await import('jspdf-autotable');
 
         // Create new PDF document
         const doc = new jsPDF({
-          orientation: "landscape",
-          unit: "mm",
-          format: "a4",
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
         });
 
         try {
           // Fetch the local font file
           const fontResponse = await fetch(
-            "/assets/fonts/IBMPlexMono-Regular.ttf",
+            '/assets/fonts/IBMPlexMono-Regular.ttf'
           );
-          if (!fontResponse.ok) throw new Error("Font file not found");
+          if (!fontResponse.ok) throw new Error('Font file not found');
 
           // Convert font to array buffer
           const fontArrayBuffer = await fontResponse.arrayBuffer();
 
           // Add font to PDF
           doc.addFileToVFS(
-            "IBMPlexMono-Regular.ttf",
-            this.arrayBufferToBase64(fontArrayBuffer),
+            'IBMPlexMono-Regular.ttf',
+            arrayBufferToBase64(fontArrayBuffer)
           );
-          doc.addFont("IBMPlexMono-Regular.ttf", "IBMPlexMono", "normal");
-          doc.setFont("IBMPlexMono");
+          doc.addFont('IBMPlexMono-Regular.ttf', 'IBMPlexMono', 'normal');
+          doc.setFont('IBMPlexMono');
         } catch (fontError) {
-          console.warn("Could not load local font, using fallback", fontError);
-          doc.setFont("helvetica");
+          console.warn('Could not load local font, using fallback', fontError);
+          doc.setFont('helvetica');
         }
 
         // Get page dimensions for centering
@@ -256,15 +249,15 @@ export default {
         const subheaderTemplate =
           import.meta.env.VITE_PDF_SUBHEADER_TEMPLATE.toString();
         const subheaderText = subheaderTemplate
-          .replace("{0}", this.getMonthName())
-          .replace("{1}", this.selectedYear);
+          .replace('{0}', this.getMonthName())
+          .replace('{1}', this.selectedYear);
         const subheaderWidth =
           (doc.getStringUnitWidth(subheaderText) * doc.getFontSize()) /
           doc.internal.scaleFactor;
         doc.text(subheaderText, (pageWidth - subheaderWidth) / 2, 22);
 
         // Prepare headers
-        const headers = ["Imię"];
+        const headers = ['Imię'];
         for (let day = 1; day <= this.getDaysInMonth(); day++) {
           headers.push(day.toString());
         }
@@ -273,8 +266,8 @@ export default {
         const body = this.people.map((person) => {
           const row = [person.name];
           for (let day = 1; day <= this.getDaysInMonth(); day++) {
-            const shift = this.getFormattedShift(person.id, day, "\n");
-            row.push(shift || "");
+            const shift = this.getFormattedShift(person.id, day, '\n');
+            row.push(shift || '');
           }
           return row;
         });
@@ -282,33 +275,33 @@ export default {
           head: [headers],
           body: body,
           startY: 30,
-          theme: "grid",
+          theme: 'grid',
           margin: { left: 8 },
           styles: {
             fontSize: 8,
             cellPadding: 3,
-            font: "IBMPlexMono",
-            fontStyle: "normal",
+            font: 'IBMPlexMono',
+            fontStyle: 'normal',
             lineWidth: 0.3,
             minCellHeight: 8,
-            halign: "center",
-            cellWidth: "wrap",
-            overflow: "linebreak", // Better text wrapping
+            halign: 'center',
+            cellWidth: 'wrap',
+            overflow: 'linebreak' // Better text wrapping
           },
           columnStyles: {
-            0: { cellWidth: 24 }, // Name column width defined above
+            0: { cellWidth: 24 } // Name column width defined above
           },
           // Use headStyles for ALL headers and override with didParseCell
           headStyles: {
             fillColor: [0, 62, 62],
             textColor: [255, 255, 255],
-            fontSize: 6,
+            fontSize: 6
           },
           didParseCell: function (data) {
             try {
               // Style header cells (weekends and holidays)
               if (
-                data.section === "head" &&
+                data.section === 'head' &&
                 data.row.index === 0 &&
                 data.column.index > 0
               ) {
@@ -317,7 +310,7 @@ export default {
                   const date = new Date(
                     this.selectedYear,
                     this.selectedMonth,
-                    day,
+                    day
                   );
                   const dayOfWeek = date.getDay();
                   const isSaturday = dayOfWeek === 6;
@@ -341,7 +334,7 @@ export default {
               }
 
               // Style body cells
-              else if (data.section === "body") {
+              else if (data.section === 'body') {
                 // Apply alternating row styling
                 if (data.row.index % 2 === 1) {
                   data.cell.styles.fillColor = [240, 240, 240]; // Light gray for even rows
@@ -356,7 +349,7 @@ export default {
                     const date = new Date(
                       this.selectedYear,
                       this.selectedMonth,
-                      day,
+                      day
                     );
                     const dayOfWeek = date.getDay();
                     const isSaturday = dayOfWeek === 6;
@@ -372,14 +365,14 @@ export default {
                 }
               }
             } catch (error) {
-              console.error("Error in didParseCell:", error);
+              console.error('Error in didParseCell:', error);
             }
           }.bind(this),
 
           didDrawCell: function (data) {
             try {
               if (
-                data.section === "head" &&
+                data.section === 'head' &&
                 data.row.index === 0 &&
                 data.column.index > 0
               ) {
@@ -388,7 +381,7 @@ export default {
                   const date = new Date(
                     this.selectedYear,
                     this.selectedMonth,
-                    day,
+                    day
                   );
                   const holidayInfo = isPolishHoliday(date);
 
@@ -397,16 +390,16 @@ export default {
                     const { x, y, width } = data.cell;
                     doc.setFontSize(6);
                     doc.setTextColor(204, 0, 0);
-                    doc.text("*", x + width - 3, y + 3);
+                    doc.text('*', x + width - 3, y + 3);
                     doc.setFontSize(8); // Reset font size
                     doc.setTextColor(0, 0, 0); // Reset text color
                   }
                 }
               }
             } catch (error) {
-              console.error("Error in didDrawCell:", error);
+              console.error('Error in didDrawCell:', error);
             }
-          }.bind(this),
+          }.bind(this)
         });
 
         // Legend and holiday information
@@ -417,10 +410,10 @@ export default {
         doc.setTextColor(0, 0, 0);
 
         // Legend
-        doc.text("Legenda:", 14, legendY);
-        doc.text("D  - Dzienna 07:00-19:00", 14, legendY + 6);
-        doc.text("N  - Nocna   19:00-07:00", 14, legendY + 12);
-        doc.text("DN - Doba    07:00-07:00", 14, legendY + 18);
+        doc.text('Legenda:', 14, legendY);
+        doc.text('D  - Dzienna 07:00-19:00', 14, legendY + 6);
+        doc.text('N  - Nocna   19:00-07:00', 14, legendY + 12);
+        doc.text('DN - Doba    07:00-07:00', 14, legendY + 18);
 
         // Holiday information
         const monthHolidays = [];
@@ -432,39 +425,39 @@ export default {
           }
         }
         if (monthHolidays.length != 0) {
-          doc.text("Święta w tym miesiącu:", 14, legendY + 28);
+          doc.text('Święta w tym miesiącu:', 14, legendY + 28);
 
           monthHolidays.forEach((holiday, index) => {
             doc.text(
               `${holiday.date.getDate()} - ${holiday.name}`,
               14,
-              legendY + 34 + index * 6,
+              legendY + 34 + index * 6
             );
           });
         }
 
         // Save PDF
-        doc.save(this.getFilename("pdf"));
+        doc.save(this.getFilename('pdf'));
         this.showExportMenu = false;
-        addNotification("Harmonogram zapisany jako PDF", "green");
+        addNotification('Harmonogram zapisany jako PDF', 'green');
       } catch (error) {
-        console.error("Error exporting PDF:", error);
-        addNotification("Błąd podczas eksportu do PDF", "red");
+        console.error('Error exporting PDF:', error);
+        addNotification('Błąd podczas eksportu do PDF', 'red');
       }
     },
 
     async exportToExcel() {
       try {
-        const ExcelJS = await import("exceljs");
+        const ExcelJS = await import('exceljs');
 
         // Create a workbook with a worksheet
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet(
-          `${this.getMonthName()} ${this.selectedYear}`,
+          `${this.getMonthName()} ${this.selectedYear}`
         );
 
         // Prepare the header row
-        const headerRow = ["Imię"];
+        const headerRow = ['Imię'];
         for (let day = 1; day <= this.getDaysInMonth(); day++) {
           headerRow.push(day.toString());
         }
@@ -473,19 +466,19 @@ export default {
         // Style the header row
         const headerCells = worksheet.getRow(1).eachCell((cell) => {
           cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "003E3E" },
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '003E3E' }
           };
           cell.font = {
-            color: { argb: "FFFFFF" },
-            bold: true,
+            color: { argb: 'FFFFFF' },
+            bold: true
           };
           cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
           };
         });
 
@@ -494,7 +487,7 @@ export default {
           const rowData = [person.name];
           for (let day = 1; day <= this.getDaysInMonth(); day++) {
             // Keep spaces instead of newlines for Excel
-            rowData.push(this.getFormattedShift(person.id, day, " "));
+            rowData.push(this.getFormattedShift(person.id, day, ' '));
           }
           worksheet.addRow(rowData);
 
@@ -505,9 +498,9 @@ export default {
           if (rowIndex % 2 === 0) {
             worksheet.getRow(rowIndex).eachCell((cell) => {
               cell.fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "F0F0F0" },
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'F0F0F0' }
               };
             });
           }
@@ -523,15 +516,15 @@ export default {
           const isWeekend = isSaturday || isSunday;
 
           if (isWeekend || isHoliday) {
-            const colLetter = this.getExcelColumnLetter(day + 1); // +1 for name column
+            const colLetter = getExcelColumnLetter(day + 1); // +1 for name column
 
             // Apply to all cells in this column except header
             for (let row = 2; row <= this.people.length + 1; row++) {
               const cell = worksheet.getCell(`${colLetter}${row}`);
               cell.fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: isHoliday ? "FFEEEE" : "EEEEEE" }, // Light pink for holidays
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: isHoliday ? 'FFEEEE' : 'EEEEEE' } // Light pink for holidays
               };
             }
 
@@ -541,33 +534,33 @@ export default {
             if (isHoliday) {
               // Keep original holiday styling
               headerCell.note = name; // Add holiday name as note/comment
-              const headerText = headerCell.value?.toString() || "";
-              headerCell.value = headerText + "★";
+              const headerText = headerCell.value?.toString() || '';
+              headerCell.value = headerText + '★';
               headerCell.font = {
-                color: { argb: "FFCC0000" }, // Red text for holidays
-                bold: true,
+                color: { argb: 'FFCC0000' }, // Red text for holidays
+                bold: true
               };
             } else if (isSaturday) {
               // Green background for Saturday headers
               headerCell.fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "009900" }, // Green background
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '009900' } // Green background
               };
               headerCell.font = {
-                color: { argb: "FFFFFF" }, // White text
-                bold: true,
+                color: { argb: 'FFFFFF' }, // White text
+                bold: true
               };
             } else if (isSunday) {
               // Red background for Sunday headers
               headerCell.fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: { argb: "CC0000" }, // Red background
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'CC0000' } // Red background
               };
               headerCell.font = {
-                color: { argb: "FFFFFF" }, // White text
-                bold: true,
+                color: { argb: 'FFFFFF' }, // White text
+                bold: true
               };
             }
           }
@@ -578,30 +571,30 @@ export default {
           column.width = 12;
         });
         worksheet.getColumn(1).width = 20; // Name column width
-        worksheet.getColumn(1).alignment = { horizontal: "left" }; // Align name column to the left
+        worksheet.getColumn(1).alignment = { horizontal: 'left' }; // Align name column to the left
 
         // Generate Excel file
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
 
-        this.downloadFile(blob, this.getFilename("xlsx"));
+        this.downloadFile(blob, this.getFilename('xlsx'));
         this.showExportMenu = false;
-        addNotification("Harmonogram zapisany jako Excel", "green");
+        addNotification('Harmonogram zapisany jako Excel', 'green');
       } catch (error) {
-        console.error("Error exporting Excel:", error);
-        addNotification("Błąd podczas eksportu do Excel", "red");
+        console.error('Error exporting Excel:', error);
+        addNotification('Błąd podczas eksportu do Excel', 'red');
       }
     },
 
     downloadFile(blob, filename) {
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = "hidden";
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
 
       document.body.appendChild(link);
       link.click();
@@ -613,90 +606,16 @@ export default {
       return new Date(this.selectedYear, this.selectedMonth + 1, 0).getDate();
     },
 
-    // Replace both methods with this single method
-    getFormattedShift(personId, day, separator = "\n") {
-      const dateObj = new Date(this.selectedYear, this.selectedMonth, day);
-      const dateString = dateObj.toDateString();
-
-      const shiftData = localStorage.getItem(dateString);
-      if (shiftData) {
-        const parsedData = JSON.parse(shiftData);
-        const shifts = [];
-
-        if (
-          parsedData.dayShift1 === personId ||
-          parsedData.dayShift2 === personId
-        ) {
-          shifts.push("D");
-        }
-        if (
-          parsedData.nightShift1 === personId ||
-          parsedData.nightShift2 === personId
-        ) {
-          shifts.push("N");
-        }
-
-        // Return with specified separator
-        return shifts.join(separator);
-      }
-      return "";
-    },
-
-    // Check if a day is weekend or holiday
-    isWeekendOrHoliday(day) {
-      // Check if weekend (Saturday or Sunday)
+    getFormattedShift(personId, day, separator = '\n') {
       const date = new Date(this.selectedYear, this.selectedMonth, day);
-      const dayOfWeek = date.getDay();
-
-      // 0 = Sunday, 6 = Saturday
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        return true;
-      }
-
-      // Check if holiday using the Polish holidays utility
-      const { isHoliday } = isPolishHoliday(date);
-      return isHoliday;
+      return getFormattedShift(personId, date, separator);
     },
 
-    // Get color styles for weekend columns
-    getWeekendColumnStyles() {
-      const styles = {};
-
-      // Start from 1 (skip name column)
-      for (let i = 1; i <= this.getDaysInMonth(); i++) {
-        if (this.isWeekendOrHoliday(i)) {
-          styles[i] = {
-            fillColor: [235, 235, 235], // Light gray for weekends/holidays
-          };
-        }
-      }
-
-      return styles;
-    },
-
-    // Convert column number to Excel column letter (A, B, C...)
-    getExcelColumnLetter(columnNumber) {
-      let dividend = columnNumber;
-      let columnName = "";
-      let modulo;
-
-      while (dividend > 0) {
-        modulo = (dividend - 1) % 26;
-        columnName = String.fromCharCode(65 + modulo) + columnName;
-        dividend = Math.floor((dividend - modulo) / 26);
-      }
-
-      return columnName;
-    },
-    arrayBufferToBase64(buffer) {
-      let binary = "";
-      const bytes = new Uint8Array(buffer);
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
-    },
-  },
+    isWeekendOrHoliday(day) {
+      const date = new Date(this.selectedYear, this.selectedMonth, day);
+      return isWeekendOrHoliday(date);
+    }
+  }
 };
 </script>
 

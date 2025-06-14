@@ -102,6 +102,7 @@ import {
   saveDayToLocalStorage,
   MESSAGES
 } from '@/utils/shiftManagement';
+import { getFormattedShift } from '@/utils/exportUtils';
 
 // Constants
 const SHIFT_OPTIONS = [
@@ -203,33 +204,12 @@ export default {
     isEditing(personId, day) {
       return this.editedShifts.hasOwnProperty(`${personId}-${day}`);
     },
+
     getShiftForPersonAndDay(personId, day) {
-      const date = this.monthDays
-        .find((d) => d.date.getDate() === day)
-        ?.date.toDateString();
-      const shiftData = localStorage.getItem(date);
-      if (shiftData) {
-        const parsedData = JSON.parse(shiftData);
-        const shifts = [];
-
-        // Check if the person is assigned to day or night shifts
-        if (
-          parsedData.dayShift1 === personId ||
-          parsedData.dayShift2 === personId
-        ) {
-          shifts.push('D'); // Day shift
-        }
-        if (
-          parsedData.nightShift1 === personId ||
-          parsedData.nightShift2 === personId
-        ) {
-          shifts.push('N'); // Night shift
-        }
-
-        return shifts.join(' '); // Combine shifts (e.g., "D N" if both)
-      }
-      return null;
+      const date = this.monthDays.find((d) => d.date.getDate() === day)?.date;
+      return date ? getFormattedShift(personId, date, ' ') : null;
     },
+
     editCell(personId, day) {
       if (this.isEditingMode) {
         const key = `${personId}-${day}`;
