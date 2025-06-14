@@ -95,23 +95,15 @@ import {
 } from '@/utils/dataSync.ts';
 import { isPolishHoliday } from '@/utils/polishHolidays.ts';
 import { ShiftType } from '@/types/calendar';
+import {
+  validateShiftAssignment,
+  assignShiftToDay,
+  clearShiftAssignment,
+  saveDayToLocalStorage,
+  MESSAGES
+} from '@/utils/shiftManagement';
 
 // Constants
-const MESSAGES = {
-  UNLOCK_WIDTH: 'Odblokuj szerokość',
-  LOCK_WIDTH: 'Zablokuj szerokość',
-  CLICK_TO_EDIT: 'Kliknij aby edytować zmianę',
-  INVALID_VALUE: "Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.",
-  TWO_RATOWNIK_DAY: 'Nie można przypisać dwóch ratowników na zmianę dzienną.',
-  TWO_RATOWNIK_NIGHT: 'Nie można przypisać dwóch ratowników na zmianę nocną.',
-  MAX_DAY_PEOPLE:
-    'Nie można przypisać więcej niż dwóch osób na zmianę dzienną.',
-  MAX_NIGHT_PEOPLE:
-    'Nie można przypisać więcej niż dwóch osób na zmianę nocną.',
-  LOAD_ERROR: 'Nie udało się załadować danych lokalnych. Sprawdź konsolę.',
-  NOT_ASSIGNED: 'Not assigned'
-} as const;
-
 const SHIFT_OPTIONS = [
   { value: '', label: '' },
   { value: 'D', label: 'D' },
@@ -172,8 +164,8 @@ export default {
       scrollContainer: null,
       isFirstColumnLocked: false,
       importedCells: new Set(),
-      SHIFT_OPTIONS,
-      MESSAGES
+      MESSAGES,
+      SHIFT_OPTIONS
     };
   },
   computed: {
@@ -271,7 +263,7 @@ export default {
           return shiftPerson?.ratownik && id !== personId;
         });
         if (hasOtherRatownikDay) {
-          addNotification(MESSAGES.TWO_RATOWNIK_DAY, 'red');
+          addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
           return false;
         }
       }
@@ -286,7 +278,7 @@ export default {
           return shiftPerson?.ratownik && id !== personId;
         });
         if (hasOtherRatownikNight) {
-          addNotification(MESSAGES.TWO_RATOWNIK_NIGHT, 'red');
+          addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
           return false;
         }
       }
@@ -339,59 +331,57 @@ export default {
     saveShift(personId, day) {
       const key = `${personId}-${day}`;
       const newValue = this.validateShiftValue(this.editedShifts[key]);
-      const previousValue = this.getShiftForPersonAndDay(personId, day) || '';
-
-      if (newValue === null) {
-        addNotification(MESSAGES.INVALID_VALUE, 'red');
-        this.$nextTick(() => {
-          this.editedShifts[key] = previousValue;
-        });
-        return;
-      }
-
       const date = this.getDateString(day);
       if (!date) return;
 
       const dayData = this.findDayByDate(date);
       if (!dayData) return;
 
-      // Clear existing assignments for this person
-      this.clearPersonFromAllShifts(dayData, personId);
+      // Clear existing assignments
+      clearShiftAssignment(dayData, 'dayShift1');
+      clearShiftAssignment(dayData, 'dayShift2');
+      clearShiftAssignment(dayData, 'nightShift1');
+      clearShiftAssignment(dayData, 'nightShift2');
 
-      // Handle empty value - already cleared above
       if (newValue === '') {
-        this.saveShiftData(dayData, date);
-        this.$nextTick(() => {
-          delete this.editedShifts[key];
-          this.$forceUpdate();
-        });
-        return;
-      }
-
-      // Validate ratownik assignments
-      if (!this.validateRatownikAssignment(dayData, personId, newValue)) {
+        saveDayToLocalStorage(dayData);
         delete this.editedShifts[key];
         return;
       }
+
+      const person = this.people.find((p) => p.id === personId);
+      if (!person) return;
 
       // Assign new shifts
-      let assignmentSuccess = true;
-
       if (newValue.includes('D')) {
-        assignmentSuccess = this.assignDayShift(dayData, personId);
+        if (
+          !validateShiftAssignment(dayData, 'dayShift1', personId, this.people)
+        ) {
+          delete this.editedShifts[key];
+          return;
+        }
+        assignShiftToDay(dayData, 'dayShift1', person);
       }
 
-      if (assignmentSuccess && newValue.includes('N')) {
-        assignmentSuccess = this.assignNightShift(dayData, personId);
+      if (newValue.includes('N')) {
+        if (
+          !validateShiftAssignment(
+            dayData,
+            'nightShift1',
+            personId,
+            this.people
+          )
+        ) {
+          delete this.editedShifts[key];
+          return;
+        }
+        assignShiftToDay(dayData, 'nightShift1', person);
       }
 
-      if (!assignmentSuccess) {
-        delete this.editedShifts[key];
-        return;
-      }
-
-      this.saveShiftData(dayData, date);
+      saveDayToLocalStorage(dayData);
       delete this.editedShifts[key];
+      this.madeChanges = true;
+      this.$emit('has-changes', true);
     },
     generateMonthDays() {
       this.resetUserChanges();

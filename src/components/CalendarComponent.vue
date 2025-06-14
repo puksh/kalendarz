@@ -5,7 +5,7 @@
       <p>{{ MESSAGES.MOBILE_WARNING_TEXT }}</p>
       <p>{{ MESSAGES.MOBILE_WARNING_INSTRUCTION }}</p>
       <button @click="handleMobileWarningClose" class="warning-button">
-        {{ MESSAGES.OK_BUTTON }}
+        {{ MESSAGES.MOBILE_WARNING_OK_BUTTON }}
       </button>
     </div>
   </div>
@@ -76,21 +76,16 @@ import {
   resetUserChanges as utilResetUserChanges,
   isToday as utilIsToday
 } from '@/utils/calendarChecks.ts';
+import {
+  validateShiftAssignment,
+  assignShiftToDay,
+  clearShiftAssignment,
+  saveDayToLocalStorage,
+  MESSAGES
+} from '@/utils/shiftManagement';
 import { ShiftType } from '@/types/calendar';
 import ShiftSlot from './CalendarShiftSlotComponent.vue';
 // Constants
-const MESSAGES = {
-  MOBILE_WARNING_TITLE: '!! Urządzenie mobilne wykryte !!',
-  MOBILE_WARNING_TEXT:
-    'Niestety, tryb edycji w widoku kalendarza nie jest obsługiwany na urządzeniach mobilnych.',
-  MOBILE_WARNING_INSTRUCTION:
-    'Proszę przejdź do widoku tabeli lub skorzystaj z komputera.',
-  OK_BUTTON: 'Ok ☹',
-  DUPLICATE_SHIFT: 'Ta sama osoba na obydwu zmianach.',
-  TWO_RATOWNIK_ERROR: 'Nie można przypisać dwóch ratowników na jedną zmianę.',
-  LOAD_ERROR: 'Failed to load local data: '
-} as const;
-
 const SHIFT_TYPES: ShiftType[] = [
   'dayShift1',
   'dayShift2',
@@ -151,33 +146,22 @@ export default {
       if (!draggedPerson) return;
 
       const day = this.findDayByDate(date);
-
-      if (!this.validateShiftAssignment(day, shiftType, draggedPerson)) {
+      if (
+        !validateShiftAssignment(day, shiftType, draggedPerson.id, this.people)
+      ) {
         return;
       }
 
-      this.assignShiftToDay(day, shiftType, draggedPerson);
+      assignShiftToDay(day, shiftType, draggedPerson);
+      saveDayToLocalStorage(day);
       this.markChangesAndEmit();
       this.clearDraggedPersonFromStorage();
     },
-    isDropTarget(date, shiftType) {
-      if (!this.currentDropTarget.date) return false;
 
-      return (
-        this.currentDropTarget.date.toDateString() === date.toDateString() &&
-        this.currentDropTarget.shiftType === shiftType
-      );
-    },
     handleClickResetShift(day, shift) {
       if (day[shift] !== null) {
-        day[shift] = null;
-        day[shift + 'Name'] = 'Usunięto';
-        day[shift + 'Ratownik'] = null;
-        day[shift + 'UserChanged'] = true;
-
-        // .call(this) is used because utilSaveDayToLocalStorage uses this.localData
-        utilSaveDayToLocalStorage.call(this, day);
-
+        clearShiftAssignment(day, shift);
+        saveDayToLocalStorage(day);
         this.madeChanges = true;
         this.$emit('has-changes', true);
       }
