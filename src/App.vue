@@ -71,7 +71,10 @@
       <div class="refresh-overlay" v-if="isRefreshing">
         <RefreshIcon class="centered-refresh-icon refreshing" />
       </div>
-      <div :style="{ opacity: isRefreshing ? '0.5' : '1' }">
+      <div
+        class="component-wrapper"
+        :style="{ opacity: isRefreshing ? '0.5' : '1' }"
+      >
         <component
           ref="calendarComponent"
           v-if="currentPage === 'CalendarComponent'"
@@ -363,15 +366,23 @@ export default {
 </script>
 
 <style scoped>
+.component-wrapper {
+  min-height: 360px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
 .main-content {
   padding-top: 20px;
   max-width: 100%;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 40px !important;
+  min-height: calc(100vh - 200px); /* Account for header and footer */
 }
+
 .footer {
   position: fixed;
   bottom: 0;
