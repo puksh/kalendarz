@@ -22,7 +22,6 @@
           :key="index"
           :class="{ 'today-column': isToday(day.date) }"
           @dragover.prevent
-          @drop="handleDrop(day.date, 'day')"
         >
           <div>
             <div
@@ -33,11 +32,7 @@
               <div class="day-header">
                 {{ daysOfWeek[day.date.getDay()] }}
               </div>
-              <div
-                class="shift"
-                @drop="handleDrop(day.date, 'day')"
-                @dragover.prevent
-              >
+              <div class="shift" @dragover.prevent>
                 <div class="day-date">{{ day.date.getDate() }}</div>
                 <shift-slot
                   v-for="shiftType in SHIFT_TYPES"
@@ -83,8 +78,14 @@ import {
   saveDayToLocalStorage,
   MESSAGES
 } from '@/utils/shiftManagement';
-import { ShiftType } from '@/types/calendar';
+import { Person, ShiftType, DayData } from '@/types/calendar';
 import ShiftSlot from './CalendarShiftSlotComponent.vue';
+interface DraggedPerson extends Person {
+  id: number;
+  name: string;
+  ratownik: boolean;
+}
+
 // Constants
 const SHIFT_TYPES: ShiftType[] = [
   'dayShift1',
@@ -115,20 +116,23 @@ export default {
       required: true
     },
     people: {
-      type: Array,
+      type: Array as () => Person[],
       required: true
     }
   },
   data() {
     return {
-      monthDays: [],
-      localData: {},
-      syncedChanges: {}, // Server-synced changes
+      monthDays: [] as DayData[],
+      localData: {} as Record<string, DayData>,
+      syncedChanges: {} as Record<string, any>, // Server-synced changes
       daysOfWeek,
       currentDate: new Date(),
       madeChanges: false,
-      scrollContainer: null,
-      currentDropTarget: { date: null, shiftType: null },
+      scrollContainer: null as HTMLElement | null,
+      currentDropTarget: {
+        date: null as Date | null,
+        shiftType: null as ShiftType | null
+      },
       showMobileWarning: false,
       isMobileDevice: false,
       MESSAGES,
@@ -141,12 +145,13 @@ export default {
     }
   },
   methods: {
-    handleDrop(date, shiftType) {
+    handleDrop(date: Date, shiftType: ShiftType): void {
       const draggedPerson = this.getDraggedPersonFromStorage();
       if (!draggedPerson) return;
 
       const day = this.findDayByDate(date);
       if (
+        !day ||
         !validateShiftAssignment(day, shiftType, draggedPerson.id, this.people)
       ) {
         return;
@@ -158,7 +163,7 @@ export default {
       this.clearDraggedPersonFromStorage();
     },
 
-    handleClickResetShift(day, shift) {
+    handleClickResetShift(day: DayData, shift: ShiftType): void {
       if (day[shift] !== null) {
         clearShiftAssignment(day, shift);
         saveDayToLocalStorage(day);
@@ -299,7 +304,7 @@ export default {
 
       return true;
     },
-    getDraggedPersonFromStorage() {
+    getDraggedPersonFromStorage(): DraggedPerson | null {
       const stored = localStorage.getItem('draggedPerson');
       return stored ? JSON.parse(stored) : null;
     },

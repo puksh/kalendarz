@@ -427,10 +427,6 @@ export default {
   align-items: center;
 }
 
-.editing-mode-label {
-  /* Styles for the label */
-}
-
 .editing-mode-status {
   color: #4caf50;
 }

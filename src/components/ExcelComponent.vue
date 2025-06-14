@@ -94,7 +94,7 @@ import {
   resetSyncedChangesSessionStorage
 } from '@/utils/dataSync.ts';
 import { isPolishHoliday } from '@/utils/polishHolidays.ts';
-import { ShiftType } from '@/types/calendar';
+import { Person, ShiftType, DayData } from '@/types/calendar';
 import {
   validateShiftAssignment,
   assignShiftToDay,
@@ -113,6 +113,8 @@ const SHIFT_OPTIONS = [
 ] as const;
 
 const VALID_SHIFT_VALUES = ['D', 'N', 'D N', ''] as const;
+type ValidShiftValue = (typeof VALID_SHIFT_VALUES)[number];
+
 const MAX_DAYS_IN_MONTH = 31;
 const SHIFT_TYPES: ShiftType[] = [
   'dayShift1',
@@ -148,7 +150,7 @@ export default {
       required: true
     },
     people: {
-      type: Array,
+      type: Array as () => Person[],
       required: true
     }
   },
@@ -157,14 +159,14 @@ export default {
   },
   data() {
     return {
-      editedShifts: {},
-      monthDays: [],
-      localData: {},
+      editedShifts: {} as Record<string, ValidShiftValue>,
+      monthDays: [] as DayData[],
+      localData: {} as Record<string, DayData>,
       daysOfWeek,
       madeChanges: false,
-      scrollContainer: null,
+      scrollContainer: null as HTMLElement | null,
       isFirstColumnLocked: false,
-      importedCells: new Set(),
+      importedCells: new Set<string>(),
       MESSAGES,
       SHIFT_OPTIONS
     };
@@ -201,27 +203,31 @@ export default {
     }
   },
   methods: {
-    isEditing(personId, day) {
+    isEditing(personId: number, day: number): boolean {
       return this.editedShifts.hasOwnProperty(`${personId}-${day}`);
     },
 
-    getShiftForPersonAndDay(personId, day) {
+    getShiftForPersonAndDay(personId: number, day: number): string | null {
       const date = this.monthDays.find((d) => d.date.getDate() === day)?.date;
       return date ? getFormattedShift(personId, date, ' ') : null;
     },
 
-    editCell(personId, day) {
+    editCell(personId: number, day: number): void {
       if (this.isEditingMode) {
         const key = `${personId}-${day}`;
-        const currentValue = this.getShiftForPersonAndDay(personId, day) || ''; // Get the current value
-        this.editedShifts[key] = currentValue; // Initialize the editedShifts object with the current value
+        const currentValue = this.getShiftForPersonAndDay(personId, day) || '';
+        this.editedShifts[key] = currentValue as ValidShiftValue;
       }
     },
-    validateShiftValue(value) {
+
+    validateShiftValue(value: string | undefined): ValidShiftValue | null {
       const trimmedValue = value?.trim().toUpperCase() || '';
-      return VALID_SHIFT_VALUES.includes(trimmedValue) ? trimmedValue : null;
+      return VALID_SHIFT_VALUES.includes(trimmedValue as ValidShiftValue)
+        ? (trimmedValue as ValidShiftValue)
+        : null;
     },
-    clearPersonFromAllShifts(dayData, personId) {
+
+    clearPersonFromAllShifts(dayData: DayData, personId: number): void {
       SHIFT_TYPES.forEach((shiftType) => {
         if (dayData[shiftType] === personId) {
           dayData[shiftType] = null;
@@ -230,7 +236,11 @@ export default {
         }
       });
     },
-    validateRatownikAssignment(dayData, personId, shiftValue) {
+    validateRatownikAssignment(
+      dayData: DayData,
+      personId: number,
+      shiftValue: string
+    ): boolean {
       const person = this.people.find((p) => p.id === personId);
       if (!person?.ratownik) return true;
 
@@ -265,7 +275,11 @@ export default {
 
       return true;
     },
-    assignPersonToShift(dayData, personId, shiftType) {
+    assignPersonToShift(
+      dayData: DayData,
+      personId: number,
+      shiftType: ShiftType
+    ): boolean {
       const person = this.people.find((p) => p.id === personId);
       if (!dayData[shiftType]) {
         dayData[shiftType] = personId;
@@ -275,14 +289,14 @@ export default {
       }
       return false;
     },
-    assignDayShift(dayData, personId) {
+    assignDayShift(dayData: DayData, personId: number): boolean {
       if (this.assignPersonToShift(dayData, personId, 'dayShift1')) return true;
       if (this.assignPersonToShift(dayData, personId, 'dayShift2')) return true;
 
       addNotification(MESSAGES.MAX_DAY_PEOPLE, 'red');
       return false;
     },
-    assignNightShift(dayData, personId) {
+    assignNightShift(dayData: DayData, personId: number): boolean {
       if (this.assignPersonToShift(dayData, personId, 'nightShift1'))
         return true;
       if (this.assignPersonToShift(dayData, personId, 'nightShift2'))
@@ -291,7 +305,7 @@ export default {
       addNotification(MESSAGES.MAX_NIGHT_PEOPLE, 'red');
       return false;
     },
-    saveShiftData(dayData, date) {
+    saveShiftData(dayData: DayData, date: string): void {
       const updatedData = {
         dayShift1: dayData.dayShift1,
         dayShift2: dayData.dayShift2,
@@ -308,7 +322,7 @@ export default {
       this.madeChanges = true;
       this.$emit('has-changes', this.madeChanges);
     },
-    saveShift(personId, day) {
+    saveShift(personId: number, day: number): void {
       const key = `${personId}-${day}`;
       const newValue = this.validateShiftValue(this.editedShifts[key]);
       const date = this.getDateString(day);
@@ -317,11 +331,13 @@ export default {
       const dayData = this.findDayByDate(date);
       if (!dayData) return;
 
-      // Clear existing assignments
-      clearShiftAssignment(dayData, 'dayShift1');
-      clearShiftAssignment(dayData, 'dayShift2');
-      clearShiftAssignment(dayData, 'nightShift1');
-      clearShiftAssignment(dayData, 'nightShift2');
+      // Only clear shifts for this person
+      const personCurrentShifts = SHIFT_TYPES.filter(
+        (shiftType) => dayData[shiftType] === personId
+      );
+      personCurrentShifts.forEach((shiftType) => {
+        clearShiftAssignment(dayData, shiftType);
+      });
 
       if (newValue === '') {
         saveDayToLocalStorage(dayData);
@@ -332,30 +348,46 @@ export default {
       const person = this.people.find((p) => p.id === personId);
       if (!person) return;
 
-      // Assign new shifts
-      if (newValue.includes('D')) {
+      // Helper function to assign to first available slot
+      const assignToFirstAvailable = (
+        daySlot: ShiftType,
+        nightSlot: ShiftType
+      ): boolean => {
+        // Try first slot
         if (
-          !validateShiftAssignment(dayData, 'dayShift1', personId, this.people)
+          !dayData[daySlot] &&
+          validateShiftAssignment(dayData, daySlot, personId, this.people)
         ) {
+          assignShiftToDay(dayData, daySlot, person);
+          return true;
+        }
+        // Try second slot
+        if (
+          !dayData[nightSlot] &&
+          validateShiftAssignment(dayData, nightSlot, personId, this.people)
+        ) {
+          assignShiftToDay(dayData, nightSlot, person);
+          return true;
+        }
+        return false;
+      };
+
+      // Try to assign day shift
+      if (newValue.includes('D')) {
+        if (!assignToFirstAvailable('dayShift1', 'dayShift2')) {
+          addNotification(MESSAGES.MAX_DAY_PEOPLE, 'red');
           delete this.editedShifts[key];
           return;
         }
-        assignShiftToDay(dayData, 'dayShift1', person);
       }
 
+      // Try to assign night shift
       if (newValue.includes('N')) {
-        if (
-          !validateShiftAssignment(
-            dayData,
-            'nightShift1',
-            personId,
-            this.people
-          )
-        ) {
+        if (!assignToFirstAvailable('nightShift1', 'nightShift2')) {
+          addNotification(MESSAGES.MAX_NIGHT_PEOPLE, 'red');
           delete this.editedShifts[key];
           return;
         }
-        assignShiftToDay(dayData, 'nightShift1', person);
       }
 
       saveDayToLocalStorage(dayData);
@@ -388,7 +420,7 @@ export default {
       this.loadFromLocalStorage();
       this.$emit('month-days-updated', this.monthDays);
     },
-    updateChanges(hasChanges) {
+    updateChanges(hasChanges: boolean) {
       this.madeChanges = hasChanges;
       this.$emit('has-changes', this.madeChanges);
     },
@@ -402,7 +434,7 @@ export default {
         this.loadDayFromStorage(year, month, dayNum);
       }
     },
-    loadDayFromStorage(year, month, dayNum) {
+    loadDayFromStorage(year: number, month: number, dayNum: number) {
       const date = new Date(year, month, dayNum).toDateString();
       const savedStates = localStorage.getItem(date);
 
@@ -420,7 +452,7 @@ export default {
         addNotification(MESSAGES.LOAD_ERROR, 'red');
       }
     },
-    applyStoredStatesToDay(day, parsedStates) {
+    applyStoredStatesToDay(day: DayData, parsedStates: Record<string, any>) {
       SHIFT_TYPES.forEach((shiftType) => {
         day[shiftType] = parsedStates[shiftType];
         day[shiftType + 'Name'] =
