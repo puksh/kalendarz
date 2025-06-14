@@ -69,7 +69,7 @@ export default {
   left: 4px;
   top: 12px;
   gap: 6px;
-  background: var(--glass-bg-color);
+  background: var(--glass-bg-color-opaque);
   border: 1px solid var(--glass-border-color);
   color: var(--color-text);
   height: 36px;

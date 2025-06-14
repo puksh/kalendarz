@@ -194,7 +194,7 @@ export default defineComponent({
   left: 4px;
   z-index: var(--z-index-hamburger);
   padding: 10px;
-  background: var(--glass-bg-color);
+  background: var(--glass-bg-color-opaque);
   border: 1px solid var(--glass-border-color);
   border-radius: var(--border-radius-small);
   cursor: pointer;
@@ -223,6 +223,14 @@ export default defineComponent({
 
 /* Mobile Styles */
 @media (max-width: 768px) {
+  .buttons-top-bar {
+    border-bottom: none;
+  }
+
+  .buttons-top-bar:not(:has(.collapsible-buttons.menu-open)) {
+    border-bottom: 1px solid var(--glass-border-color);
+  }
+
   .fixed-buttons {
     position: relative;
     z-index: var(--z-index-hamburger);
@@ -247,7 +255,9 @@ export default defineComponent({
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
     padding: 16px;
-    transform: translateY(-150%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top;
+    transform: perspective(1000px) rotateX(-90deg);
     opacity: 0;
     visibility: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -255,7 +265,7 @@ export default defineComponent({
   }
 
   .collapsible-buttons.mobile-view.menu-open {
-    transform: translateY(0);
+    transform: perspective(1000px) rotateX(0);
     opacity: 1;
     visibility: visible;
   }

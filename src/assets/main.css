@@ -37,6 +37,7 @@
 
   /* Updated Glass Theme Colors */
   --glass-bg-color: rgba(0, 50, 50, 0.4); /* Dark mint-tinted background */
+  --glass-bg-color-opaque: rgba(0, 50, 50, 1); /* Dark mint-tinted background */
   --glass-border-color: rgba(0, 200, 200, 0.5); /* Mint-colored border */
   --glass-box-shadow: 0 4px 6px rgba(0, 200, 200, 0.2); /* Mint shadow for depth */
   --glass-blur: 10px; /* Blur intensity */
@@ -92,7 +93,7 @@ button:disabled {
   height: 36px;
   width: 36px;
   color: var(--color-text);
-  background-color: var(--glass-bg-color);
+  background-color: var(--glass-bg-color-opaque);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
