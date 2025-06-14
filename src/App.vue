@@ -19,7 +19,7 @@
     >
       Zapisz
     </button>
-    <SideBarComponent
+    <ButtonSwitchView
       :currentComponent="currentPage"
       @navigate="handleNavigation"
     />
@@ -142,6 +142,7 @@
 <script>
 import { defineAsyncComponent, markRaw } from 'vue';
 import PencilIcon from './components/PencilIcon.vue';
+import ButtonSwitchView from './components/ButtonSwitchView.vue';
 import { checkShiftDataSync } from '@/utils/dataSync.js';
 import { addNotification } from './components/NotificationMessage.vue';
 import RefreshIcon from './components/icons/RefreshIcon.vue';
@@ -151,9 +152,7 @@ import ButtonImport from './components/ButtonImport.vue';
 export default {
   name: 'VueCalendar',
   components: {
-    SideBarComponent: defineAsyncComponent(
-      () => import('./components/SideBarComponent.vue')
-    ),
+    ButtonSwitchView,
     MonthSelector: defineAsyncComponent(
       () => import('./components/MonthSelector.vue')
     ),
