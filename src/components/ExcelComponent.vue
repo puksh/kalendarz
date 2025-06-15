@@ -90,6 +90,7 @@ import { daysOfWeek } from '@/data/daysOfWeek.ts';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
 import { isPolishHoliday } from '@/utils/polishHolidays.ts';
+import { isToday as utilIsToday } from '@/utils/calendarChecks.ts';
 import { Person, ShiftType, DayData } from '@/types/calendar';
 import {
   validateShiftAssignment,
@@ -487,12 +488,7 @@ export default {
       keysToRemove.forEach((key) => sessionStorage.removeItem(key));
     },
     isToday(date: Date) {
-      const today = new Date();
-      return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-      );
+      return utilIsToday(date);
     },
     isImportedCell(personId, day) {
       return this.importedCells.has(`${personId}-${day}`);

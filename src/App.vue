@@ -197,7 +197,6 @@ export default {
     handleAuthorization() {
       this.showPasswordModal = false;
       this.hasUnsavedChanges = false;
-      this.activeComponentRef?.handleChangesSaved();
     },
     loadPageComponent(name) {
       const loaders = {
@@ -290,7 +289,12 @@ export default {
     safeGetFromStorage(key, defaultValue) {
       try {
         const item = localStorage.getItem(key);
-        return item !== null ? JSON.parse(item) : defaultValue;
+        if (item === null) return defaultValue;
+
+        // Handle string values that don't need parsing
+        if (key === 'currentPage') return item;
+
+        return JSON.parse(item);
       } catch (e) {
         console.warn(`Error reading ${key} from localStorage:`, e);
         return defaultValue;

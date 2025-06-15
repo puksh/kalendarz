@@ -77,10 +77,12 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
+import { ShiftData, AuthMode, ShiftDataCollection } from '../types/calendar';
 
-export default {
+export default defineComponent({
   name: 'AuthorizationModal',
   props: {
     show: {
@@ -88,9 +90,9 @@ export default {
       required: true
     },
     mode: {
-      type: String,
-      default: 'save', // 'save' or 'salary'
-      validator: (value: string) => ['save', 'salary'].includes(value)
+      type: String as () => AuthMode,
+      default: 'save',
+      validator: (value: string): boolean => ['save', 'salary'].includes(value)
     }
   },
   emits: ['close', 'authorized'],
@@ -105,7 +107,7 @@ export default {
     };
   },
   methods: {
-    getButtonText() {
+    getButtonText(): string {
       if (this.isAuthorizing) {
         return 'Weryfikacja...';
       }
@@ -114,7 +116,7 @@ export default {
         : 'Zapisz zmiany';
     },
 
-    async authorize() {
+    async authorize(): Promise<void> {
       if (this.isAuthorizing) return;
       this.isAuthorizing = true;
       this.showPassword = false;
@@ -141,7 +143,7 @@ export default {
       }
     },
 
-    async verifyPassword() {
+    async verifyPassword(): Promise<boolean> {
       const salt = new TextEncoder().encode(
         import.meta.env.VITE_AUTH_SALT.toString()
       );
@@ -177,13 +179,13 @@ export default {
       return derivedKeyHex === storedHash;
     },
 
-    handleSalaryMode() {
+    handleSalaryMode(): void {
       addNotification('Dostęp przyznany', 'green');
       this.$emit('authorized');
       this.closeModal();
     },
 
-    async handleSaveMode() {
+    async handleSaveMode(): Promise<void> {
       const dataToSave = this.collectSessionStorageData();
 
       if (Object.keys(dataToSave).length === 0) {
@@ -197,13 +199,20 @@ export default {
       this.closeModal();
     },
 
-    collectSessionStorageData() {
-      const collectedData = {};
+    collectSessionStorageData(): ShiftDataCollection {
+      const collectedData: ShiftDataCollection = {};
       for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
         if (key) {
           try {
-            collectedData[key] = JSON.parse(sessionStorage.getItem(key));
+            const storedData = JSON.parse(sessionStorage.getItem(key) || '{}');
+            const shiftData: ShiftData = {
+              dayShift1: storedData.dayShift1 ?? null,
+              dayShift2: storedData.dayShift2 ?? null,
+              nightShift1: storedData.nightShift1 ?? null,
+              nightShift2: storedData.nightShift2 ?? null
+            };
+            collectedData[key] = shiftData;
           } catch {
             // Skip invalid JSON
           }
@@ -212,8 +221,21 @@ export default {
       return collectedData;
     },
 
-    async saveDataToServer(data) {
-      const jsonString = JSON.stringify(data);
+    async saveDataToServer(data: ShiftDataCollection): Promise<void> {
+      const essentialData: ShiftDataCollection = {};
+      Object.entries(data).forEach(([date, shifts]) => {
+        if (shifts) {
+          const sanitizedShift: ShiftData = {
+            dayShift1: shifts.dayShift1 ?? null,
+            dayShift2: shifts.dayShift2 ?? null,
+            nightShift1: shifts.nightShift1 ?? null,
+            nightShift2: shifts.nightShift2 ?? null
+          };
+          essentialData[date] = sanitizedShift;
+        }
+      });
+
+      const jsonString = JSON.stringify(essentialData);
       const base64Data = btoa(jsonString);
 
       const response = await fetch('https://mc.kot.li/?key=shiftData.json', {
@@ -230,18 +252,18 @@ export default {
       }
     },
 
-    closeModal() {
+    closeModal(): void {
       this.password = '';
       this.$emit('close');
     },
 
-    cancel() {
+    cancel(): void {
       if (!this.isAuthorizing) {
         this.closeModal();
       }
     },
 
-    togglePasswordVisibility() {
+    togglePasswordVisibility(): void {
       this.showPassword = !this.showPassword;
     }
   },
@@ -251,7 +273,7 @@ export default {
       this.$refs.passwordInput?.focus();
     });
   }
-};
+});
 </script>
 
 <style scoped>

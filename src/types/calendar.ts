@@ -5,10 +5,10 @@ export type Person = {
 };
 
 export type ShiftType =
-  | "dayShift1"
-  | "dayShift2"
-  | "nightShift1"
-  | "nightShift2";
+  | 'dayShift1'
+  | 'dayShift2'
+  | 'nightShift1'
+  | 'nightShift2';
 
 export type DayData = {
   date: Date;
@@ -29,4 +29,17 @@ export type DayData = {
   nightShift1UserChanged?: boolean;
   nightShift2UserChanged?: boolean;
   isCurrentMonth?: boolean;
+};
+
+export type ShiftData = {
+  dayShift1: number | null;
+  dayShift2: number | null;
+  nightShift1: number | null;
+  nightShift2: number | null;
+};
+
+export type AuthMode = 'save' | 'salary';
+
+export type ShiftDataCollection = {
+  [key: string]: ShiftData;
 };
