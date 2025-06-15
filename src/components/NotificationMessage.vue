@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts">
-import { reactive } from "vue";
+import { reactive } from 'vue';
 
 const notifications = reactive([]);
 let notificationId = 0;
-export const addNotification = (message, type = "blue", duration = 3000) => {
+export const addNotification = (message, type = 'blue', duration = 3000) => {
   const id = notificationId++;
   notifications.push({ id, message, type });
   setTimeout(() => {
@@ -39,16 +39,16 @@ export const addNotification = (message, type = "blue", duration = 3000) => {
 };
 export const removeNotification = (id) => {
   const index = notifications.findIndex(
-    (notification) => notification.id === id,
+    (notification) => notification.id === id
   );
   if (index !== -1) notifications.splice(index, 1);
 };
 
 export default {
-  name: "NotificationMessage",
+  name: 'NotificationMessage',
   setup() {
     return { notifications, removeNotification };
-  },
+  }
 };
 </script>
 

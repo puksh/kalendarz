@@ -33,7 +33,17 @@ export function validateShiftAssignment(
   const person = people.find((p) => p.id === personId);
   if (!person?.ratownik) return true;
 
+  // Check for duplicate assignments on day shift
   if (shiftType.includes('day')) {
+    // Check if person is already assigned to another day shift
+    if (
+      (shiftType === 'dayShift1' && dayData.dayShift2 === personId) ||
+      (shiftType === 'dayShift2' && dayData.dayShift1 === personId)
+    ) {
+      addNotification(MESSAGES.DUPLICATE_SHIFT, 'red');
+      return false;
+    }
+
     const dayShiftPeople = [dayData.dayShift1, dayData.dayShift2].filter(
       Boolean
     );
@@ -48,7 +58,17 @@ export function validateShiftAssignment(
     }
   }
 
+  // Check for duplicate assignments on night shift
   if (shiftType.includes('night')) {
+    // Check if person is already assigned to another night shift
+    if (
+      (shiftType === 'nightShift1' && dayData.nightShift2 === personId) ||
+      (shiftType === 'nightShift2' && dayData.nightShift1 === personId)
+    ) {
+      addNotification(MESSAGES.DUPLICATE_SHIFT, 'red');
+      return false;
+    }
+
     const nightShiftPeople = [dayData.nightShift1, dayData.nightShift2].filter(
       Boolean
     );
@@ -92,6 +112,6 @@ export function saveDayToLocalStorage(day: DayData) {
     nightShift1: day.nightShift1,
     nightShift2: day.nightShift2
   };
-  localStorage.setItem(dateKey, JSON.stringify(updatedData));
+  sessionStorage.setItem(dateKey, JSON.stringify(updatedData));
   return updatedData;
 }

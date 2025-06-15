@@ -38,16 +38,6 @@
         }
       ]"
     >
-      <button
-        :disabled="!canSave"
-        @click="$emit('save')"
-        class="submit-button"
-        aria-label="Zapisz zmiany"
-        title="Zapisz zmiany w harmonogramie"
-      >
-        Zapisz
-      </button>
-
       <ButtonSwitchView
         :currentComponent="currentComponent"
         @navigate="$emit('navigate', $event)"
@@ -101,7 +91,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import ButtonSwitchView from './ButtonSwitchView.vue';
-import PencilIcon from './PencilIcon.vue';
+import PencilIcon from './icons/PencilIcon.vue';
 import RefreshIcon from './icons/RefreshIcon.vue';
 import ButtonExport from './ButtonExport.vue';
 import ButtonImport from './ButtonImport.vue';

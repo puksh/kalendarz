@@ -48,6 +48,7 @@
   --z-index-modal: 2000;
   --z-index-refresh-overlay: 1900;
   --z-index-hamburger: 1800;
+  --z-index-submit-button: 1850; /* Add this line */
   --z-index-topbar: 1700;
   --z-index-mobile-menu: 1600;
   --z-index-main-content: 1000;
@@ -202,29 +203,6 @@ button:disabled {
 }
 
 /* Button Styles */
-.submit-button {
-  position: absolute;
-  bottom: 100px;
-  right: 20px;
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius-small);
-  filter: drop-shadow(var(--shadow-drop));
-  box-shadow: var(--glass-box-shadow);
-  padding: var(--spacing-medium) var(--spacing-large);
-  cursor: pointer;
-  font-size: var(--font-size-large);
-  transition: all 0.3s ease;
-  z-index: var(--z-index-top-bar);
-}
-.submit-button:disabled {
-  background-color: var(--color-button-disabled-bg);
-  cursor: not-allowed;
-  filter: none;
-  visibility: hidden !important;
-}
 
 .editing-mode-label {
   background: var(--glass-bg-color);

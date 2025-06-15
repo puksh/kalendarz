@@ -54,10 +54,7 @@
 
 <script lang="ts">
 import { daysOfWeek } from '@/data/daysOfWeek.ts';
-import {
-  checkShiftDataSync,
-  resetSyncedChangesSessionStorage
-} from '@/utils/dataSync.js';
+import { checkShiftDataSync } from '@/utils/dataSync.js';
 import { isPolishHoliday as utilIsPolishHoliday } from '@/utils/polishHolidays.ts'; // Aliased to avoid conflict if isPolishHoliday is used directly elsewhere
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
@@ -210,7 +207,7 @@ export default {
     },
     loadDayFromStorage(year, month, dayNum) {
       const date = new Date(year, month, dayNum).toDateString();
-      const savedStates = localStorage.getItem(date);
+      const savedStates = sessionStorage.getItem(date);
 
       if (!savedStates) return;
 
@@ -232,9 +229,6 @@ export default {
         day[shiftType + 'Name'] = personData.name;
         day[shiftType + 'Ratownik'] = personData.isRatownik;
       });
-    },
-    resetSyncedChangesSessionStorage() {
-      this.syncedChanges = resetSyncedChangesSessionStorage();
     },
     resetUserChanges() {
       const result = utilResetUserChanges();

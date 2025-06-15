@@ -4,9 +4,9 @@
       <h3>Autoryzacja</h3>
       <p>
         {{
-          mode === "salary"
-            ? "Wpisz hasło aby wyświetlić wynagrodzenie:"
-            : "Wpisz hasło aby zapisać zmiany:"
+          mode === 'salary'
+            ? 'Wpisz hasło aby wyświetlić wynagrodzenie:'
+            : 'Wpisz hasło aby zapisać zmiany:'
         }}
       </p>
       <div class="input-container">
@@ -77,41 +77,41 @@
 </template>
 
 <script lang="ts">
-import NotificationMessage from "./NotificationMessage.vue";
-import { addNotification } from "./NotificationMessage.vue";
+import NotificationMessage from './NotificationMessage.vue';
+import { addNotification } from './NotificationMessage.vue';
 
 export default {
-  name: "AuthorizationModal",
+  name: 'AuthorizationModal',
   props: {
     show: {
       type: Boolean,
-      required: true,
+      required: true
     },
     mode: {
       type: String,
-      default: "save", // 'save' or 'salary'
-      validator: (value: string) => ["save", "salary"].includes(value),
-    },
+      default: 'save', // 'save' or 'salary'
+      validator: (value: string) => ['save', 'salary'].includes(value)
+    }
   },
-  emits: ["close", "authorized"],
+  emits: ['close', 'authorized'],
   components: {
-    NotificationMessage,
+    NotificationMessage
   },
   data() {
     return {
-      password: "",
+      password: '',
       isAuthorizing: false,
-      showPassword: false,
+      showPassword: false
     };
   },
   methods: {
     getButtonText() {
       if (this.isAuthorizing) {
-        return "Weryfikacja...";
+        return 'Weryfikacja...';
       }
-      return this.mode === "salary"
-        ? "Wyświetl wynagrodzenie"
-        : "Zapisz zmiany";
+      return this.mode === 'salary'
+        ? 'Wyświetl wynagrodzenie'
+        : 'Zapisz zmiany';
     },
 
     async authorize() {
@@ -123,19 +123,19 @@ export default {
         const isValidPassword = await this.verifyPassword();
 
         if (!isValidPassword) {
-          addNotification("Nieprawidłowe hasło", "red");
-          this.password = "";
+          addNotification('Nieprawidłowe hasło', 'red');
+          this.password = '';
           return;
         }
 
-        if (this.mode === "salary") {
+        if (this.mode === 'salary') {
           this.handleSalaryMode();
         } else {
           await this.handleSaveMode();
         }
       } catch (error) {
         console.error(error);
-        addNotification("Wystąpił błąd podczas autoryzacji", "red");
+        addNotification('Wystąpił błąd podczas autoryzacji', 'red');
       } finally {
         this.isAuthorizing = false;
       }
@@ -143,75 +143,72 @@ export default {
 
     async verifyPassword() {
       const salt = new TextEncoder().encode(
-        import.meta.env.VITE_AUTH_SALT.toString(),
+        import.meta.env.VITE_AUTH_SALT.toString()
       );
       const iterations = 100000;
       const keyLength = 32; // 256 bits
 
       const enc = new TextEncoder();
       const passwordKey = await window.crypto.subtle.importKey(
-        "raw",
+        'raw',
         enc.encode(this.password),
-        { name: "PBKDF2" },
+        { name: 'PBKDF2' },
         false,
-        ["deriveBits"],
+        ['deriveBits']
       );
 
       const derivedBits = await window.crypto.subtle.deriveBits(
         {
-          name: "PBKDF2",
+          name: 'PBKDF2',
           salt: salt,
           iterations: iterations,
-          hash: "SHA-256",
+          hash: 'SHA-256'
         },
         passwordKey,
-        keyLength * 8,
+        keyLength * 8
       );
 
       // Convert derivedBits to hex string
       const derivedKeyHex = Array.from(new Uint8Array(derivedBits))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
 
       const storedHash = import.meta.env.VITE_AUTH_PASSWORD;
       return derivedKeyHex === storedHash;
     },
 
     handleSalaryMode() {
-      addNotification("Dostęp przyznany", "green");
-      this.$emit("authorized");
+      addNotification('Dostęp przyznany', 'green');
+      this.$emit('authorized');
       this.closeModal();
     },
 
     async handleSaveMode() {
-      const dataToSave = this.collectLocalStorageData();
+      const dataToSave = this.collectSessionStorageData();
 
       if (Object.keys(dataToSave).length === 0) {
-        addNotification("Brak zmian do zapisania", "yellow");
+        addNotification('Brak zmian do zapisania', 'yellow');
         return;
       }
 
       await this.saveDataToServer(dataToSave);
-      addNotification("Zmiany zapisano pomyślnie!", "green");
-      this.$emit("authorized");
+      addNotification('Zmiany zapisano pomyślnie!', 'green');
+      this.$emit('authorized');
       this.closeModal();
     },
 
-    collectLocalStorageData() {
+    collectSessionStorageData() {
       const collectedData = {};
-      const excludedKeys = ["isEditingMode", "currentPage"];
-
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && !excludedKeys.includes(key)) {
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key) {
           try {
-            collectedData[key] = JSON.parse(localStorage.getItem(key));
+            collectedData[key] = JSON.parse(sessionStorage.getItem(key));
           } catch {
             // Skip invalid JSON
           }
         }
       }
-
       return collectedData;
     },
 
@@ -219,13 +216,13 @@ export default {
       const jsonString = JSON.stringify(data);
       const base64Data = btoa(jsonString);
 
-      const response = await fetch("https://mc.kot.li/?key=shiftData.json", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('https://mc.kot.li/?key=shiftData.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          key: "shiftData",
-          value: base64Data,
-        }),
+          key: 'shiftData',
+          value: base64Data
+        })
       });
 
       if (!response.ok) {
@@ -234,8 +231,8 @@ export default {
     },
 
     closeModal() {
-      this.password = "";
-      this.$emit("close");
+      this.password = '';
+      this.$emit('close');
     },
 
     cancel() {
@@ -246,14 +243,14 @@ export default {
 
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
-    },
+    }
   },
 
   mounted() {
     this.$nextTick(() => {
       this.$refs.passwordInput?.focus();
     });
-  },
+  }
 };
 </script>
 
@@ -300,8 +297,8 @@ export default {
   position: relative;
 }
 
-.modal-content input[type="password"],
-.modal-content input[type="text"] {
+.modal-content input[type='password'],
+.modal-content input[type='text'] {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid var(--glass-border-color, rgba(255, 255, 255, 0.2));
@@ -400,7 +397,7 @@ export default {
     background-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
   }
-  .modal-content input[type="password"]:focus {
+  .modal-content input[type='password']:focus {
     box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.4);
     border-color: #4caf50;
   }

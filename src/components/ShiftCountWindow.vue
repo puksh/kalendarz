@@ -36,7 +36,7 @@
           stroke-linecap="round"
         />
       </svg>
-      {{ showSalaries ? "Ukryj wynagrodzenia" : "Pokaż wynagrodzenia" }}
+      {{ showSalaries ? 'Ukryj wynagrodzenia' : 'Pokaż wynagrodzenia' }}
     </button>
 
     <Teleport to="body">
@@ -147,7 +147,7 @@
 
 <script lang="ts">
 export default {
-  name: "ShiftCountWindow",
+  name: 'ShiftCountWindow',
   props: {
     people: {
       type: Array as () => {
@@ -156,12 +156,12 @@ export default {
         ratownik: boolean;
         shiftCount?: number;
       }[],
-      required: true,
+      required: true
     },
     monthDays: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
@@ -170,8 +170,8 @@ export default {
       AuthorizationModal: null,
       salaryRates: {
         ratownik: 90,
-        nurse: 97,
-      },
+        nurse: 97
+      }
     };
   },
   async mounted() {
@@ -179,10 +179,10 @@ export default {
 
     // Dynamically import AuthorizationModal
     try {
-      const module = await import("./AuthorizationModal.vue");
+      const module = await import('./AuthorizationModal.vue');
       this.AuthorizationModal = module.default;
     } catch (error) {
-      console.error("Failed to load AuthorizationModal:", error);
+      console.error('Failed to load AuthorizationModal:', error);
     }
   },
   methods: {
@@ -230,13 +230,13 @@ export default {
         .reduce(
           (total, person) =>
             total + this.calculateNetto(person.shiftCount || 0, isRatownik),
-          0,
+          0
         );
     },
     formatCurrency(amount) {
-      return new Intl.NumberFormat("pl-PL", {
+      return new Intl.NumberFormat('pl-PL', {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
+        maximumFractionDigits: 2
       }).format(amount);
     },
 
@@ -253,7 +253,7 @@ export default {
     handleSalaryAuthorization() {
       this.showSalaries = true;
       this.showPasswordModal = false;
-    },
+    }
   },
 
   watch: {
@@ -261,9 +261,9 @@ export default {
       handler() {
         this.calculateAllShiftCounts();
       },
-      deep: true,
-    },
-  },
+      deep: true
+    }
+  }
 };
 </script>
 

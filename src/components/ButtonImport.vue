@@ -33,7 +33,7 @@
           class="drop-zone"
           :class="{
             'drag-active': isDragging,
-            'has-data': parsedData.length > 0,
+            'has-data': parsedData.length > 0
           }"
           @dragover.prevent="onDragOver"
           @dragleave.prevent="onDragLeave"
@@ -137,39 +137,39 @@
 </template>
 
 <script>
-import { addNotification } from "./NotificationMessage.vue";
+import { addNotification } from './NotificationMessage.vue';
 
 export default {
-  name: "ButtonImport",
+  name: 'ButtonImport',
   props: {
     isEditingMode: {
       type: Boolean,
-      required: true,
+      required: true
     },
     people: {
       type: Array,
-      required: true,
+      required: true
     },
     monthDays: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
-  emits: ["has-changes", "cells-imported"],
+  emits: ['has-changes', 'cells-imported'],
   data() {
     return {
       showModal: false,
-      pastedData: "",
+      pastedData: '',
       parsedData: [],
       daysMismatch: false,
       importedCells: new Set(),
-      isDragging: false,
+      isDragging: false
     };
   },
   computed: {
     daysInMonth() {
       return this.monthDays.length;
-    },
+    }
   },
   mounted() {
     // Set up focus and keyboard events
@@ -180,11 +180,11 @@ export default {
     });
 
     // Add global paste event listener
-    window.addEventListener("paste", this.handleGlobalPaste);
+    window.addEventListener('paste', this.handleGlobalPaste);
   },
   beforeUnmount() {
     // Remove global paste event listener
-    window.removeEventListener("paste", this.handleGlobalPaste);
+    window.removeEventListener('paste', this.handleGlobalPaste);
   },
   methods: {
     showImportModal() {
@@ -202,7 +202,7 @@ export default {
     },
 
     resetImport() {
-      this.pastedData = "";
+      this.pastedData = '';
       this.parsedData = [];
       this.importedCells.clear();
     },
@@ -215,7 +215,7 @@ export default {
 
     onDragOver(event) {
       this.isDragging = true;
-      event.dataTransfer.dropEffect = "copy";
+      event.dataTransfer.dropEffect = 'copy';
     },
 
     onDragLeave() {
@@ -229,12 +229,12 @@ export default {
         this.handleFileData(files[0]);
       } else {
         // Try to get HTML table data
-        const html = event.dataTransfer.getData("text/html");
+        const html = event.dataTransfer.getData('text/html');
         if (html) {
           this.processHtmlTable(html);
         } else {
           // Fallback to plain text
-          const text = event.dataTransfer.getData("text/plain");
+          const text = event.dataTransfer.getData('text/plain');
           if (text) {
             this.pastedData = text;
             this.parseImportedData();
@@ -247,14 +247,14 @@ export default {
       const clipboardData = event.clipboardData || window.clipboardData;
 
       // Check for HTML content (tables)
-      const html = clipboardData.getData("text/html");
+      const html = clipboardData.getData('text/html');
       if (html) {
         this.processHtmlTable(html);
         return;
       }
 
       // Fallback to plain text
-      const text = clipboardData.getData("text/plain");
+      const text = clipboardData.getData('text/plain');
       if (text) {
         this.pastedData = text;
         this.parseImportedData();
@@ -271,28 +271,28 @@ export default {
     processHtmlTable(html) {
       try {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const tables = doc.querySelectorAll("table");
+        const doc = parser.parseFromString(html, 'text/html');
+        const tables = doc.querySelectorAll('table');
 
         if (tables.length > 0) {
           const table = tables[0];
-          const rows = table.querySelectorAll("tr");
-          let tableText = "";
+          const rows = table.querySelectorAll('tr');
+          let tableText = '';
 
           rows.forEach((row) => {
-            const cells = row.querySelectorAll("th, td");
+            const cells = row.querySelectorAll('th, td');
             const rowData = Array.from(cells).map((cell) =>
-              cell.textContent.trim(),
+              cell.textContent.trim()
             );
-            tableText += rowData.join("\t") + "\n";
+            tableText += rowData.join('\t') + '\n';
           });
 
           this.pastedData = tableText;
           this.parseImportedData();
         }
       } catch (error) {
-        console.error("Error processing HTML table:", error);
-        addNotification("Nie udało się przetworzyć tabeli.", "red");
+        console.error('Error processing HTML table:', error);
+        addNotification('Nie udało się przetworzyć tabeli.', 'red');
       }
     },
 
@@ -304,18 +304,18 @@ export default {
     },
 
     handleFileData(file) {
-      if (file.type === "text/csv" || file.name.endsWith(".csv")) {
+      if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
         this.parseCSVFile(file);
       } else if (
-        file.type.includes("spreadsheetml") ||
-        file.name.endsWith(".xlsx") ||
-        file.name.endsWith(".xls")
+        file.type.includes('spreadsheetml') ||
+        file.name.endsWith('.xlsx') ||
+        file.name.endsWith('.xls')
       ) {
         this.parseExcelFile(file);
       } else {
         addNotification(
-          "Nie wspierany format pliku. Proszę użyć pliku CSV lub Excela.",
-          "red",
+          'Nie wspierany format pliku. Proszę użyć pliku CSV lub Excela.',
+          'red'
         );
       }
     },
@@ -331,7 +331,7 @@ export default {
 
     async parseExcelFile(file) {
       try {
-        const ExcelJS = await import("exceljs");
+        const ExcelJS = await import('exceljs');
         const workbook = new ExcelJS.Workbook();
 
         const reader = new FileReader();
@@ -343,10 +343,10 @@ export default {
           const worksheet = workbook.getWorksheet(1);
 
           // Convert to CSV format
-          let csvData = "";
+          let csvData = '';
           worksheet.eachRow((row, rowNumber) => {
             const rowValues = row.values.slice(1); // Remove the first undefined value
-            csvData += rowValues.join(",") + "\n";
+            csvData += rowValues.join(',') + '\n';
           });
 
           this.pastedData = csvData;
@@ -355,8 +355,8 @@ export default {
 
         reader.readAsArrayBuffer(file);
       } catch (error) {
-        console.error("Error parsing Excel file:", error);
-        addNotification("Nie udało się przetworzyć pliku Excela.", "red");
+        console.error('Error parsing Excel file:', error);
+        addNotification('Nie udało się przetworzyć pliku Excela.', 'red');
       }
     },
 
@@ -374,8 +374,8 @@ export default {
           .filter((line) => line.trim());
         if (lines.length < 2) {
           addNotification(
-            "Zły format danych. Musi zawierać wiersz z dniami i kolumnę z członkami zespołu.",
-            "orange",
+            'Zły format danych. Musi zawierać wiersz z dniami i kolumnę z członkami zespołu.',
+            'orange'
           );
           return;
         }
@@ -384,7 +384,7 @@ export default {
         const parseCSVLine = (line) => {
           // Handle quoted fields properly
           const result = [];
-          let field = "";
+          let field = '';
           let inQuotes = false;
 
           for (let i = 0; i < line.length; i++) {
@@ -403,11 +403,11 @@ export default {
             }
             // Handle delimiters
             else if (
-              (char === "," || char === "\t" || char === ";") &&
+              (char === ',' || char === '\t' || char === ';') &&
               !inQuotes
             ) {
               result.push(field.trim());
-              field = "";
+              field = '';
             }
             // Add character to current field
             else {
@@ -432,19 +432,19 @@ export default {
         // Create structured data
         this.parsedData = dataRows.map((row) => {
           // Get name (first column) - strip quotes if they exist
-          const name = row[0].replace(/^"(.*)"$/, "$1");
+          const name = row[0].replace(/^"(.*)"$/, '$1');
 
           // Process the shifts for each day
           const shifts = row.slice(1).map((cell) => {
             // Normalize shift values and strip quotes if they exist
             const normalizedValue = cell
-              .replace(/^"(.*)"$/, "$1")
+              .replace(/^"(.*)"$/, '$1')
               .toUpperCase()
               .trim();
-            if (["D", "N", "D N", "DN"].includes(normalizedValue)) {
-              return normalizedValue === "DN" ? "D N" : normalizedValue;
+            if (['D', 'N', 'D N', 'DN'].includes(normalizedValue)) {
+              return normalizedValue === 'DN' ? 'D N' : normalizedValue;
             }
-            return "";
+            return '';
           });
 
           return { name, shifts };
@@ -456,10 +456,10 @@ export default {
         // Check if days count matches the current month
         this.daysMismatch = headerRow.length !== this.monthDays.length;
       } catch (error) {
-        console.error("Error parsing imported data:", error);
+        console.error('Error parsing imported data:', error);
         addNotification(
-          "Nie udało się przetworzyć danych. Proszę sprawdzić format.",
-          "red",
+          'Nie udało się przetworzyć danych. Proszę sprawdzić format.',
+          'red'
         );
         this.parsedData = [];
       }
@@ -475,12 +475,12 @@ export default {
       this.parsedData.forEach((row) => {
         // Find matching person by name
         const person = this.people.find(
-          (p) => p.name.toLowerCase() === row.name.toLowerCase(),
+          (p) => p.name.toLowerCase() === row.name.toLowerCase()
         );
         if (!person) {
           addNotification(
             `Nie znaleziono osoby o nazwie: ${row.name}`,
-            "orange",
+            'orange'
           );
           return;
         }
@@ -508,7 +508,7 @@ export default {
               }
 
               // Add day shift if needed
-              if (shift.includes("D")) {
+              if (shift.includes('D')) {
                 if (!dayData.dayShift1) {
                   dayData.dayShift1 = person.id;
                   dayData.dayShift1Name = person.name;
@@ -519,7 +519,7 @@ export default {
               }
 
               // Add night shift if needed
-              if (shift.includes("N")) {
+              if (shift.includes('N')) {
                 if (!dayData.nightShift1) {
                   dayData.nightShift1 = person.id;
                   dayData.nightShift1Name = person.name;
@@ -542,7 +542,7 @@ export default {
       // Save all modified dates to localStorage with only essential data
       modifiedDates.forEach((date) => {
         const dayData = this.monthDays.find(
-          (day) => day.date.toDateString() === date,
+          (day) => day.date.toDateString() === date
         );
         if (dayData) {
           // Only save the essential shift ID data
@@ -550,7 +550,7 @@ export default {
             dayShift1: dayData.dayShift1,
             dayShift2: dayData.dayShift2,
             nightShift1: dayData.nightShift1,
-            nightShift2: dayData.nightShift2,
+            nightShift2: dayData.nightShift2
           };
 
           localStorage.setItem(date, JSON.stringify(updatedData));
@@ -558,13 +558,13 @@ export default {
       });
 
       this.closeImportModal();
-      addNotification("Import zakończony sukcesem.", "green");
-      this.$emit("has-changes", true);
+      addNotification('Import zakończony sukcesem.', 'green');
+      this.$emit('has-changes', true);
 
       // Add imported cells to parent component for styling
-      this.$emit("cells-imported", Array.from(this.importedCells));
-    },
-  },
+      this.$emit('cells-imported', Array.from(this.importedCells));
+    }
+  }
 };
 </script>
 

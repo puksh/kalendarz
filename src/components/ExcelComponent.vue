@@ -89,10 +89,6 @@
 import { daysOfWeek } from '@/data/daysOfWeek.ts';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
-import {
-  checkShiftDataSync,
-  resetSyncedChangesSessionStorage
-} from '@/utils/dataSync.ts';
 import { isPolishHoliday } from '@/utils/polishHolidays.ts';
 import { Person, ShiftType, DayData } from '@/types/calendar';
 import {
@@ -318,7 +314,7 @@ export default {
       };
 
       this.localData[date] = updatedData;
-      localStorage.setItem(date, JSON.stringify(updatedData));
+      sessionStorage.setItem(date, JSON.stringify(updatedData));
       this.madeChanges = true;
       this.$emit('has-changes', this.madeChanges);
     },
@@ -436,7 +432,7 @@ export default {
     },
     loadDayFromStorage(year: number, month: number, dayNum: number) {
       const date = new Date(year, month, dayNum).toDateString();
-      const savedStates = localStorage.getItem(date);
+      const savedStates = sessionStorage.getItem(date);
 
       if (!savedStates) return;
 
@@ -469,12 +465,12 @@ export default {
     clearUserChangesFromStorage() {
       const keysToRemove = [];
 
-      for (const key in localStorage) {
+      for (const key in sessionStorage) {
         if (key === 'isEditingMode' || key === 'currentPage') continue;
 
-        if (localStorage.hasOwnProperty(key)) {
+        if (sessionStorage.hasOwnProperty(key)) {
           try {
-            const savedData = JSON.parse(localStorage.getItem(key) || '{}');
+            const savedData = JSON.parse(sessionStorage.getItem(key) || '{}');
             const hasUserChanges = SHIFT_TYPES.some(
               (shiftType) => savedData[shiftType + 'UserChanged']
             );
@@ -488,7 +484,7 @@ export default {
         }
       }
 
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      keysToRemove.forEach((key) => sessionStorage.removeItem(key));
     },
     isToday(date: Date) {
       const today = new Date();

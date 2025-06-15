@@ -11,6 +11,7 @@
       mode="save"
     />
 
+    <SubmitButton :canSave="canSave" @save="showPasswordPrompt" />
     <ButtonsTopBar
       :canSave="canSave"
       :currentComponent="currentPage"
@@ -107,11 +108,12 @@
 <script>
 import { defineAsyncComponent, markRaw } from 'vue';
 import ButtonsTopBar from './components/ButtonsTopBar.vue';
-import PencilIcon from './components/PencilIcon.vue';
+import SubmitButton from './components/ButtomSubmit.vue';
 import ButtonSwitchView from './components/ButtonSwitchView.vue';
 import { checkShiftDataSync } from '@/utils/dataSync.js';
 import { addNotification } from './components/NotificationMessage.vue';
 import RefreshIcon from './components/icons/RefreshIcon.vue';
+import PencilIcon from './components/icons/PencilIcon.vue';
 import ButtonExport from './components/ButtonExport.vue';
 import ButtonImport from './components/ButtonImport.vue';
 
@@ -120,6 +122,7 @@ export default {
   components: {
     ButtonsTopBar,
     ButtonSwitchView,
+    SubmitButton,
     MonthSelector: defineAsyncComponent(
       () => import('./components/MonthSelector.vue')
     ),

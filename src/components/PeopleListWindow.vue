@@ -12,10 +12,10 @@
           class="person-item ratownik"
           :class="{
             draggable: isEditingMode,
-            'being-touched': touchedPerson?.id === person.id,
+            'being-touched': touchedPerson?.id === person.id
           }"
           :style="{
-            borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
+            borderRadius: isEditingMode ? 'var(--border-radius)' : '0'
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
@@ -34,10 +34,10 @@
           class="person-item pielegniarka"
           :class="{
             draggable: isEditingMode,
-            'being-touched': touchedPerson?.id === person.id,
+            'being-touched': touchedPerson?.id === person.id
           }"
           :style="{
-            borderRadius: isEditingMode ? 'var(--border-radius)' : '0',
+            borderRadius: isEditingMode ? 'var(--border-radius)' : '0'
           }"
           :draggable="isEditingMode"
           @dragstart="isEditingMode ? startDrag(person) : null"
@@ -51,16 +51,16 @@
 
 <script lang="ts">
 export default {
-  name: "PeopleListWindow",
+  name: 'PeopleListWindow',
   props: {
     people: {
       type: Array as () => { id: number; name: string; ratownik: boolean }[],
-      required: true,
+      required: true
     },
     isEditingMode: {
       type: Boolean,
-      required: true, // Ensure the parent always provides this prop
-    },
+      required: true // Ensure the parent always provides this prop
+    }
   },
   data() {
     return {
@@ -68,17 +68,17 @@ export default {
       touchedPerson: null,
       touchStartTime: 0,
       touchTimer: null,
-      isDragging: false,
+      isDragging: false
     };
   },
   methods: {
     startDrag(person) {
-      localStorage.setItem("draggedPerson", JSON.stringify(person));
+      localStorage.setItem('draggedPerson', JSON.stringify(person));
     },
     handleDragEnd() {
-      localStorage.removeItem("draggedPerson");
-    },
-  },
+      localStorage.removeItem('draggedPerson');
+    }
+  }
 };
 </script>
 

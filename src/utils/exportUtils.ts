@@ -38,7 +38,7 @@ export const getFormattedShift = (
   separator = '\n'
 ): string => {
   const dateString = date.toDateString();
-  const shiftData = localStorage.getItem(dateString);
+  const shiftData = sessionStorage.getItem(dateString);
 
   if (shiftData) {
     const parsedData = JSON.parse(shiftData);
