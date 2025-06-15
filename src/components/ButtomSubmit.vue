@@ -46,6 +46,6 @@ export default {
   background-color: var(--color-button-disabled-bg);
   cursor: not-allowed;
   filter: none;
-  opacity: 0;
+  visibility: hidden;
 }
 </style>
