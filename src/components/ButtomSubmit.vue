@@ -25,9 +25,9 @@ export default {
 
 <style scoped>
 .submit-button {
-  position: absolute;
-  bottom: 100px;
-  right: 20px;
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
   background: var(--glass-bg-color);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
