@@ -67,6 +67,10 @@ import { Person, ShiftType, DayData } from '@/types/calendar';
 import ShiftSlot from './CalendarShiftSlotComponent.vue';
 import MobileWarningModal from './MobileWarningModal.vue';
 import { MESSAGES } from '@/constants/messages';
+import {
+  handleHorizontalScroll,
+  scrollToTodayColumn
+} from '@/utils/scrollUtils';
 
 interface DraggedPerson extends Person {
   id: number;
@@ -198,40 +202,19 @@ export default {
       this.$emit('has-changes', this.madeChanges);
     },
     handleScroll(event) {
-      if (this.scrollContainer) {
-        event.preventDefault(); // Prevent default vertical scrolling
-        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
-      }
+      handleHorizontalScroll(event, this.scrollContainer);
     },
     scrollToToday() {
       this.$nextTick(() => {
-        const today = new Date();
-        if (
-          today.getMonth() === this.selectedMonth &&
-          today.getFullYear() === this.selectedYear
-        ) {
-          const todayIndex = this.monthDays.findIndex((day) =>
-            utilIsToday(day.date)
-          );
-
-          if (todayIndex !== -1 && this.scrollContainer) {
-            // Get the column width (including margins)
-            const columnWidth =
-              (document.querySelector('.day-cell') as HTMLElement)
-                ?.offsetWidth || 0;
-            const containerWidth = this.scrollContainer.offsetWidth;
-
-            // Calculate scroll position to center today's column
-            const scrollPosition =
-              columnWidth * todayIndex - containerWidth / 2 + columnWidth / 2;
-
-            // Smooth scroll to the position
-            this.scrollContainer.scrollTo({
-              left: Math.max(0, scrollPosition),
-              behavior: 'smooth'
-            });
-          }
-        }
+        const todayIndex = this.monthDays.findIndex((day) =>
+          utilIsToday(day.date)
+        );
+        scrollToTodayColumn(
+          this.scrollContainer,
+          this.selectedMonth,
+          this.selectedYear,
+          todayIndex
+        );
       });
     },
     getDayCellClasses(day) {

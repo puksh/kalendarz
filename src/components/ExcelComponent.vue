@@ -104,6 +104,10 @@ import {
 } from '@/utils/shiftManagement';
 import { getFormattedShift } from '@/utils/exportUtils';
 import { MESSAGES } from '@/constants/messages';
+import {
+  handleHorizontalScroll,
+  scrollToTodayColumn
+} from '@/utils/scrollUtils';
 
 // Constants
 const SHIFT_OPTIONS = [
@@ -197,9 +201,11 @@ export default {
   watch: {
     selectedMonth() {
       this.generateMonthDays();
+      this.scrollToToday();
     },
     selectedYear() {
       this.generateMonthDays();
+      this.scrollToToday();
     }
   },
   methods: {
@@ -457,16 +463,38 @@ export default {
         ?.date.toDateString();
     },
     handleScroll(event) {
-      if (this.scrollContainer) {
-        event.preventDefault(); // Prevent default vertical scrolling
-        this.scrollContainer.scrollLeft += event.deltaY; // Smooth horizontal scrolling
-      }
+      handleHorizontalScroll(event, this.scrollContainer);
+    },
+    findTodayIndex(): number {
+      const today = new Date();
+      return this.daysInMonth.findIndex(
+        (day) =>
+          day === today.getDate() &&
+          this.selectedMonth === today.getMonth() &&
+          this.selectedYear === today.getFullYear()
+      );
+    },
+    scrollToToday() {
+      this.$nextTick(() => {
+        const todayIndex = this.findTodayIndex();
+        scrollToTodayColumn(
+          this.scrollContainer,
+          this.selectedMonth,
+          this.selectedYear,
+          todayIndex
+        );
+      });
     }
   },
   mounted() {
     this.resetUserChanges();
     this.generateMonthDays();
     this.scrollContainer = this.$refs.scrollContainer;
+
+    if (this.scrollContainer) {
+      this.scrollContainer.style.scrollBehavior = 'smooth';
+    }
+    this.scrollToToday();
   }
 };
 </script>
@@ -478,7 +506,11 @@ export default {
   margin: 0 auto;
   overflow-x: auto;
   margin-top: 70px;
+  position: relative;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; /* for iOS */
 }
+
 /* General Table Styling */
 .calendar-table {
   width: 100%;
