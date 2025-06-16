@@ -29,13 +29,12 @@ export function validateShiftAssignment(
   shiftType: ShiftType,
   personId: number,
   people: any[]
-) {
+): boolean {
   const person = people.find((p) => p.id === personId);
   if (!person?.ratownik) return true;
 
   // Check for duplicate assignments on day shift
   if (shiftType.includes('day')) {
-    // Check if person is already assigned to another day shift
     if (
       (shiftType === 'dayShift1' && dayData.dayShift2 === personId) ||
       (shiftType === 'dayShift2' && dayData.dayShift1 === personId)
@@ -60,7 +59,6 @@ export function validateShiftAssignment(
 
   // Check for duplicate assignments on night shift
   if (shiftType.includes('night')) {
-    // Check if person is already assigned to another night shift
     if (
       (shiftType === 'nightShift1' && dayData.nightShift2 === personId) ||
       (shiftType === 'nightShift2' && dayData.nightShift1 === personId)
@@ -90,21 +88,31 @@ export function assignShiftToDay(
   day: DayData,
   shiftType: ShiftType,
   person: any
-) {
+): void {
   day[shiftType] = person.id;
   day[`${shiftType}Name`] = person.name;
   day[`${shiftType}Ratownik`] = person.ratownik;
   day[`${shiftType}UserChanged`] = true;
 }
 
-export function clearShiftAssignment(day: DayData, shift: ShiftType) {
+export function clearShiftAssignment(day: DayData, shift: ShiftType): void {
   day[shift] = null;
   day[`${shift}Name`] = MESSAGES.NOT_ASSIGNED;
   day[`${shift}Ratownik`] = null;
   day[`${shift}UserChanged`] = true;
 }
 
-export function saveDayToLocalStorage(day: DayData) {
+export function resolvePersonName(
+  id: number,
+  people: any[]
+): { name: string; isRatownik: boolean } {
+  const person = people.find((p) => p.id === id);
+  return person
+    ? { name: person.name, isRatownik: person.ratownik }
+    : { name: MESSAGES.NOT_ASSIGNED, isRatownik: false };
+}
+
+export function saveDayToSessionStorage(day: DayData) {
   const dateKey = day.date.toDateString();
   const updatedData = {
     dayShift1: day.dayShift1,

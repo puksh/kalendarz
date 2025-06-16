@@ -90,13 +90,17 @@ import { daysOfWeek } from '@/data/daysOfWeek.ts';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
 import { isPolishHoliday } from '@/utils/polishHolidays.ts';
-import { isToday as utilIsToday } from '@/utils/calendarChecks.ts';
+import { isToday, generateMonthDays } from '@/utils/dateUtils';
+import {
+  loadAllFromSessionStorage,
+  clearUserChangesFromStorage,
+  saveDayToSessionStorage
+} from '@/utils/sessionStorageUtils.ts';
 import { Person, ShiftType, DayData } from '@/types/calendar';
 import {
   validateShiftAssignment,
   assignShiftToDay,
   clearShiftAssignment,
-  saveDayToLocalStorage,
   MESSAGES
 } from '@/utils/shiftManagement';
 import { getFormattedShift } from '@/utils/exportUtils';
@@ -337,7 +341,7 @@ export default {
       });
 
       if (newValue === '') {
-        saveDayToLocalStorage(dayData);
+        saveDayToSessionStorage(dayData);
         delete this.editedShifts[key];
         return;
       }
@@ -387,108 +391,46 @@ export default {
         }
       }
 
-      saveDayToLocalStorage(dayData);
+      saveDayToSessionStorage(dayData);
       delete this.editedShifts[key];
       this.madeChanges = true;
       this.$emit('has-changes', true);
     },
     generateMonthDays() {
       this.resetUserChanges();
-      const year = this.selectedYear;
-      const month = this.selectedMonth;
-      const lastDay = new Date(year, month + 1, 0).getDate();
-
-      this.monthDays = [];
-      for (let i = 1; i <= lastDay; i++) {
-        this.monthDays.push({
-          date: new Date(year, month, i),
-          dayShift1: null,
-          dayShift2: null,
-          nightShift1: null,
-          nightShift2: null,
-          dayShift1Name: 'Not assigned',
-          dayShift2Name: 'Not assigned',
-          nightShift1Name: 'Not assigned',
-          nightShift2Name: 'Not assigned',
-          isCurrentMonth: true
-        });
-      }
-
-      this.loadFromLocalStorage();
+      this.monthDays = generateMonthDays(this.selectedYear, this.selectedMonth);
+      loadAllFromSessionStorage(
+        this.selectedYear,
+        this.selectedMonth,
+        this.monthDays,
+        this.people
+      );
       this.$emit('month-days-updated', this.monthDays);
     },
     updateChanges(hasChanges: boolean) {
       this.madeChanges = hasChanges;
       this.$emit('has-changes', this.madeChanges);
     },
-    loadFromLocalStorage() {
-      const { year, month } = {
-        year: this.selectedYear,
-        month: this.selectedMonth
-      };
-
-      for (let dayNum = 1; dayNum <= MAX_DAYS_IN_MONTH; dayNum++) {
-        this.loadDayFromStorage(year, month, dayNum);
-      }
-    },
-    loadDayFromStorage(year: number, month: number, dayNum: number) {
-      const date = new Date(year, month, dayNum).toDateString();
-      const savedStates = sessionStorage.getItem(date);
-
-      if (!savedStates) return;
-
-      try {
-        const parsedStates = JSON.parse(savedStates);
-        const day = this.findDayByDate(date);
-
-        if (day) {
-          this.applyStoredStatesToDay(day, parsedStates);
-        }
-      } catch (error) {
-        console.error('Failed to load local data:', error);
-        addNotification(MESSAGES.LOAD_ERROR, 'red');
-      }
-    },
-    applyStoredStatesToDay(day: DayData, parsedStates: Record<string, any>) {
-      SHIFT_TYPES.forEach((shiftType) => {
-        day[shiftType] = parsedStates[shiftType];
-        day[shiftType + 'Name'] =
-          parsedStates[shiftType + 'Name'] || MESSAGES.NOT_ASSIGNED;
-      });
+    loadFromSessionStorage() {
+      loadAllFromSessionStorage(
+        this.selectedYear,
+        this.selectedMonth,
+        this.monthDays,
+        this.people
+      );
     },
     resetUserChanges() {
-      this.clearUserChangesFromStorage();
+      clearUserChangesFromStorage();
       this.localData = {};
       this.editedShifts = {};
       this.madeChanges = false;
       this.$emit('has-changes', this.madeChanges);
     },
     clearUserChangesFromStorage() {
-      const keysToRemove = [];
-
-      for (const key in sessionStorage) {
-        if (key === 'isEditingMode' || key === 'currentPage') continue;
-
-        if (sessionStorage.hasOwnProperty(key)) {
-          try {
-            const savedData = JSON.parse(sessionStorage.getItem(key) || '{}');
-            const hasUserChanges = SHIFT_TYPES.some(
-              (shiftType) => savedData[shiftType + 'UserChanged']
-            );
-
-            if (hasUserChanges) {
-              keysToRemove.push(key);
-            }
-          } catch (error) {
-            continue;
-          }
-        }
-      }
-
-      keysToRemove.forEach((key) => sessionStorage.removeItem(key));
+      clearUserChangesFromStorage();
     },
     isToday(date: Date) {
-      return utilIsToday(date);
+      return isToday(date);
     },
     isImportedCell(personId, day) {
       return this.importedCells.has(`${personId}-${day}`);

@@ -96,7 +96,7 @@ export default {
         ratownik: this.isRatownik,
         pielegniarka: this.isPielegniarka,
         userChanged: this.isUserChanged,
-        clickable: this.isEditing
+        clickable: this.isEditing && this.hasAssignedPerson
       };
     },
     getShiftAriaLabel(): string {
@@ -130,6 +130,7 @@ export default {
   align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 42px;
 }
 
 .shift-slot:has(.empty-slot) {
@@ -140,6 +141,13 @@ export default {
 
 .shift-slot.clickable {
   cursor: pointer;
+}
+.shift-slot.clickable:hover {
+  filter: saturate(0.2);
+}
+.userChanged {
+  color: var(--color-user-changed) !important;
+  border: 2px solid var(--color-user-changed);
 }
 
 .empty-slot {
@@ -170,14 +178,6 @@ export default {
 
 .assigned-person.deleted {
   color: var(--color-text-secondary);
-  border: 2px solid var(--glass-border-color);
   font-style: italic;
-}
-
-.shift-slot.touch-hover {
-  background-color: rgba(76, 175, 80, 0.2);
-  border: 2px dashed #4caf50;
-  transform: scale(1.05);
-  transition: all 0.2s ease;
 }
 </style>

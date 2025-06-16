@@ -21,6 +21,7 @@
           v-for="(day, index) in monthDays"
           :key="index"
           :class="{ 'today-column': isToday(day.date) }"
+          class="day-column"
           @dragover.prevent
         >
           <div>
@@ -55,24 +56,19 @@
 <script lang="ts">
 import { daysOfWeek } from '@/data/daysOfWeek.ts';
 import { checkShiftDataSync } from '@/utils/dataSync.js';
-import { isPolishHoliday as utilIsPolishHoliday } from '@/utils/polishHolidays.ts'; // Aliased to avoid conflict if isPolishHoliday is used directly elsewhere
+import { isPolishHoliday as utilIsPolishHoliday } from '@/utils/polishHolidays.ts';
+import { isToday as utilIsToday, generateMonthDays } from '@/utils/dateUtils';
+import {
+  loadAllFromSessionStorage,
+  saveDayToSessionStorage
+} from '@/utils/sessionStorageUtils.ts';
+import { resetUserChanges } from '@/utils/calendarChecks.ts';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
 import {
-  generateMonthDays as utilGenerateMonthDays,
-  resolvePersonName as utilResolvePersonName,
-  hasOtherRatownik as utilHasOtherRatownik,
-  assignShift as utilAssignShift,
-  saveDayToLocalStorage as utilSaveDayToLocalStorage,
-  isDuplicateShift as utilIsDuplicateShift,
-  resetUserChanges as utilResetUserChanges,
-  isToday as utilIsToday
-} from '@/utils/calendarChecks.ts';
-import {
   validateShiftAssignment,
-  assignShiftToDay,
+  assignShiftToDay as utilAssignShift,
   clearShiftAssignment,
-  saveDayToLocalStorage,
   MESSAGES
 } from '@/utils/shiftManagement';
 import { Person, ShiftType, DayData } from '@/types/calendar';
@@ -90,7 +86,6 @@ const SHIFT_TYPES: ShiftType[] = [
   'nightShift1',
   'nightShift2'
 ];
-const MAX_DAYS_IN_MONTH = 31;
 
 export default {
   name: 'CalendarComponent',
@@ -154,8 +149,8 @@ export default {
         return;
       }
 
-      assignShiftToDay(day, shiftType, draggedPerson);
-      saveDayToLocalStorage(day);
+      utilAssignShift(day, shiftType, draggedPerson);
+      saveDayToSessionStorage(day);
       this.markChangesAndEmit();
       this.clearDraggedPersonFromStorage();
     },
@@ -163,22 +158,19 @@ export default {
     handleClickResetShift(day: DayData, shift: ShiftType): void {
       if (day[shift] !== null) {
         clearShiftAssignment(day, shift);
-        saveDayToLocalStorage(day);
+        saveDayToSessionStorage(day);
         this.madeChanges = true;
         this.$emit('has-changes', true);
       }
     },
-    resolvePersonName(id: number) {
-      // .call(this) is used because utilResolvePersonName uses this.people
-      return utilResolvePersonName.call(this, id);
-    },
-
     generateMonthDays() {
-      this.monthDays = utilGenerateMonthDays(
+      this.monthDays = generateMonthDays(this.selectedYear, this.selectedMonth);
+      loadAllFromSessionStorage(
         this.selectedYear,
-        this.selectedMonth
+        this.selectedMonth,
+        this.monthDays,
+        this.people
       );
-      this.loadFromLocalStorage();
       this.$emit('month-days-updated', this.monthDays);
     },
 
@@ -195,43 +187,16 @@ export default {
         this.generateMonthDays()
       );
     },
-    loadFromLocalStorage() {
-      const { year, month } = {
-        year: this.selectedYear,
-        month: this.selectedMonth
-      };
-
-      for (let dayNum = 1; dayNum <= MAX_DAYS_IN_MONTH; dayNum++) {
-        this.loadDayFromStorage(year, month, dayNum);
-      }
-    },
-    loadDayFromStorage(year, month, dayNum) {
-      const date = new Date(year, month, dayNum).toDateString();
-      const savedStates = sessionStorage.getItem(date);
-
-      if (!savedStates) return;
-
-      try {
-        const parsedStates = JSON.parse(savedStates);
-        const day = this.findDayByDate(new Date(date));
-
-        if (day) {
-          this.applyStoredStatesToDay(day, parsedStates);
-        }
-      } catch (error) {
-        addNotification(MESSAGES.LOAD_ERROR + error, 'red');
-      }
-    },
-    applyStoredStatesToDay(day, parsedStates) {
-      SHIFT_TYPES.forEach((shiftType) => {
-        day[shiftType] = parsedStates[shiftType];
-        const personData = this.resolvePersonName(day[shiftType]);
-        day[shiftType + 'Name'] = personData.name;
-        day[shiftType + 'Ratownik'] = personData.isRatownik;
-      });
+    loadFromSessionStorage() {
+      loadAllFromSessionStorage(
+        this.selectedYear,
+        this.selectedMonth,
+        this.monthDays,
+        this.people
+      );
     },
     resetUserChanges() {
-      const result = utilResetUserChanges();
+      const result = resetUserChanges();
       this.localData = result.localData;
       this.madeChanges = result.madeChanges;
       this.$emit('has-changes', this.madeChanges);
@@ -285,19 +250,6 @@ export default {
     getHolidayTooltip(date) {
       return this.isHoliday(date).name || '';
     },
-    validateShiftAssignment(day, shiftType, draggedPerson) {
-      if (utilIsDuplicateShift(day, shiftType, draggedPerson.id)) {
-        addNotification(MESSAGES.DUPLICATE_SHIFT, 'red');
-        return false;
-      }
-
-      if (draggedPerson.ratownik && utilHasOtherRatownik(day, shiftType)) {
-        addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
-        return false;
-      }
-
-      return true;
-    },
     getDraggedPersonFromStorage(): DraggedPerson | null {
       const stored = localStorage.getItem('draggedPerson');
       return stored ? JSON.parse(stored) : null;
@@ -309,7 +261,7 @@ export default {
     },
     assignShiftToDay(day, shiftType, draggedPerson) {
       utilAssignShift(day, shiftType, draggedPerson);
-      utilSaveDayToLocalStorage.call(this, day);
+      saveDayToSessionStorage.call(this, day);
     },
     markChangesAndEmit() {
       this.madeChanges = true;
@@ -333,7 +285,7 @@ export default {
     isToday(date: Date) {
       return utilIsToday(date);
     },
-    isHoliday(date) {
+    isHoliday(date: Date) {
       return utilIsPolishHoliday(date);
     }
   },
@@ -364,13 +316,6 @@ export default {
 </script>
 
 <style scoped>
-/* Changes Highlight */
-.userChanged {
-  color: var(--color-user-changed) !important; /* Highlight user-made changes */
-}
-.clickable {
-  cursor: pointer !important;
-}
 .calendar-grid {
   margin-top: 3ch;
   display: grid;
@@ -400,61 +345,7 @@ export default {
   color: var(--color-text);
 }
 
-/* Shifts styles */
-.shift-slot {
-  margin-top: var(--spacing-small);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-.shift-slot:has(.empty-slot) {
-  filter: saturate(0.3) opacity(0.7);
-  border: 2px solid var(--color-empty-slot) !important;
-  font-weight: 600;
-}
-.shift-slot[clickable='true'] {
-  cursor: pointer;
-}
-.empty-slot {
-  color: var(--color-text);
-  padding: var(--spacing-small);
-  height: var(--height-empty-slot);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-medium);
-  width: 100%;
-  background-color: transparent !important;
-}
-/* Assigned Person Styles */
-.assigned-person {
-  padding: var(--spacing-small);
-  background-color: transparent;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-medium);
-  font-weight: bolder;
-  transition: all 0.2s ease;
-  width: 100%;
-  color: var(--color-text);
-}
-
-.shift-label {
-  background-color: var(--color-label-bg);
-  padding: var(--spacing-small);
-}
-.calendar-container {
-  margin-top: 40px;
-}
-.shift-slot.touch-hover {
-  background-color: rgba(76, 175, 80, 0.2);
-  border: 2px dashed #4caf50;
-  transform: scale(1.05);
-  transition: all 0.2s ease;
-} /* Mobile warning styles */
+/* Mobile warning styles */
 .mobile-warning-overlay {
   position: fixed;
   top: 0;
@@ -500,10 +391,8 @@ export default {
   margin-top: 10px;
   cursor: pointer;
 }
-.assigned-person.deleted {
-  color: var(--color-text-secondary);
-  border: 2px solid var(--glass-border-color);
-  font-style: italic;
+.day-column {
+  min-width: 140px;
 }
 .today-column {
   position: relative;
