@@ -505,7 +505,7 @@ export default {
   max-width: 9999px;
   margin: 0 auto;
   overflow-x: auto;
-  margin-top: 70px;
+  margin-top: 16px;
   position: relative;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; /* for iOS */

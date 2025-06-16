@@ -346,7 +346,7 @@ export default {
 }
 
 .main-content {
-  padding-top: 70px;
+  padding-top: 108px;
   max-width: 100%;
   text-align: center;
   display: flex;
