@@ -145,7 +145,7 @@ export default {
     return {
       showExportMenu: false,
       isMobileView: false,
-      MESSAGES // Make MESSAGES available
+      MESSAGES
     };
   },
   mounted() {

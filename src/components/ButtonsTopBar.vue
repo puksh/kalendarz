@@ -124,7 +124,7 @@ export default defineComponent({
     return {
       isMenuOpen: false,
       isMobileView: false,
-      MESSAGES // Make MESSAGES available in the template
+      MESSAGES
     };
   },
   methods: {
@@ -243,9 +243,6 @@ export default defineComponent({
     right: 0;
     z-index: var(--z-index-mobile-menu);
     flex-direction: column;
-    background: var(--glass-bg-color);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
     padding: 16px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: top;
@@ -258,6 +255,9 @@ export default defineComponent({
 
   .collapsible-buttons.mobile-view.menu-open {
     transform: perspective(1000px) rotateX(0);
+    background: var(--glass-bg-color);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     opacity: 1;
     visibility: visible;
   }
