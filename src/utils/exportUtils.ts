@@ -45,14 +45,14 @@ export const getFormattedShift = (
     const shifts = [];
 
     if (
-      parsedData.dayShift1 === personId ||
-      parsedData.dayShift2 === personId
+      parsedData?.dayShift1 === personId ||
+      parsedData?.dayShift2 === personId
     ) {
       shifts.push('D');
     }
     if (
-      parsedData.nightShift1 === personId ||
-      parsedData.nightShift2 === personId
+      parsedData?.nightShift1 === personId ||
+      parsedData?.nightShift2 === personId
     ) {
       shifts.push('N');
     }

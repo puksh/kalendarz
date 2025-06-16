@@ -65,7 +65,6 @@ function hasConflictingRatownik(
 
   return shiftPeople.some((id) => {
     const shiftPerson = people.find((p) => p.id === id);
-    console.log('Checking ratownik for person:', shiftPerson);
     return Boolean(shiftPerson?.ratownik);
   });
 }

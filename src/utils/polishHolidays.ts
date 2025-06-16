@@ -1,42 +1,42 @@
 export function getPolishHolidays(
-  year: number,
+  year: number
 ): { date: Date; name: string }[] {
   // Fixed date holidays
   const holidays = [
-    { date: new Date(year, 0, 1), name: "Nowy Rok" },
-    { date: new Date(year, 0, 6), name: "Święto Trzech Króli" },
-    { date: new Date(year, 4, 1), name: "Święto Pracy" },
-    { date: new Date(year, 4, 3), name: "Święto Konstytucji 3 Maja" },
+    { date: new Date(year, 0, 1), name: 'Nowy Rok' },
+    { date: new Date(year, 0, 6), name: 'Święto Trzech Króli' },
+    { date: new Date(year, 4, 1), name: 'Święto Pracy' },
+    { date: new Date(year, 4, 3), name: 'Święto Konstytucji 3 Maja' },
     {
       date: new Date(year, 7, 15),
-      name: "Wniebowzięcie Najświętszej Maryi Panny",
+      name: 'Wniebowzięcie Najświętszej Maryi Panny'
     },
-    { date: new Date(year, 10, 1), name: "Wszystkich Świętych" },
-    { date: new Date(year, 10, 11), name: "Święto Niepodległości" },
-    { date: new Date(year, 11, 25), name: "Boże Narodzenie (pierwszy dzień)" },
-    { date: new Date(year, 11, 26), name: "Boże Narodzenie (drugi dzień)" },
+    { date: new Date(year, 10, 1), name: 'Wszystkich Świętych' },
+    { date: new Date(year, 10, 11), name: 'Święto Niepodległości' },
+    { date: new Date(year, 11, 25), name: 'Boże Narodzenie (pierwszy dzień)' },
+    { date: new Date(year, 11, 26), name: 'Boże Narodzenie (drugi dzień)' }
   ];
 
   // Calculate Easter date
   const easter = calculateEaster(year);
 
   // Add Easter and related holidays
-  holidays.push({ date: easter, name: "Wielkanoc" });
+  holidays.push({ date: easter, name: 'Wielkanoc' });
 
   // Easter Monday (1 day after Easter)
   const easterMonday = new Date(easter);
   easterMonday.setDate(easter.getDate() + 1);
-  holidays.push({ date: easterMonday, name: "Poniedziałek Wielkanocny" });
+  holidays.push({ date: easterMonday, name: 'Poniedziałek Wielkanocny' });
 
   // Pentecost (49 days after Easter)
   const pentecost = new Date(easter);
   pentecost.setDate(easter.getDate() + 49);
-  holidays.push({ date: pentecost, name: "Zielone Świątki" });
+  holidays.push({ date: pentecost, name: 'Zielone Świątki' });
 
   // Corpus Christi (60 days after Easter)
   const corpusChristi = new Date(easter);
   corpusChristi.setDate(easter.getDate() + 60);
-  holidays.push({ date: corpusChristi, name: "Boże Ciało" });
+  holidays.push({ date: corpusChristi, name: 'Boże Ciało' });
 
   return holidays;
 }
@@ -67,13 +67,10 @@ export function isPolishHoliday(date: Date): {
   name?: string;
 } {
   const holidays = getPolishHolidays(date.getFullYear());
+  const dateString = date.toDateString();
 
   for (const holiday of holidays) {
-    if (
-      holiday.date.getDate() === date.getDate() &&
-      holiday.date.getMonth() === date.getMonth() &&
-      holiday.date.getFullYear() === date.getFullYear()
-    ) {
+    if (holiday.date.toDateString() === dateString) {
       return { isHoliday: true, name: holiday.name };
     }
   }

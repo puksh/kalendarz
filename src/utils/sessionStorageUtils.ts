@@ -42,7 +42,7 @@ export function loadDayFromStorage(
         day[shiftType + 'Name'] = personData.name;
         day[shiftType + 'Ratownik'] = personData.isRatownik;
         day[shiftType + 'UserChanged'] =
-          parsedStates[shiftType + 'UserChanged'];
+          parsedStates[shiftType + 'UserChanged'] ?? false;
       });
     }
   } catch (error) {

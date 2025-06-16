@@ -144,7 +144,7 @@ export default {
       const day = this.findDayByDate(date);
       if (
         !day ||
-        !validateShiftAssignment(day, shiftType, draggedPerson.id, this.people)
+        !validateShiftAssignment(day, shiftType, draggedPerson, this.people)
       ) {
         return;
       }
