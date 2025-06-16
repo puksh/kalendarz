@@ -1,5 +1,6 @@
 import { addNotification } from '../components/NotificationMessage.vue';
 import type { DayData } from '../types/calendar';
+import { MESSAGES } from '../constants/messages';
 
 export async function fetchServerShiftData(
   callback: () => void
@@ -14,16 +15,16 @@ export async function fetchServerShiftData(
 
     if (!response.ok) {
       if (response.status === 404) {
-        addNotification('Brak danych na serwerze', 'red');
+        addNotification(MESSAGES.SERVER_NO_DATA, 'red');
       }
-      throw new Error(`Failed to fetch data from server: ${response.status}`);
+      throw new Error(MESSAGES.ERROR_FETCHING_DATA + `${response.status}`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching data from server:', error);
-    addNotification('Nie udało się połączyć z serwerem', 'red');
+    console.error(MESSAGES.SERVER_CONNECTION_ERROR, error);
+    addNotification(MESSAGES.SERVER_CONNECTION_ERROR, 'red');
     return null;
   }
 }
@@ -55,8 +56,8 @@ export async function checkShiftDataSync(generateMonthDays) {
     }
     return remoteData;
   } catch (error) {
-    console.error('Error during data synchronization:', error);
-    addNotification('Błąd podczas synchronizacji danych', 'red');
+    console.error(MESSAGES.DATA_SYNC_ERROR, error);
+    addNotification(MESSAGES.DATA_SYNC_ERROR, 'red');
     return null;
   }
 }

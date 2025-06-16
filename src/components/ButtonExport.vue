@@ -7,8 +7,8 @@
         'calendar-position': currentPage === 'CalendarComponent'
       }"
       @click="toggleExportMenu"
-      title="Eksportuj harmonogram"
-      aria-label="Eksportuj harmonogram"
+      :title="MESSAGES.EXPORT_SCHEDULE_TITLE"
+      :aria-label="MESSAGES.EXPORT_SCHEDULE_ARIA"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@
           <path d="M9 17h6" />
           <path d="M9 13h6" />
         </svg>
-        <span>CSV</span>
+        <span>{{ MESSAGES.EXPORT_FORMAT_CSV }}</span>
       </button>
 
       <button @click="exportToExcel" class="export-option">
@@ -79,7 +79,7 @@
           <line x1="16" y1="17" x2="8" y2="17" />
           <polyline points="10 9 9 9 8 9" />
         </svg>
-        <span>Excel (XLSX)</span>
+        <span>{{ MESSAGES.EXPORT_FORMAT_EXCEL }}</span>
       </button>
 
       <button @click="exportToPdf" class="export-option">
@@ -99,7 +99,7 @@
           <line x1="16" y1="17" x2="8" y2="17" />
           <polyline points="10 9 9 9 8 9" />
         </svg>
-        <span>PDF</span>
+        <span>{{ MESSAGES.EXPORT_FORMAT_PDF }}</span>
       </button>
     </div>
   </div>
@@ -115,6 +115,7 @@ import {
 } from '../utils/exportUtils';
 import { downloadFile, arrayBufferToBase64 } from '../utils/fileUtils';
 import { isPolishHoliday } from '../utils/polishHolidays';
+import { MESSAGES } from '../constants/messages';
 
 export default {
   name: 'ButtonExport',
@@ -143,7 +144,8 @@ export default {
   data() {
     return {
       showExportMenu: false,
-      isMobileView: false
+      isMobileView: false,
+      MESSAGES // Make MESSAGES available
     };
   },
   mounted() {
@@ -173,7 +175,7 @@ export default {
     },
 
     getFilename(extension) {
-      return `Harmonogram_${this.getMonthName()}_${this.selectedYear}.${extension}`;
+      return `${this.MESSAGES.EXPORT_FILENAME_PREFIX}${this.getMonthName()}_${this.selectedYear}.${extension}`;
     },
 
     exportToCsv() {
@@ -420,10 +422,10 @@ export default {
         doc.setTextColor(0, 0, 0);
 
         // Legend
-        doc.text('Legenda:', 14, legendY);
-        doc.text('D  - Dzienna 07:00-19:00', 14, legendY + 6);
-        doc.text('N  - Nocna   19:00-07:00', 14, legendY + 12);
-        doc.text('DN - Doba    07:00-07:00', 14, legendY + 18);
+        doc.text(this.MESSAGES.EXPORT_LEGEND, 14, legendY);
+        doc.text(this.MESSAGES.EXPORT_LEGEND_DAY_SHIFT, 14, legendY + 6);
+        doc.text(this.MESSAGES.EXPORT_LEGEND_NIGHT_SHIFT, 14, legendY + 12);
+        doc.text(this.MESSAGES.EXPORT_LEGEND_FULL_DAY_SHIFT, 14, legendY + 18);
 
         // Holiday information
         const monthHolidays = [];
@@ -435,7 +437,7 @@ export default {
           }
         }
         if (monthHolidays.length != 0) {
-          doc.text('Święta w tym miesiącu:', 14, legendY + 28);
+          doc.text(this.MESSAGES.EXPORT_HOLIDAYS_THIS_MONTH, 14, legendY + 28);
 
           monthHolidays.forEach((holiday, index) => {
             doc.text(
@@ -449,10 +451,10 @@ export default {
         // Save PDF
         doc.save(this.getFilename('pdf'));
         this.showExportMenu = false;
-        addNotification('Harmonogram zapisany jako PDF', 'green');
+        addNotification(this.MESSAGES.EXPORT_PDF_SUCCESS, 'green');
       } catch (error) {
         console.error('Error exporting PDF:', error);
-        addNotification('Błąd podczas eksportu do PDF', 'red');
+        addNotification(this.MESSAGES.EXPORT_PDF_ERROR, 'red');
       }
     },
 
@@ -545,7 +547,8 @@ export default {
               // Keep original holiday styling
               headerCell.note = name; // Add holiday name as note/comment
               const headerText = headerCell.value?.toString() || '';
-              headerCell.value = headerText + '★';
+              headerCell.value =
+                headerText + this.MESSAGES.EXPORT_EXCEL_HOLIDAY_INDICATOR;
               headerCell.font = {
                 color: { argb: 'FFCC0000' }, // Red text for holidays
                 bold: true
@@ -591,10 +594,10 @@ export default {
 
         this.downloadFile(blob, this.getFilename('xlsx'));
         this.showExportMenu = false;
-        addNotification('Harmonogram zapisany jako Excel', 'green');
+        addNotification(this.MESSAGES.EXPORT_EXCEL_SUCCESS, 'green');
       } catch (error) {
         console.error('Error exporting Excel:', error);
-        addNotification('Błąd podczas eksportu do Excel', 'red');
+        addNotification(this.MESSAGES.EXPORT_EXCEL_ERROR, 'red');
       }
     },
 

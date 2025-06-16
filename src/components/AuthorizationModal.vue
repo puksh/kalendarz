@@ -1,12 +1,12 @@
 <template>
   <section v-if="show" class="modal">
     <div class="modal-content">
-      <h3>Autoryzacja</h3>
+      <h3>{{ MESSAGES.AUTH_TITLE }}</h3>
       <p>
         {{
           mode === 'salary'
-            ? 'Wpisz hasło aby wyświetlić wynagrodzenie:'
-            : 'Wpisz hasło aby zapisać zmiany:'
+            ? MESSAGES.AUTH_PROMPT_SALARY
+            : MESSAGES.AUTH_PROMPT_SAVE
         }}
       </p>
       <div class="input-container">
@@ -14,7 +14,7 @@
           :type="showPassword ? 'text' : 'password'"
           v-model="password"
           @keyup.enter="authorize"
-          placeholder="Hasło..."
+          :placeholder="MESSAGES.AUTH_PASSWORD_PLACEHOLDER"
           autocomplete="current-password"
           ref="passwordInput"
         />
@@ -22,8 +22,16 @@
           type="button"
           class="toggle-password-button"
           @click="togglePasswordVisibility"
-          :aria-label="showPassword ? 'Ukryj hasło' : 'Pokaż hasło'"
-          :title="showPassword ? 'Ukryj hasło' : 'Pokaż hasło'"
+          :aria-label="
+            showPassword
+              ? MESSAGES.AUTH_PASSWORD_HIDE_ARIA
+              : MESSAGES.AUTH_PASSWORD_SHOW_ARIA
+          "
+          :title="
+            showPassword
+              ? MESSAGES.AUTH_PASSWORD_HIDE_ARIA
+              : MESSAGES.AUTH_PASSWORD_SHOW_ARIA
+          "
         >
           <span class="eye-icon">
             <svg
@@ -69,7 +77,7 @@
           @click="cancel"
           :disabled="isAuthorizing"
         >
-          Anuluj
+          {{ MESSAGES.CANCEL }}
         </button>
       </div>
     </div>
@@ -81,6 +89,7 @@ import { defineComponent } from 'vue';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
 import { ShiftData, AuthMode, ShiftDataCollection } from '../types/calendar';
+import { MESSAGES } from '../constants/messages';
 
 export default defineComponent({
   name: 'AuthorizationModal',
@@ -103,17 +112,18 @@ export default defineComponent({
     return {
       password: '',
       isAuthorizing: false,
-      showPassword: false
+      showPassword: false,
+      MESSAGES: MESSAGES
     };
   },
   methods: {
     getButtonText(): string {
       if (this.isAuthorizing) {
-        return 'Weryfikacja...';
+        return this.MESSAGES.AUTH_VERIFYING;
       }
       return this.mode === 'salary'
-        ? 'Wyświetl wynagrodzenie'
-        : 'Zapisz zmiany';
+        ? this.MESSAGES.AUTH_BUTTON_SHOW_SALARY
+        : this.MESSAGES.SAVE_CHANGES;
     },
 
     async authorize(): Promise<void> {
@@ -125,7 +135,7 @@ export default defineComponent({
         const isValidPassword = await this.verifyPassword();
 
         if (!isValidPassword) {
-          addNotification('Nieprawidłowe hasło', 'red');
+          addNotification(this.MESSAGES.AUTH_INVALID_PASSWORD, 'red');
           this.password = '';
           return;
         }
@@ -137,7 +147,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error);
-        addNotification('Wystąpił błąd podczas autoryzacji', 'red');
+        addNotification(this.MESSAGES.AUTH_ERROR, 'red');
       } finally {
         this.isAuthorizing = false;
       }
@@ -180,7 +190,7 @@ export default defineComponent({
     },
 
     handleSalaryMode(): void {
-      addNotification('Dostęp przyznany', 'green');
+      addNotification(this.MESSAGES.AUTH_ACCESS_GRANTED, 'green');
       this.$emit('authorized');
       this.closeModal();
     },
@@ -189,12 +199,12 @@ export default defineComponent({
       const dataToSave = this.collectSessionStorageData();
 
       if (Object.keys(dataToSave).length === 0) {
-        addNotification('Brak zmian do zapisania', 'yellow');
+        addNotification(this.MESSAGES.AUTH_NO_CHANGES_TO_SAVE, 'yellow');
         return;
       }
 
       await this.saveDataToServer(dataToSave);
-      addNotification('Zmiany zapisano pomyślnie!', 'green');
+      addNotification(this.MESSAGES.AUTH_SAVE_SUCCESS, 'green');
       this.$emit('authorized');
       this.closeModal();
     },

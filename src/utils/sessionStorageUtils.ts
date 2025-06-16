@@ -1,5 +1,5 @@
 import { DayData, ShiftType } from '../types/calendar';
-import { MESSAGES, resolvePersonName } from './shiftManagement';
+import { resolvePersonName } from './personUtils';
 
 const SHIFT_TYPES: ShiftType[] = [
   'dayShift1',
@@ -14,15 +14,7 @@ export function saveDayToSessionStorage(day: DayData): void {
     dayShift1: day.dayShift1,
     dayShift2: day.dayShift2,
     nightShift1: day.nightShift1,
-    nightShift2: day.nightShift2,
-    dayShift1Name: day.dayShift1Name,
-    dayShift2Name: day.dayShift2Name,
-    nightShift1Name: day.nightShift1Name,
-    nightShift2Name: day.nightShift2Name,
-    dayShift1UserChanged: day.dayShift1UserChanged,
-    dayShift2UserChanged: day.dayShift2UserChanged,
-    nightShift1UserChanged: day.nightShift1UserChanged,
-    nightShift2UserChanged: day.nightShift2UserChanged
+    nightShift2: day.nightShift2
   };
   sessionStorage.setItem(dateKey, JSON.stringify(updatedData));
 }

@@ -47,15 +47,15 @@
         <button
           class="top-right-buttons buttonRefresh"
           @click="$emit('refresh')"
-          aria-label="Odśwież harmonogram"
-          title="Odśwież harmonogram"
+          :aria-label="MESSAGES.REFRESH"
+          :title="MESSAGES.REFRESH"
         >
           <refresh-icon :class="{ refreshing: isRefreshing }" />
         </button>
 
         <label
           class="top-right-buttons compact-toggle"
-          title="Przełącz tryb edytowania"
+          :title="MESSAGES.CLICK_TO_EDIT"
         >
           <input
             type="checkbox"
@@ -63,7 +63,7 @@
             @change="
               $emit('toggle-edit', ($event.target as HTMLInputElement).checked)
             "
-            aria-label="Przełącz tryb edytowania"
+            :aria-label="MESSAGES.CLICK_TO_EDIT"
           />
           <PencilIcon :isEditing="isEditingMode" />
         </label>
@@ -96,6 +96,7 @@ import RefreshIcon from './icons/RefreshIcon.vue';
 import ButtonExport from './ButtonExport.vue';
 import ButtonImport from './ButtonImport.vue';
 import MonthSelector from './MonthSelector.vue';
+import { MESSAGES } from '@/constants/messages';
 
 export default defineComponent({
   name: 'ButtonsTopBar',
@@ -122,7 +123,8 @@ export default defineComponent({
   data() {
     return {
       isMenuOpen: false,
-      isMobileView: false
+      isMobileView: false,
+      MESSAGES // Make MESSAGES available in the template
     };
   },
   methods: {

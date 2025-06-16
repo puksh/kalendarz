@@ -1,11 +1,10 @@
-<!-- filepath: c:\Users\PIuksha\GitHub\vueCalendar\src\components\MonthSelector.vue -->
 <template>
   <section class="monthChange">
     <button
       class="buttonMonthChange prev-month"
       @click="handleMonthChange(-1)"
-      aria-label="Poprzedni miesiąc"
-      title="Idź do poprzedniego miesiąca"
+      :aria-label="MESSAGES.MONTH_PREVIOUS"
+      :title="MESSAGES.MONTH_PREVIOUS_GO_TO"
     >
       &#8249;
     </button>
@@ -15,8 +14,8 @@
     <button
       class="buttonMonthChange next-month"
       @click="handleMonthChange(1)"
-      aria-label="Następny miesiąc"
-      title="Idź do następnego miesiąca"
+      :aria-label="MESSAGES.MONTH_NEXT"
+      :title="MESSAGES.MONTH_NEXT_GO_TO"
     >
       &#8250;
     </button>
@@ -24,6 +23,8 @@
 </template>
 
 <script lang="ts">
+import { MESSAGES } from '@/constants/messages';
+
 export default {
   name: 'MonthSelector',
   props: {
@@ -46,7 +47,8 @@ export default {
   },
   data() {
     return {
-      isChanging: false
+      isChanging: false,
+      MESSAGES
     };
   },
   computed: {
@@ -115,9 +117,7 @@ export default {
     },
     handleMonthChange(delta) {
       if (this.hasUnsavedChanges) {
-        const confirmSwitch = confirm(
-          'Masz niezapisane zmiany. Czy na pewno chcesz zmienić miesiąc? Twoje zmiany zostaną utracone.'
-        );
+        const confirmSwitch = confirm(MESSAGES.MONTH_CHANGE_UNSAVED);
 
         if (!confirmSwitch) {
           return; // Cancel the month change

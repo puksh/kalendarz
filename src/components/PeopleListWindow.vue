@@ -4,7 +4,7 @@
     <h3 style="font-weight: bold">Zespół</h3>
     <div class="people-list-content">
       <!-- Ratownik List -->
-      <h4>Ratowniczki/cy</h4>
+      <h4>{{ MESSAGES.ROLE_RATOWNIK_PLURAL }}</h4>
       <div class="person-lists">
         <div
           v-for="person in people.filter((p) => p.ratownik)"
@@ -26,7 +26,7 @@
       </div>
 
       <!-- Non-Ratownik List -->
-      <h4>Pielęgniarki/rze</h4>
+      <h4>{{ MESSAGES.ROLE_NURSE_PLURAL }}</h4>
       <div class="person-lists">
         <div
           v-for="person in people.filter((p) => !p.ratownik)"
@@ -50,6 +50,8 @@
 </template>
 
 <script lang="ts">
+import { MESSAGES } from '@/constants/messages';
+
 export default {
   name: 'PeopleListWindow',
   props: {
@@ -59,7 +61,7 @@ export default {
     },
     isEditingMode: {
       type: Boolean,
-      required: true // Ensure the parent always provides this prop
+      required: true
     }
   },
   data() {
@@ -68,7 +70,8 @@ export default {
       touchedPerson: null,
       touchStartTime: 0,
       touchTimer: null,
-      isDragging: false
+      isDragging: false,
+      MESSAGES
     };
   },
   methods: {

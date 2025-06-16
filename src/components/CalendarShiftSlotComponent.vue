@@ -17,28 +17,21 @@
       class="assigned-person deleted"
       v-else-if="day[shiftType + 'UserChanged']"
     >
-      {{ MESSAGES.DELETED }}
+      {{ MESSAGES.SHIFT_DELETED }}
     </div>
     <div class="empty-slot" v-else>
-      {{ shiftType.includes('day') ? 'D' : 'N' }}
+      {{
+        shiftType.includes('day')
+          ? MESSAGES.SHIFT_DAY_INITIAL
+          : MESSAGES.SHIFT_NIGHT_INITIAL
+      }}
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { ShiftType } from '@/types/calendar';
-
-const MESSAGES = {
-  DELETED: 'Usunięto',
-  DAY_SHIFT: 'Zmiana dzienna',
-  NIGHT_SHIFT: 'Zmiana nocna',
-  CLICK_TO_REMOVE: 'Kliknij aby usunąć zmianę',
-  EMPTY_SHIFT: 'Pusta zmiana',
-  DRAG_TO_ASSIGN: 'Przeciągnij członka zespołu by nadać im zmianę',
-  CLICK_TO_DELETE: 'Kliknij by usunąć',
-  DRAG_TO_ASSIGN_SHIFT: 'Przeciągnij członka zespołu by nadać im',
-  UNASSIGNED: 'Nieprzypisana'
-} as const;
+import { MESSAGES } from '../constants/messages';
 
 export default {
   name: 'CalendarShiftSlotComponent',
@@ -70,7 +63,9 @@ export default {
       return this.shiftType.includes('day');
     },
     shiftName(): string {
-      return this.isDayShift ? MESSAGES.DAY_SHIFT : MESSAGES.NIGHT_SHIFT;
+      return this.isDayShift
+        ? this.MESSAGES.SHIFT_DAY
+        : this.MESSAGES.SHIFT_NIGHT;
     },
     hasAssignedPerson(): boolean {
       return !!this.day[this.shiftType];
@@ -102,22 +97,22 @@ export default {
     getShiftAriaLabel(): string {
       if (this.isEditing) {
         return this.hasAssignedPerson
-          ? `${this.shiftName}: ${this.assignedPersonName}. ${MESSAGES.CLICK_TO_REMOVE}.`
-          : `${this.shiftName}: ${MESSAGES.EMPTY_SHIFT}. ${MESSAGES.DRAG_TO_ASSIGN}.`;
+          ? `${this.shiftName}: ${this.assignedPersonName}. ${this.MESSAGES.SHIFT_CLICK_TO_REMOVE}.`
+          : `${this.shiftName}: ${this.MESSAGES.SHIFT_EMPTY}. ${this.MESSAGES.SHIFT_DRAG_TO_ASSIGN}.`;
       }
       return this.hasAssignedPerson
         ? `${this.shiftName}: ${this.assignedPersonName}`
-        : `${this.shiftName}: ${MESSAGES.EMPTY_SHIFT}.`;
+        : `${this.shiftName}: ${this.MESSAGES.SHIFT_EMPTY}.`;
     },
     getShiftTooltip(): string {
       if (this.isEditing) {
         return this.hasAssignedPerson
-          ? `${this.shiftName}: ${this.assignedPersonName} (${MESSAGES.CLICK_TO_DELETE})`
-          : `${MESSAGES.DRAG_TO_ASSIGN_SHIFT} - ${this.shiftName.toLowerCase()}`;
+          ? `${this.shiftName}: ${this.assignedPersonName} (${this.MESSAGES.SHIFT_CLICK_TO_DELETE})`
+          : `${this.MESSAGES.SHIFT_DRAG_TO_ASSIGN_SPECIFIC} - ${this.shiftName.toLowerCase()}`;
       }
       return this.hasAssignedPerson
         ? `${this.shiftName}: ${this.assignedPersonName}`
-        : `${this.shiftName}: ${MESSAGES.UNASSIGNED}`;
+        : `${this.shiftName}: ${this.MESSAGES.NOT_ASSIGNED}`;
     }
   }
 };

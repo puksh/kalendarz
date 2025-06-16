@@ -1,3 +1,5 @@
+import { MESSAGES } from '@/constants/messages';
+
 export function isToday(date: Date): boolean {
   const today = new Date();
   return (
@@ -32,10 +34,10 @@ export function generateMonthDays(
       dayShift2: null,
       nightShift1: null,
       nightShift2: null,
-      dayShift1Name: 'Not assigned',
-      dayShift2Name: 'Not assigned',
-      nightShift1Name: 'Not assigned',
-      nightShift2Name: 'Not assigned',
+      dayShift1Name: MESSAGES.NOT_ASSIGNED,
+      dayShift2Name: MESSAGES.NOT_ASSIGNED,
+      nightShift1Name: MESSAGES.NOT_ASSIGNED,
+      nightShift2Name: MESSAGES.NOT_ASSIGNED,
       isCurrentMonth: true
     });
   }

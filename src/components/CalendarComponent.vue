@@ -64,15 +64,15 @@ import {
 } from '@/utils/sessionStorageUtils.ts';
 import { resetUserChanges } from '@/utils/calendarChecks.ts';
 import NotificationMessage from './NotificationMessage.vue';
-import { addNotification } from './NotificationMessage.vue';
 import {
   validateShiftAssignment,
   assignShiftToDay as utilAssignShift,
-  clearShiftAssignment,
-  MESSAGES
+  clearShiftAssignment
 } from '@/utils/shiftManagement';
 import { Person, ShiftType, DayData } from '@/types/calendar';
 import ShiftSlot from './CalendarShiftSlotComponent.vue';
+import { MESSAGES } from '@/constants/messages';
+
 interface DraggedPerson extends Person {
   id: number;
   name: string;

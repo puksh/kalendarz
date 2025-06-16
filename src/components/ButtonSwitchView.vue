@@ -3,8 +3,8 @@
     v-if="currentComponent === 'ExcelComponent'"
     @click="$emit('navigate', 'CalendarComponent')"
     class="switch-view-button"
-    title="Zmień widok na kalendarz"
-    aria-label="Zmień widok na kalendarz"
+    :title="MESSAGES.VIEW_SWITCH_TO_CALENDAR"
+    :aria-label="MESSAGES.VIEW_SWITCH_TO_CALENDAR"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,14 +19,14 @@
       <line x1="3" y1="10" x2="21" y2="10" />
       <line x1="9" y1="4" x2="9" y2="22" />
     </svg>
-    Kalendarz
+    {{ MESSAGES.VIEW_CALENDAR_TEXT }}
   </button>
   <button
     v-else
     @click="$emit('navigate', 'ExcelComponent')"
     class="switch-view-button"
-    title="Zmień widok na tabele"
-    aria-label="Zmień widok na tabele"
+    :title="MESSAGES.VIEW_SWITCH_TO_TABLE"
+    :aria-label="MESSAGES.VIEW_SWITCH_TO_TABLE"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -43,12 +43,15 @@
       <line x1="9" y1="3" x2="9" y2="21" />
       <line x1="15" y1="3" x2="15" y2="21" />
     </svg>
-    Tabela
+    {{ MESSAGES.VIEW_TABLE_TEXT }}
   </button>
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent } from 'vue';
+import { MESSAGES } from '../constants/messages';
+
+export default defineComponent({
   name: 'ButtonSwitchView',
   props: {
     currentComponent: {
@@ -57,8 +60,13 @@ export default {
       validator: (value: string) =>
         ['CalendarComponent', 'ExcelComponent'].includes(value)
     }
+  },
+  data() {
+    return {
+      MESSAGES: MESSAGES
+    };
   }
-};
+});
 </script>
 
 <style scoped>

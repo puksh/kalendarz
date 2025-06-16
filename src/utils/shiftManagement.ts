@@ -1,28 +1,6 @@
 import { DayData, ShiftType } from '../types/calendar';
 import { addNotification } from '../components/NotificationMessage.vue';
-
-export const MESSAGES = {
-  DUPLICATE_SHIFT: 'Ta sama osoba na obydwu zmianach.',
-  INVALID_VALUE: "Zła wartość! Tylko 'D', 'N', lub 'D N' są dozwolone.",
-  INVALID_SHIFT:
-    'Nieprawidłowy typ zmiany. Dozwolone wartości to: "day", "night", "day night".',
-  TWO_RATOWNIK_ERROR: 'Nie można przypisać dwóch ratowników na jedną zmianę.',
-  MAX_DAY_PEOPLE:
-    'Nie można przypisać więcej niż dwóch osób na zmianę dzienną.',
-  MAX_NIGHT_PEOPLE:
-    'Nie można przypisać więcej niż dwóch osób na zmianę nocną.',
-  NOT_ASSIGNED: 'Not assigned',
-  CLICK_TO_EDIT: 'Click to edit',
-  UNLOCK_WIDTH: 'Odblokuj szerokość',
-  LOCK_WIDTH: 'Zablokuj szerokość',
-  LOAD_ERROR: 'Failed to load local data: ',
-  MOBILE_WARNING_TITLE: '!! Urządzenie mobilne wykryte !!',
-  MOBILE_WARNING_TEXT:
-    'Niestety, tryb edycji w widoku kalendarza nie jest obsługiwany na urządzeniach mobilnych.',
-  MOBILE_WARNING_INSTRUCTION:
-    'Proszę przejdź do widoku tabeli lub skorzystaj z komputera.',
-  MOBILE_WARNING_OK_BUTTON: 'Ok ☹'
-};
+import { MESSAGES } from '../constants/messages';
 
 export function validateShiftAssignment(
   dayData: DayData,
@@ -100,26 +78,4 @@ export function clearShiftAssignment(day: DayData, shift: ShiftType): void {
   day[`${shift}Name`] = MESSAGES.NOT_ASSIGNED;
   day[`${shift}Ratownik`] = null;
   day[`${shift}UserChanged`] = true;
-}
-
-export function resolvePersonName(
-  id: number,
-  people: any[]
-): { name: string; isRatownik: boolean } {
-  const person = people.find((p) => p.id === id);
-  return person
-    ? { name: person.name, isRatownik: person.ratownik }
-    : { name: MESSAGES.NOT_ASSIGNED, isRatownik: false };
-}
-
-export function saveDayToSessionStorage(day: DayData) {
-  const dateKey = day.date.toDateString();
-  const updatedData = {
-    dayShift1: day.dayShift1,
-    dayShift2: day.dayShift2,
-    nightShift1: day.nightShift1,
-    nightShift2: day.nightShift2
-  };
-  sessionStorage.setItem(dateKey, JSON.stringify(updatedData));
-  return updatedData;
 }

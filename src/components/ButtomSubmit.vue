@@ -3,14 +3,16 @@
     :disabled="!canSave"
     @click="$emit('save')"
     class="submit-button"
-    aria-label="Zapisz zmiany"
-    title="Zapisz zmiany w harmonogramie"
+    :aria-label="MESSAGES.SAVE_CHANGES"
+    :title="MESSAGES.SAVE_CHANGES"
   >
-    Zapisz
+    {{ MESSAGES.SAVE_BUTTON_TEXT }}
   </button>
 </template>
 
 <script>
+import { MESSAGES } from '@/constants/messages';
+
 export default {
   name: 'SubmitButton',
   props: {
@@ -19,7 +21,12 @@ export default {
       required: true
     }
   },
-  emits: ['save']
+  emits: ['save'],
+  data() {
+    return {
+      MESSAGES
+    };
+  }
 };
 </script>
 

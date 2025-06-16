@@ -3,7 +3,7 @@
     class="shift-counts-window"
     :class="{ 'show-salaries': showSalaries }"
   >
-    <h3 style="margin: 8px">Ilość zmian</h3>
+    <h3 style="margin: 8px">{{ MESSAGES.SHIFT_COUNT_TITLE }}</h3>
 
     <!-- Toggle button for salary view -->
     <button
@@ -36,7 +36,7 @@
           stroke-linecap="round"
         />
       </svg>
-      {{ showSalaries ? 'Ukryj wynagrodzenia' : 'Pokaż wynagrodzenia' }}
+      {{ showSalaries ? MESSAGES.SALARY_HIDE : MESSAGES.SALARY_SHOW }}
     </button>
 
     <Teleport to="body">
@@ -46,8 +46,8 @@
         :show="showPasswordModal"
         @close="showPasswordModal = false"
         @authorized="handleSalaryAuthorization"
-        aria-label="Autoryzuj dostęp do wynagrodzeń"
-        title="Wprowadź hasło aby zobaczyć wynagrodzenia"
+        :aria-label="MESSAGES.AUTH_SALARY_ACCESS_ARIA"
+        :title="MESSAGES.AUTH_SALARY_ACCESS_TITLE"
         mode="salary"
       />
     </Teleport>
@@ -62,7 +62,7 @@
             gap: 4px;
           "
         >
-          Ratowniczki/cy
+          {{ MESSAGES.ROLE_RATOWNIK_PLURAL }}
           <p v-if="showSalaries" style="color: var(--color-success) !important">
             |
             {{ salaryRates.ratownik }} / godz.
@@ -93,7 +93,7 @@
             gap: 4px;
           "
         >
-          Pielęgniarki/rze
+          {{ MESSAGES.ROLE_NURSE_PLURAL }}
           <p v-if="showSalaries" style="color: var(--color-success) !important">
             |
             {{ salaryRates.nurse }} / godz.
@@ -121,22 +121,22 @@
 
     <!-- Total summary when salaries are shown -->
     <div v-if="showSalaries" class="salary-summary">
-      <h4>Podsumowanie miesięczne:</h4>
+      <h4>{{ MESSAGES.SALARY_SUMMARY_MONTHLY }}</h4>
       <p>
         <strong
-          >Ratownicy łącznie: {{ formatCurrency(getTotalSalary(true)) }} zł
-          netto</strong
+          >{{ MESSAGES.SALARY_TOTAL_RATOWNIK }}
+          {{ formatCurrency(getTotalSalary(true)) }} zł netto</strong
         >
       </p>
       <p>
         <strong
-          >Pielęgniarki łącznie: {{ formatCurrency(getTotalSalary(false)) }} zł
-          netto</strong
+          >{{ MESSAGES.SALARY_TOTAL_NURSE }}
+          {{ formatCurrency(getTotalSalary(false)) }} zł netto</strong
         >
       </p>
       <p class="total-all">
         <strong
-          >SUMA CAŁKOWITA:
+          >{{ MESSAGES.SALARY_TOTAL_ALL }}
           {{ formatCurrency(getTotalSalary(true) + getTotalSalary(false)) }} zł
           netto</strong
         >
@@ -146,6 +146,8 @@
 </template>
 
 <script lang="ts">
+import { MESSAGES } from '@/constants/messages';
+
 export default {
   name: 'ShiftCountWindow',
   props: {
@@ -171,7 +173,8 @@ export default {
       salaryRates: {
         ratownik: 90,
         nurse: 97
-      }
+      },
+      MESSAGES
     };
   },
   async mounted() {

@@ -8,7 +8,7 @@
       {{ notification.message }}
       <button
         @click="removeNotification(notification.id)"
-        aria-label="Close notification"
+        :aria-label="MESSAGES.CLOSE_NOTIFICATION"
       >
         <svg
           viewBox="0 0 24 24"
@@ -27,6 +27,7 @@
 
 <script lang="ts">
 import { reactive } from 'vue';
+import { MESSAGES } from '@/constants/messages';
 
 const notifications = reactive([]);
 let notificationId = 0;
@@ -46,6 +47,11 @@ export const removeNotification = (id) => {
 
 export default {
   name: 'NotificationMessage',
+  data() {
+    return {
+      MESSAGES
+    };
+  },
   setup() {
     return { notifications, removeNotification };
   }

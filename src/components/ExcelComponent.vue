@@ -100,10 +100,10 @@ import { Person, ShiftType, DayData } from '@/types/calendar';
 import {
   validateShiftAssignment,
   assignShiftToDay,
-  clearShiftAssignment,
-  MESSAGES
+  clearShiftAssignment
 } from '@/utils/shiftManagement';
 import { getFormattedShift } from '@/utils/exportUtils';
+import { MESSAGES } from '@/constants/messages';
 
 // Constants
 const SHIFT_OPTIONS = [
@@ -116,7 +116,6 @@ const SHIFT_OPTIONS = [
 const VALID_SHIFT_VALUES = ['D', 'N', 'D N', ''] as const;
 type ValidShiftValue = (typeof VALID_SHIFT_VALUES)[number];
 
-const MAX_DAYS_IN_MONTH = 31;
 const SHIFT_TYPES: ShiftType[] = [
   'dayShift1',
   'dayShift2',
@@ -236,45 +235,6 @@ export default {
           dayData[shiftType + 'UserChanged'] = true;
         }
       });
-    },
-    validateRatownikAssignment(
-      dayData: DayData,
-      personId: number,
-      shiftValue: string
-    ): boolean {
-      const person = this.people.find((p) => p.id === personId);
-      if (!person?.ratownik) return true;
-
-      if (shiftValue.includes('D')) {
-        const dayShiftPeople = [dayData.dayShift1, dayData.dayShift2].filter(
-          Boolean
-        );
-        const hasOtherRatownikDay = dayShiftPeople.some((id) => {
-          const shiftPerson = this.people.find((p) => p.id === id);
-          return shiftPerson?.ratownik && id !== personId;
-        });
-        if (hasOtherRatownikDay) {
-          addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
-          return false;
-        }
-      }
-
-      if (shiftValue.includes('N')) {
-        const nightShiftPeople = [
-          dayData.nightShift1,
-          dayData.nightShift2
-        ].filter(Boolean);
-        const hasOtherRatownikNight = nightShiftPeople.some((id) => {
-          const shiftPerson = this.people.find((p) => p.id === id);
-          return shiftPerson?.ratownik && id !== personId;
-        });
-        if (hasOtherRatownikNight) {
-          addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
-          return false;
-        }
-      }
-
-      return true;
     },
     assignPersonToShift(
       dayData: DayData,

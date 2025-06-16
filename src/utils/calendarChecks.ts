@@ -1,5 +1,4 @@
 import { DayData, ShiftType } from '../types/calendar.ts';
-import { addNotification } from '../components/NotificationMessage.vue';
 import { clearUserChangesFromStorage } from './sessionStorageUtils';
 
 export function hasOtherRatownik(day: DayData, shiftType: ShiftType): boolean {

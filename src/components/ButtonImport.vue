@@ -137,6 +137,7 @@
 </template>
 
 <script>
+import { MESSAGES } from '@/constants/messages';
 import { addNotification } from './NotificationMessage.vue';
 
 export default {
@@ -292,7 +293,7 @@ export default {
         }
       } catch (error) {
         console.error('Error processing HTML table:', error);
-        addNotification('Nie udało się przetworzyć tabeli.', 'red');
+        addNotification(MESSAGES.IMPORT_TABLE_PROCESS_ERROR, 'red');
       }
     },
 
@@ -313,10 +314,7 @@ export default {
       ) {
         this.parseExcelFile(file);
       } else {
-        addNotification(
-          'Nie wspierany format pliku. Proszę użyć pliku CSV lub Excela.',
-          'red'
-        );
+        addNotification(MESSAGES.IMPORT_UNSUPPORTED_FILE_TYPE, 'red');
       }
     },
 
@@ -356,7 +354,7 @@ export default {
         reader.readAsArrayBuffer(file);
       } catch (error) {
         console.error('Error parsing Excel file:', error);
-        addNotification('Nie udało się przetworzyć pliku Excela.', 'red');
+        addNotification(MESSAGES.IMPORT_EXCEL_PROCESS_ERROR, 'red');
       }
     },
 
@@ -373,10 +371,7 @@ export default {
           .split(/\r?\n/)
           .filter((line) => line.trim());
         if (lines.length < 2) {
-          addNotification(
-            'Zły format danych. Musi zawierać wiersz z dniami i kolumnę z członkami zespołu.',
-            'orange'
-          );
+          addNotification(MESSAGES.IMPORT_BAD_DATA_FORMAT, 'orange');
           return;
         }
 
@@ -457,10 +452,7 @@ export default {
         this.daysMismatch = headerRow.length !== this.monthDays.length;
       } catch (error) {
         console.error('Error parsing imported data:', error);
-        addNotification(
-          'Nie udało się przetworzyć danych. Proszę sprawdzić format.',
-          'red'
-        );
+        addNotification(MESSAGES.IMPORT_DATA_PROCESS_ERROR, 'red');
         this.parsedData = [];
       }
     },
@@ -479,7 +471,7 @@ export default {
         );
         if (!person) {
           addNotification(
-            `Nie znaleziono osoby o nazwie: ${row.name}`,
+            MESSAGES.IMPORT_PERSON_NOT_FOUND.replace('${row.name}', row.name),
             'orange'
           );
           return;
@@ -558,7 +550,7 @@ export default {
       });
 
       this.closeImportModal();
-      addNotification('Import zakończony sukcesem.', 'green');
+      addNotification(MESSAGES.IMPORT_SUCCESS, 'green');
       this.$emit('has-changes', true);
 
       // Add imported cells to parent component for styling
