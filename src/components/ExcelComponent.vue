@@ -317,7 +317,7 @@ export default {
         // Try first slot
         if (
           !dayData[daySlot] &&
-          validateShiftAssignment(dayData, daySlot, personId, this.people)
+          validateShiftAssignment(dayData, daySlot, person, this.people)
         ) {
           assignShiftToDay(dayData, daySlot, person);
           return true;
@@ -325,7 +325,7 @@ export default {
         // Try second slot
         if (
           !dayData[nightSlot] &&
-          validateShiftAssignment(dayData, nightSlot, personId, this.people)
+          validateShiftAssignment(dayData, nightSlot, person, this.people)
         ) {
           assignShiftToDay(dayData, nightSlot, person);
           return true;
