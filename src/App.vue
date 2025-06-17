@@ -70,25 +70,10 @@
         :people="people"
         :isEditingMode="peopleListEditingMode"
       />
-      <div v-show="isEditingMode" class="editing-mode-container">
-        <h1
-          v-show="currentPage === 'CalendarComponent'"
-          class="editing-mode-label"
-        >
-          Tryb edytowania
-          <a class="editing-mode-status">Włączony</a><br />
-          Przeciągaj członków zespołu na miejsca w grafiku.<br />Kliknij na
-          zajętą zmianę, aby ją wyczyścić.
-        </h1>
-        <h1
-          v-show="currentPage === 'ExcelComponent'"
-          class="editing-mode-label"
-        >
-          Tryb edytowania
-          <a class="editing-mode-status">Włączony</a><br />
-          Kliknij na miejsce w tabeli, aby wybrać zmianę.
-        </h1>
-      </div>
+      <EditingModeContainer
+        :isEditingMode="isEditingMode"
+        :currentPage="currentPage"
+      />
       <ShiftCountWindow
         ref="shiftCountWindow"
         v-if="monthDays.length > 0 && localData[1] !== null"
@@ -116,6 +101,7 @@ import RefreshIcon from './components/icons/RefreshIcon.vue';
 import PencilIcon from './components/icons/PencilIcon.vue';
 import ButtonExport from './components/ButtonExport.vue';
 import ButtonImport from './components/ButtonImport.vue';
+import EditingModeContainer from './components/EditingModeContainer.vue';
 
 export default {
   name: 'VueCalendar',
@@ -138,7 +124,8 @@ export default {
     RefreshIcon,
     ButtonExport,
     ButtonImport,
-    PencilIcon
+    PencilIcon,
+    EditingModeContainer
   },
   data() {
     return {
@@ -405,15 +392,5 @@ export default {
   width: 60px;
   height: 60px;
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
-}
-
-.editing-mode-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.editing-mode-status {
-  color: #4caf50;
 }
 </style>

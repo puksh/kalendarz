@@ -202,22 +202,6 @@ button:disabled {
   transform: rotate(20deg); /* Slight rotation when checked */
 }
 
-/* Button Styles */
-
-.editing-mode-label {
-  background: var(--glass-bg-color);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border-color);
-  border-radius: var(--border-radius-small);
-  filter: drop-shadow(var(--shadow-drop));
-  color: var(--color-text);
-  font-size: 20px;
-  box-shadow: var(--glass-box-shadow);
-  padding: var(--spacing-medium);
-  text-align: center;
-}
-
 .top-right-buttons svg,
 button svg {
   pointer-events: none;
