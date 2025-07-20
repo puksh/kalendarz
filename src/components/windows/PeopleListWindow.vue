@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { MESSAGES } from '@/constants/messages';
+import { MESSAGES } from '@/constants';
 
 export default {
   name: 'PeopleListWindow',

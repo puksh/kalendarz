@@ -92,15 +92,15 @@
 
 <script>
 import { defineAsyncComponent, markRaw } from 'vue';
-import ButtonsTopBar from './components/ButtonsTopBar.vue';
-import SubmitButton from './components/ButtomSubmit.vue';
-import ButtonSwitchView from './components/ButtonSwitchView.vue';
+import ButtonsTopBar from './components/buttons/ButtonsTopBar.vue';
+import SubmitButton from './components/buttons/ButtonSubmit.vue';
+import ButtonSwitchView from './components/buttons/ButtonSwitchView.vue';
 import { checkShiftDataSync } from '@/utils/dataSync.js';
 import { addNotification } from './components/NotificationMessage.vue';
 import RefreshIcon from './components/icons/RefreshIcon.vue';
 import PencilIcon from './components/icons/PencilIcon.vue';
-import ButtonExport from './components/ButtonExport.vue';
-import ButtonImport from './components/ButtonImport.vue';
+import ButtonExport from './components/buttons/ButtonExport.vue';
+import ButtonImport from './components/buttons/ButtonImport.vue';
 import EditingModeContainer from './components/EditingModeContainer.vue';
 
 export default {
@@ -113,10 +113,10 @@ export default {
       () => import('./components/MonthSelector.vue')
     ),
     PeopleListWindow: defineAsyncComponent(
-      () => import('./components/PeopleListWindow.vue')
+      () => import('./components/windows/PeopleListWindow.vue')
     ),
     ShiftCountWindow: defineAsyncComponent(
-      () => import('./components/ShiftCountWindow.vue')
+      () => import('./components/windows/ShiftCountWindow.vue')
     ),
     NotificationMessage: defineAsyncComponent(
       () => import('./components/NotificationMessage.vue')
@@ -187,7 +187,8 @@ export default {
     },
     loadPageComponent(name) {
       const loaders = {
-        CalendarComponent: () => import('./components/CalendarComponent.vue'),
+        CalendarComponent: () =>
+          import('./components/calendarView/CalendarComponent.vue'),
         ExcelComponent: () => import('./components/ExcelComponent.vue')
       };
       const loader = loaders[name];

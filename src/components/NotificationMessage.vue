@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { reactive } from 'vue';
-import { MESSAGES } from '@/constants/messages';
+import { MESSAGES } from '@/constants';
 
 const notifications = reactive([]);
 let notificationId = 0;

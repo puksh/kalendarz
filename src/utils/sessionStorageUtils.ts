@@ -1,12 +1,6 @@
-import { DayData, ShiftType } from '../types/calendar';
+import { DayData } from '../types';
 import { resolvePersonName } from './personUtils';
-
-const SHIFT_TYPES: ShiftType[] = [
-  'dayShift1',
-  'dayShift2',
-  'nightShift1',
-  'nightShift2'
-];
+import { SHIFT_TYPES } from '../constants';
 
 export function saveDayToSessionStorage(day: DayData): void {
   const dateKey = day.date.toDateString();

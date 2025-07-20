@@ -1,9 +1,9 @@
 import { addNotification } from '../components/NotificationMessage.vue';
-import type { DayData } from '../types/calendar';
-import { MESSAGES } from '../constants/messages';
+import type { DayData } from '../types';
+import { MESSAGES } from '../constants';
 
 export async function fetchServerShiftData(
-  callback: () => void
+  _callback: () => void
 ): Promise<Record<string, DayData>> {
   try {
     const response = await fetch('https://mc.kot.li/?key=shiftData.json', {

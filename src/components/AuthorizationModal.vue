@@ -88,8 +88,8 @@
 import { defineComponent } from 'vue';
 import NotificationMessage from './NotificationMessage.vue';
 import { addNotification } from './NotificationMessage.vue';
-import { ShiftData, AuthMode, ShiftDataCollection } from '../types/calendar';
-import { MESSAGES } from '../constants/messages';
+import { ShiftData, AuthMode, ShiftDataCollection } from '../types';
+import { MESSAGES } from '../constants';
 
 export default defineComponent({
   name: 'AuthorizationModal',

@@ -91,12 +91,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import ButtonSwitchView from './ButtonSwitchView.vue';
-import PencilIcon from './icons/PencilIcon.vue';
-import RefreshIcon from './icons/RefreshIcon.vue';
+import PencilIcon from '../icons/PencilIcon.vue';
+import RefreshIcon from '../icons/RefreshIcon.vue';
 import ButtonExport from './ButtonExport.vue';
 import ButtonImport from './ButtonImport.vue';
-import MonthSelector from './MonthSelector.vue';
-import { MESSAGES } from '@/constants/messages';
+import MonthSelector from '../MonthSelector.vue';
+import { MESSAGES } from '@/constants';
 
 export default defineComponent({
   name: 'ButtonsTopBar',

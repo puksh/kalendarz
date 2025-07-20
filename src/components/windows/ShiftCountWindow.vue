@@ -146,7 +146,7 @@
 </template>
 
 <script lang="ts">
-import { MESSAGES } from '@/constants/messages';
+import { MESSAGES } from '@/constants';
 
 export default {
   name: 'ShiftCountWindow',
@@ -182,7 +182,7 @@ export default {
 
     // Dynamically import AuthorizationModal
     try {
-      const module = await import('./AuthorizationModal.vue');
+      const module = await import('../AuthorizationModal.vue');
       this.AuthorizationModal = module.default;
     } catch (error) {
       console.error('Failed to load AuthorizationModal:', error);

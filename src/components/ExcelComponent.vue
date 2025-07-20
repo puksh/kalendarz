@@ -96,46 +96,26 @@ import {
   clearUserChangesFromStorage,
   saveDayToSessionStorage
 } from '@/utils/sessionStorageUtils.ts';
-import { Person, ShiftType, DayData } from '@/types/calendar';
+import { Person, ShiftType, DayData } from '@/types';
 import {
   validateShiftAssignment,
   assignShiftToDay,
   clearShiftAssignment
 } from '@/utils/shiftManagement';
 import { getFormattedShift } from '@/utils/exportUtils';
-import { MESSAGES } from '@/constants/messages';
+import {
+  SHIFT_TYPES,
+  SHIFT_OPTIONS,
+  VALID_SHIFT_VALUES,
+  PEOPLE_ORDER,
+  MESSAGES
+} from '@/constants';
 import {
   handleHorizontalScroll,
   scrollToTodayColumn
 } from '@/utils/scrollUtils';
-
 // Constants
-const SHIFT_OPTIONS = [
-  { value: '', label: '' },
-  { value: 'D', label: 'D' },
-  { value: 'N', label: 'N' },
-  { value: 'D N', label: 'D N' }
-] as const;
-
-const VALID_SHIFT_VALUES = ['D', 'N', 'D N', ''] as const;
 type ValidShiftValue = (typeof VALID_SHIFT_VALUES)[number];
-
-const SHIFT_TYPES: ShiftType[] = [
-  'dayShift1',
-  'dayShift2',
-  'nightShift1',
-  'nightShift2'
-];
-
-const PEOPLE_ORDER = [
-  'Milena',
-  'Mikołaj',
-  'Aleksandra',
-  'Joanna',
-  'Łukasz',
-  'Natalia',
-  'Marcin'
-] as const;
 
 export default {
   name: 'SpreadsheetView',

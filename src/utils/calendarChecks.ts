@@ -1,4 +1,4 @@
-import { DayData, ShiftType } from '../types/calendar.ts';
+import { DayData, ShiftType } from '../types';
 import { clearUserChangesFromStorage } from './sessionStorageUtils';
 
 export function hasOtherRatownik(day: DayData, shiftType: ShiftType): boolean {

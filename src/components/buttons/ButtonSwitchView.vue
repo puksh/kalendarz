@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MESSAGES } from '../constants/messages';
+import { MESSAGES } from '../../constants';
 
 export default defineComponent({
   name: 'ButtonSwitchView',

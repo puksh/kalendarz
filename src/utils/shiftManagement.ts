@@ -1,6 +1,6 @@
-import { DayData, ShiftType, Person } from '../types/calendar';
+import { DayData, ShiftType, Person } from '../types';
 import { addNotification } from '../components/NotificationMessage.vue';
-import { MESSAGES } from '../constants/messages';
+import { MESSAGES } from '../constants';
 
 export function validateShiftAssignment(
   dayData: DayData,
@@ -8,19 +8,16 @@ export function validateShiftAssignment(
   personData: Person,
   people: any[]
 ): boolean {
-  const isDuplicate = isDuplicateAssignment(dayData, shiftType, personData.id);
-  if (!isDuplicate) {
+  if (!isDuplicateAssignment(dayData, shiftType, personData.id)) {
     addNotification(MESSAGES.DUPLICATE_SHIFT, 'red');
     return false;
   }
 
-  const isRatownik = personData.ratownik;
-  if (!isRatownik) {
+  if (!personData.ratownik) {
     return true;
   }
 
-  const hasConflict = hasConflictingRatownik(dayData, shiftType, people);
-  if (hasConflict) {
+  if (hasConflictingRatownik(dayData, shiftType, people)) {
     addNotification(MESSAGES.TWO_RATOWNIK_ERROR, 'red');
     return false;
   }
@@ -34,15 +31,11 @@ function isDuplicateAssignment(
   personId: number
 ): boolean {
   if (shiftType.includes('day')) {
-    const isDuplicate =
-      dayData.dayShift1 !== personId && dayData.dayShift2 !== personId;
-    return isDuplicate;
+    return dayData.dayShift1 !== personId && dayData.dayShift2 !== personId;
   }
 
   if (shiftType.includes('night')) {
-    const isDuplicate =
-      dayData.nightShift1 !== personId && dayData.nightShift2 !== personId;
-    return isDuplicate;
+    return dayData.nightShift1 !== personId && dayData.nightShift2 !== personId;
   }
 
   return true;

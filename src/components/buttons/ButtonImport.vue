@@ -137,8 +137,8 @@
 </template>
 
 <script>
-import { MESSAGES } from '@/constants/messages';
-import { addNotification } from './NotificationMessage.vue';
+import { MESSAGES } from '@/constants';
+import { addNotification } from '../NotificationMessage.vue';
 
 export default {
   name: 'ButtonImport',

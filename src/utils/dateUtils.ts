@@ -1,4 +1,4 @@
-import { MESSAGES } from '@/constants/messages';
+import { MESSAGES } from '@/constants';
 
 export function isToday(date: Date): boolean {
   const today = new Date();

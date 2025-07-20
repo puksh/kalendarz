@@ -48,43 +48,39 @@
 </template>
 
 <script lang="ts">
-import { daysOfWeek } from '@/data/daysOfWeek.ts';
-import { checkShiftDataSync } from '@/utils/dataSync.js';
-import { isPolishHoliday as utilIsPolishHoliday } from '@/utils/polishHolidays.ts';
-import { isToday as utilIsToday, generateMonthDays } from '@/utils/dateUtils';
+import { daysOfWeek } from '../../data/daysOfWeek.ts';
+import { checkShiftDataSync } from '../../utils/dataSync.js';
+import { isPolishHoliday as utilIsPolishHoliday } from '../../utils/polishHolidays.ts';
+import {
+  isToday as utilIsToday,
+  generateMonthDays
+} from '../../utils/dateUtils';
 import {
   loadAllFromSessionStorage,
   saveDayToSessionStorage
-} from '@/utils/sessionStorageUtils.ts';
-import { resetUserChanges } from '@/utils/calendarChecks.ts';
-import NotificationMessage from './NotificationMessage.vue';
+} from '../../utils/sessionStorageUtils.ts';
+import { resetUserChanges } from '../../utils/calendarChecks.ts';
+import NotificationMessage from '../NotificationMessage.vue';
 import {
   validateShiftAssignment,
   assignShiftToDay as utilAssignShift,
   clearShiftAssignment
-} from '@/utils/shiftManagement';
-import { Person, ShiftType, DayData } from '@/types/calendar';
+} from '../../utils/shiftManagement';
+import { Person, ShiftType, DayData } from '../../types';
 import ShiftSlot from './CalendarShiftSlotComponent.vue';
 import MobileWarningModal from './MobileWarningModal.vue';
-import { MESSAGES } from '@/constants/messages';
+import { SHIFT_TYPES } from '@/constants';
+import { MESSAGES } from '../../constants';
 import {
   handleHorizontalScroll,
   scrollToTodayColumn
-} from '@/utils/scrollUtils';
+} from '../../utils/scrollUtils';
 
 interface DraggedPerson extends Person {
   id: number;
   name: string;
   ratownik: boolean;
 }
-
-// Constants
-const SHIFT_TYPES: ShiftType[] = [
-  'dayShift1',
-  'dayShift2',
-  'nightShift1',
-  'nightShift2'
-];
 
 export default {
   name: 'CalendarComponent',

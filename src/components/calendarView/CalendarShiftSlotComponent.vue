@@ -30,8 +30,8 @@
 </template>
 
 <script lang="ts">
-import { ShiftType } from '@/types/calendar';
-import { MESSAGES } from '../constants/messages';
+import { ShiftType } from '../../types';
+import { MESSAGES } from '../../constants';
 
 export default {
   name: 'CalendarShiftSlotComponent',
