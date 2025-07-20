@@ -51,3 +51,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+
+      - name: Purge Cloudflare Cache
+        uses: nathanvaughn/actions-cloudflare-purge@master
+        with:
+          cf_auth: ${{ secrets.CLOUDFLARE_TOKEN }}
+          cf_zone: ${{ secrets.CLOUDFLARE_ZONE }}
