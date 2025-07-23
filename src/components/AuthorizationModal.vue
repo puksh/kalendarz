@@ -248,14 +248,17 @@ export default defineComponent({
       const jsonString = JSON.stringify(essentialData);
       const base64Data = btoa(jsonString);
 
-      const response = await fetch('https://mc.kot.li/?key=shiftData.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: 'shiftData',
-          value: base64Data
-        })
-      });
+      const response = await fetch(
+        'https://mc.kot.li:8443/?key=shiftData.json',
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: 'shiftData',
+            value: base64Data
+          })
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
