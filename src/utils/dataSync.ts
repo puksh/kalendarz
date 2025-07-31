@@ -6,7 +6,7 @@ export async function fetchServerShiftData(
   _callback: () => void
 ): Promise<Record<string, DayData>> {
   try {
-    const response = await fetch('https://mc.kot.li:8443/?key=shiftData.json', {
+    const response = await fetch('https://mc.kot.li:9443/?key=shiftData.json', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
