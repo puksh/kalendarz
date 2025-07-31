@@ -249,7 +249,7 @@ export default defineComponent({
       const base64Data = btoa(jsonString);
 
       const response = await fetch(
-        'https://mc.kot.li:8443/?key=shiftData.json',
+        'https://mc.kot.li:9443/?key=shiftData.json',
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
