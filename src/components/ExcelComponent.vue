@@ -52,7 +52,10 @@
               v-for="day in daysInMonth"
               :key="day"
               class="editable-cell"
-              :class="getDataCellClasses(day)"
+              :class="[
+                getDataCellClasses(day),
+                { 'empty-cell': !getShiftForPersonAndDay(person.id, day) }
+              ]"
               @click="editCell(person.id, day)"
               :aria-label="editCellAriaLabel"
               :title="editCellTitle"
@@ -498,7 +501,8 @@ export default {
   max-width: 9999px;
   border-spacing: 1px;
   table-layout: auto;
-  background: #1a3c3c;
+  background-color: var(--glass-bg-color);
+  backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border-color);
   border-radius: 8px;
   overflow: hidden;
@@ -509,12 +513,16 @@ export default {
 
 .calendar-table th,
 .calendar-table td {
-  border: 1px solid #1e5e5e;
+  border: 1px solid #1e5e5e5b;
   text-align: center;
   padding: 8px;
   font-size: 14px;
   color: var(--color-text);
   transition: background-color 0.2s ease;
+}
+
+.calendar-table th {
+  background-color: #0a3c3c;
 }
 
 .calendar-table td {
@@ -525,6 +533,15 @@ export default {
 
 .calendar-table tr:nth-child(even) td {
   background-color: #163939;
+}
+
+/* Empty cell styling */
+.calendar-table td.empty-cell {
+  background-color: transparent !important;
+}
+
+.calendar-table tr:nth-child(even) td.empty-cell {
+  background-color: transparent !important;
 }
 
 /* First Column Styling */
