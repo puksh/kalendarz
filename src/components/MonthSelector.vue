@@ -3,6 +3,7 @@
     <button
       class="buttonMonthChange prev-month"
       @click="handleMonthChange(-1)"
+      :disabled="!canGoToPrevious"
       :aria-label="MESSAGES.MONTH_PREVIOUS"
       :title="MESSAGES.MONTH_PREVIOUS_GO_TO"
     >
@@ -14,6 +15,7 @@
     <button
       class="buttonMonthChange next-month"
       @click="handleMonthChange(1)"
+      :disabled="!canGoToNext"
       :aria-label="MESSAGES.MONTH_NEXT"
       :title="MESSAGES.MONTH_NEXT_GO_TO"
     >
@@ -48,7 +50,12 @@ export default {
   data() {
     return {
       isChanging: false,
-      MESSAGES
+      MESSAGES,
+      // Date range: October 2024 to September 2025
+      minYear: 2024,
+      minMonth: 10, // October (0-indexed)
+      maxYear: 2025,
+      maxMonth: 8 // September (0-indexed)
     };
   },
   computed: {
@@ -59,11 +66,24 @@ export default {
           year: 'numeric'
         })
         .toUpperCase();
+    },
+    canGoToPrevious() {
+      const currentDate = new Date(this.currentYear, this.currentMonth);
+      const minDate = new Date(this.minYear, this.minMonth);
+      return currentDate > minDate;
+    },
+    canGoToNext() {
+      const currentDate = new Date(this.currentYear, this.currentMonth);
+      const maxDate = new Date(this.maxYear, this.maxMonth);
+      return currentDate < maxDate;
     }
   },
   mounted() {
     // Add keyboard event listener when component mounts
     document.addEventListener('keydown', this.handleKeyDown);
+
+    // Check if current date is within allowed range
+    this.validateCurrentDate();
   },
   beforeUnmount() {
     // Remove keyboard event listener when component unmounts
@@ -85,37 +105,97 @@ export default {
       switch (event.key) {
         case 'ArrowLeft':
         case '<':
-          event.preventDefault();
-          this.handleMonthChange(-1);
+          if (this.canGoToPrevious) {
+            event.preventDefault();
+            this.handleMonthChange(-1);
+          }
           break;
         case 'ArrowRight':
         case '>':
-          event.preventDefault();
-          this.handleMonthChange(1);
+          if (this.canGoToNext) {
+            event.preventDefault();
+            this.handleMonthChange(1);
+          }
           break;
         case 'PageUp':
-          event.preventDefault();
-          this.handleMonthChange(-1);
+          if (this.canGoToPrevious) {
+            event.preventDefault();
+            this.handleMonthChange(-1);
+          }
           break;
         case 'PageDown':
-          event.preventDefault();
-          this.handleMonthChange(1);
+          if (this.canGoToNext) {
+            event.preventDefault();
+            this.handleMonthChange(1);
+          }
           break;
         case 'ArrowUp':
           if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            this.handleMonthChange(12); // Previous year
+            // Check if we can go back 12 months
+            const targetDate = new Date(
+              this.currentYear - 1,
+              this.currentMonth
+            );
+            if (
+              this.isDateInRange(
+                targetDate.getFullYear(),
+                targetDate.getMonth()
+              )
+            ) {
+              event.preventDefault();
+              this.handleMonthChange(-12); // Previous year
+            }
           }
           break;
         case 'ArrowDown':
           if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            this.handleMonthChange(-12); // Next year
+            // Check if we can go forward 12 months
+            const targetDate = new Date(
+              this.currentYear + 1,
+              this.currentMonth
+            );
+            if (
+              this.isDateInRange(
+                targetDate.getFullYear(),
+                targetDate.getMonth()
+              )
+            ) {
+              event.preventDefault();
+              this.handleMonthChange(12); // Next year
+            }
           }
           break;
       }
     },
+    validateCurrentDate() {
+      const currentDate = new Date(this.currentYear, this.currentMonth);
+      const maxDate = new Date(this.maxYear, this.maxMonth);
+
+      // If current date is after September 2025, set to September 2025
+      if (currentDate > maxDate) {
+        const monthsDiff =
+          (this.maxYear - this.currentYear) * 12 +
+          (this.maxMonth - this.currentMonth);
+        this.$emit('change-month', monthsDiff);
+      }
+    },
+    isDateInRange(year, month) {
+      const date = new Date(year, month);
+      const minDate = new Date(this.minYear, this.minMonth);
+      const maxDate = new Date(this.maxYear, this.maxMonth);
+      return date >= minDate && date <= maxDate;
+    },
     handleMonthChange(delta) {
+      // Calculate the target month and year
+      const targetDate = new Date(this.currentYear, this.currentMonth + delta);
+      const targetYear = targetDate.getFullYear();
+      const targetMonth = targetDate.getMonth();
+
+      // Check if target date is within allowed range
+      if (!this.isDateInRange(targetYear, targetMonth)) {
+        return; // Don't allow navigation outside the range
+      }
+
       if (this.hasUnsavedChanges) {
         const confirmSwitch = confirm(MESSAGES.MONTH_CHANGE_UNSAVED);
 
@@ -209,5 +289,18 @@ export default {
 .buttonMonthChange:focus-visible {
   outline: 2px solid var(--color-focus-ring, #4caf50);
   outline-offset: 2px;
+}
+
+.buttonMonthChange:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+.buttonMonthChange:disabled:hover,
+.buttonMonthChange:disabled:active {
+  transform: none !important;
+  filter: none !important;
 }
 </style>
