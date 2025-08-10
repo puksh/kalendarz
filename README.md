@@ -18,19 +18,6 @@ A team scheduling application built with Vue 3 for viewing team member shifts wi
 - **Static Deployment** - No server required, works completely offline
 - **Fast Loading** - Optimized bundle with data pre-loaded for instant access
 
-### Setup
-
-```sh
-# Install dependencies
-bun install
-
-# Development server
-bun run dev
-
-# Build
-bun run build
-```
-
 ### Configuration
 
 This is now a static application with no configuration required. All data is bundled during the build process.
