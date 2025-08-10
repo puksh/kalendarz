@@ -53,6 +53,8 @@
           <refresh-icon :class="{ refreshing: isRefreshing }" />
         </button>
 
+        <!-- Editing mode toggle disabled -->
+        <!-- 
         <label
           class="top-right-buttons compact-toggle"
           :title="MESSAGES.CLICK_TO_EDIT"
@@ -67,6 +69,7 @@
           />
           <PencilIcon :isEditing="isEditingMode" />
         </label>
+        -->
 
         <ButtonExport
           v-bind="$attrs"
@@ -76,6 +79,8 @@
           :selectedYear="currentYear"
           :current-page="currentComponent"
         />
+        <!-- Import functionality disabled -->
+        <!--
         <ButtonImport
           :isEditingMode="isEditingMode"
           :people="people"
@@ -83,6 +88,7 @@
           @has-changes="$emit('has-changes', $event)"
           @cells-imported="$emit('cells-imported', $event)"
         />
+        -->
       </div>
     </div>
   </nav>
@@ -91,10 +97,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import ButtonSwitchView from './ButtonSwitchView.vue';
-import PencilIcon from '../icons/PencilIcon.vue';
+// import PencilIcon from '../icons/PencilIcon.vue';  // Disabled
 import RefreshIcon from '../icons/RefreshIcon.vue';
 import ButtonExport from './ButtonExport.vue';
-import ButtonImport from './ButtonImport.vue';
+// import ButtonImport from './ButtonImport.vue';  // Disabled
 import MonthSelector from '../MonthSelector.vue';
 import { MESSAGES } from '@/constants';
 
@@ -102,10 +108,10 @@ export default defineComponent({
   name: 'ButtonsTopBar',
   components: {
     ButtonSwitchView,
-    PencilIcon,
+    // PencilIcon,  // Disabled
     RefreshIcon,
     ButtonExport,
-    ButtonImport,
+    // ButtonImport,  // Disabled
     MonthSelector
   },
   props: {

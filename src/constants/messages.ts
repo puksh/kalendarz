@@ -15,8 +15,7 @@ export const MESSAGES = {
   MOBILE_WARNING_INSTRUCTION:
     'Proszę przejść do widoku tabeli lub skorzystać z komputera.',
   MOBILE_WARNING_OK_BUTTON: 'Ok ☹',
-  SERVER_NO_DATA: 'Brak danych na serwerze',
-  SERVER_CONNECTION_ERROR: 'Nie udało się połączyć z serwerem',
+  DATA_LOAD_ERROR: 'Błąd podczas ładowania danych',
   DATA_SYNC_ERROR: 'Błąd podczas synchronizacji danych',
   AUTH_TITLE: 'Autoryzacja',
   AUTH_PROMPT_SALARY: 'Wpisz hasło, aby wyświetlić wynagrodzenie:',
@@ -35,7 +34,6 @@ export const MESSAGES = {
   LOAD_EXCEL_COMPONENT_ERROR: 'Błąd ładowania tabeli:',
   LOAD_CALENDAR_COMPONENT_ERROR: 'Błąd ładowania kalendarza:',
   APP_INIT_ERROR: 'Błąd inicjalizacji aplikacji:',
-  ERROR_FETCHING_DATA: 'Błąd pobierania danych z serwera:',
   REFRESH: 'Odśwież',
   MONTH_NEXT: 'Następny miesiąc',
   MONTH_PREVIOUS: 'Poprzedni miesiąc',

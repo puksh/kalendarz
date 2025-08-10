@@ -1,67 +1,68 @@
-import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import viteCompression from "vite-plugin-compression";
-import { visualizer } from "rollup-plugin-visualizer";
-import autoprefixer from "autoprefixer";
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import viteCompression from 'vite-plugin-compression';
+import { visualizer } from 'rollup-plugin-visualizer';
+import autoprefixer from 'autoprefixer';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     viteCompression({
-      algorithm: "gzip",
-      ext: ".gz",
+      algorithm: 'gzip',
+      ext: '.gz'
     }),
     visualizer({
-      filename: "stats.html",
+      filename: 'stats.html',
       open: false,
-      gzipSize: true,
-    }),
+      gzipSize: true
+    })
   ],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
   },
   build: {
-    minify: "esbuild",
-    target: "esnext",
+    minify: 'esbuild',
+    target: 'esnext',
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         // Code splitting
         manualChunks: {
-          "vue-vendor": ["vue"],
-          utils: ["./src/utils/dataSync.js"],
+          'vue-vendor': ['vue'],
+          utils: ['./src/utils/dataSync.ts'],
+          data: ['./src/assets/data/shiftData.json']
         },
         // Disable automatic preloading
         modulePreload: {
-          polyfill: false,
-        },
-      },
+          polyfill: false
+        }
+      }
     },
-    assetsInlineLimit: 4096, // 4kb
+    assetsInlineLimit: 4096 // 4kb
   },
   css: {
     preprocessorOptions: {
       css: {
-        additionalData: `@import "./assets/main.css";@import "./assets/iphone.css";`,
-      },
+        additionalData: `@import "./assets/main.css";@import "./assets/iphone.css";`
+      }
     },
     postcss: {
-      plugins: [autoprefixer],
-    },
+      plugins: [autoprefixer]
+    }
   },
   optimizeDeps: {
     // Only preload what's needed immediately
-    entries: ["./src/main.js"],
+    entries: ['./src/main.js']
   },
   // Server config for dev
   server: {
     open: true,
     cors: true,
     host: true,
-    port: 5173,
-  },
+    port: 5173
+  }
 });

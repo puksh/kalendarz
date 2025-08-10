@@ -28,9 +28,7 @@
       @change-month="handleMonthChange"
       @discard-changes="discardChanges"
       @refresh="checkShiftDataSync"
-      @toggle-edit="emitEditingMode"
       @has-changes="updateUnsavedChanges"
-      @cells-imported="handleImportedCells"
     />
 
     <main class="main-content">
@@ -70,10 +68,13 @@
         :people="people"
         :isEditingMode="peopleListEditingMode"
       />
+      <!-- EditingModeContainer disabled -->
+      <!--
       <EditingModeContainer
         :isEditingMode="isEditingMode"
         :currentPage="currentPage"
       />
+      -->
       <ShiftCountWindow
         ref="shiftCountWindow"
         v-if="monthDays.length > 0 && localData[1] !== null"
@@ -95,13 +96,13 @@ import { defineAsyncComponent, markRaw } from 'vue';
 import ButtonsTopBar from './components/buttons/ButtonsTopBar.vue';
 import SubmitButton from './components/buttons/ButtonSubmit.vue';
 import ButtonSwitchView from './components/buttons/ButtonSwitchView.vue';
-import { checkShiftDataSync } from '@/utils/dataSync.js';
+import { checkShiftDataSync } from '@/utils/dataSync.ts';
 import { addNotification } from './components/NotificationMessage.vue';
 import RefreshIcon from './components/icons/RefreshIcon.vue';
-import PencilIcon from './components/icons/PencilIcon.vue';
+// import PencilIcon from './components/icons/PencilIcon.vue';  // Disabled
 import ButtonExport from './components/buttons/ButtonExport.vue';
-import ButtonImport from './components/buttons/ButtonImport.vue';
-import EditingModeContainer from './components/EditingModeContainer.vue';
+// import ButtonImport from './components/buttons/ButtonImport.vue';  // Disabled
+// import EditingModeContainer from './components/EditingModeContainer.vue';  // Disabled
 
 export default {
   name: 'VueCalendar',
@@ -122,15 +123,15 @@ export default {
       () => import('./components/NotificationMessage.vue')
     ),
     RefreshIcon,
-    ButtonExport,
-    ButtonImport,
-    PencilIcon,
-    EditingModeContainer
+    ButtonExport
+    // ButtonImport,  // Disabled
+    // PencilIcon,  // Disabled
+    // EditingModeContainer  // Disabled
   },
   data() {
     return {
       isLoading: false,
-      isEditingMode: this.safeGetFromStorage('isEditingMode', false),
+      isEditingMode: false, // Always disabled
       selectedMonth: new Date().getMonth(),
       selectedYear: new Date().getFullYear(),
       locale: 'pl',
@@ -252,17 +253,20 @@ export default {
       }
     },
     updateEditingMode(newMode) {
-      this.isEditingMode = newMode;
-      localStorage.setItem('isEditingMode', JSON.stringify(newMode));
+      // Always keep editing mode disabled
+      this.isEditingMode = false;
+      localStorage.setItem('isEditingMode', JSON.stringify(false));
     },
     updateUnsavedChanges(hasChanges) {
       this.hasUnsavedChanges = hasChanges;
     },
     emitEditingMode(newMode) {
-      this.updateEditingMode(newMode);
+      // Always emit false to keep editing mode disabled
+      this.updateEditingMode(false);
     },
     enableEditingMode() {
-      this.isEditingMode = true;
+      // Do nothing - editing mode is permanently disabled
+      this.isEditingMode = false;
     },
     updateMonthDays(days) {
       this.monthDays = days;
@@ -287,14 +291,8 @@ export default {
         console.warn(`Error reading ${key} from localStorage:`, e);
         return defaultValue;
       }
-    },
-    handleImportedCells(importedCellKeys) {
-      if (!this.ExcelComponent) {
-        console.error('ExcelComponent is not loaded yet.');
-        return;
-      }
-      this.$refs.excelComponent.importedCells = new Set(importedCellKeys);
     }
+    // handleImportedCells method removed - import functionality disabled
   },
   async mounted() {
     try {

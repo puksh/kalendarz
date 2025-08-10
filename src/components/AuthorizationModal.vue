@@ -203,7 +203,8 @@ export default defineComponent({
         return;
       }
 
-      await this.saveDataToServer(dataToSave);
+      // Since we're now using local data, we'll just confirm the changes are saved locally
+      await this.saveDataLocally(dataToSave);
       addNotification(this.MESSAGES.AUTH_SAVE_SUCCESS, 'green');
       this.$emit('authorized');
       this.closeModal();
@@ -231,37 +232,24 @@ export default defineComponent({
       return collectedData;
     },
 
-    async saveDataToServer(data: ShiftDataCollection): Promise<void> {
-      const essentialData: ShiftDataCollection = {};
-      Object.entries(data).forEach(([date, shifts]) => {
-        if (shifts) {
-          const sanitizedShift: ShiftData = {
-            dayShift1: shifts.dayShift1 ?? null,
-            dayShift2: shifts.dayShift2 ?? null,
-            nightShift1: shifts.nightShift1 ?? null,
-            nightShift2: shifts.nightShift2 ?? null
-          };
-          essentialData[date] = sanitizedShift;
-        }
-      });
+    async saveDataLocally(data: ShiftDataCollection): Promise<void> {
+      try {
+        // Since we're using sessionStorage as our local storage mechanism,
+        // the data is already "saved" in sessionStorage.
+        // We could optionally log this or show additional feedback.
+        console.log(
+          'Data saved locally to sessionStorage:',
+          Object.keys(data).length,
+          'entries'
+        );
 
-      const jsonString = JSON.stringify(essentialData);
-      const base64Data = btoa(jsonString);
-
-      const response = await fetch(
-        'https://mc.kot.li:9443/?key=shiftData.json',
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            key: 'shiftData',
-            value: base64Data
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        // Optional: Save to localStorage for persistence across sessions
+        Object.entries(data).forEach(([date, shifts]) => {
+          localStorage.setItem(`shift_${date}`, JSON.stringify(shifts));
+        });
+      } catch (error) {
+        console.error('Error saving data locally:', error);
+        throw new Error('Błąd podczas zapisywania danych lokalnie');
       }
     },
 

@@ -49,7 +49,7 @@
 
 <script lang="ts">
 import { daysOfWeek } from '../../data/daysOfWeek.ts';
-import { checkShiftDataSync } from '../../utils/dataSync.js';
+import { checkShiftDataSync } from '../../utils/dataSync.ts';
 import { isPolishHoliday as utilIsPolishHoliday } from '../../utils/polishHolidays.ts';
 import {
   isToday as utilIsToday,
@@ -112,7 +112,7 @@ export default {
     return {
       monthDays: [] as DayData[],
       localData: {} as Record<string, DayData>,
-      syncedChanges: {} as Record<string, any>, // Server-synced changes
+      syncedChanges: {} as Record<string, any>, // Local synced changes
       daysOfWeek,
       currentDate: new Date(),
       madeChanges: false,
