@@ -7,8 +7,8 @@ A team scheduling application built with Vue 3 for viewing team member shifts wi
 1. **View Mode**: Navigate between months and review existing schedules
 2. **Calendar & Table Views**: Switch between visual calendar and tabular data formats
 3. **Export Functionality**: Export schedules to PDF or Excel formats
-   > [!IMPORTANT]
-   > This is now a read-only version. For a server-syncing functionality please switch to server-sync branch.
+> [!IMPORTANT]
+> This is now a read-only version. For a server-syncing functionality please switch to server-sync branch.
 
 ### Features
 
@@ -35,7 +35,8 @@ bun run build
 
 This is now a static application with no configuration required. All data is bundled during the build process.
 
-> [!NOTE] > **Previous Server Version**: A server-enabled version with editing capabilities is available on the `server-sync` branch.
+> [!NOTE]
+> **Previous Server Version**: A server-enabled version with editing capabilities is available on the `server-sync` branch.
 
 ### Used Technologies
 
@@ -57,4 +58,5 @@ This is now a static application with no configuration required. All data is bun
 - GitHub Actions - CI/CD pipeline
 - GitHub Pages - Static hosting and deployment
 
-> [!NOTE] > **Server-sync branch** Ultimate Express - fastest fork of express, based on µWebSockets
+> [!NOTE]
+> **Server-sync branch** Ultimate Express - fastest fork of express, based on µWebSockets
