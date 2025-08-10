@@ -2,24 +2,23 @@
 
 [![GitHub Pages](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml/badge.svg)](https://github.com/puksh/vueCalendar/actions/workflows/buildWebsite.yml)
 
-A drag-and-drop team scheduling application built with Vue 3 for managing team member shifts with a clean, responsive interface.
+A team scheduling application built with Vue 3 for viewing team member shifts with a clean, responsive interface.
 
-### 📖 Usage Guide
+1. **View Mode**: Navigate between months and review existing schedules
+2. **Calendar & Table Views**: Switch between visual calendar and tabular data formats
+3. **Export Functionality**: Export schedules to PDF or Excel formats
+   > [!IMPORTANT]
+   > This is now a read-only version. For a server-syncing functionality please switch to server-sync branch.
 
-1. View Mode: Navigate between months and review existing schedules
-2. Edit Mode: In Calendar view - toggle edit mode, drag team members to shifts, click occupied slots to clear OR in table view - select certain shifts
-3. Save Changes: Click the save button, authenticate with a password
-4. Data Sync: Click the refresh button to manually synchronize with server
+### Features
 
-### ✨ Features
+- **Interactive Calendar & Table Views** - Visualize team schedules in multiple formats
+- **Responsive Design** - Works across desktop, tablet and mobile devices
+- **Export Functionality** - Generate PDF and Excel reports
+- **Static Deployment** - No server required, works completely offline
+- **Fast Loading** - Optimized bundle with data pre-loaded for instant access
 
-- interactive calendar & table Views - Visualize team schedules in multiple formats
-- drag & drop Interface - Easily assign team members to shifts in editing mode
-- responsive design - Works across desktop and tablet devices
-- authentication - Password protection for schedule changes
-- data synchronization - Automatically sync with remote data source
-
-### 🚀 Project Setup
+### Setup
 
 ```sh
 # Install dependencies
@@ -32,29 +31,30 @@ bun run dev
 bun run build
 ```
 
-### 🔧 Configuration
+### Configuration
 
-Two environment variables control secure operations
+This is now a static application with no configuration required. All data is bundled during the build process.
 
-- `VITE_AUTH_PASSWORD`: The secure password for authorizing changes.
-- `VITE_API_URL`: The URL of the API for fetching and updating harmonogram data.
+> [!NOTE] > **Previous Server Version**: A server-enabled version with editing capabilities is available on the `server-sync` branch.
 
-### 🛠️ Used Technologies
+### Used Technologies
 
 #### Frontend
 
 - Vue 3.5 - Progressive JavaScript framework
-- Vite 6 - Next generation frontend tooling
+- Vite 6 - Next generation frontend tooling with optimized bundling
 
-#### Backend Integration
+#### Data & Storage
 
-- Fetch API - Data synchronization
-- CryptoJS - Secure authentication
-- LocalStorage/SessionStorage - Offline data persistence
+- Static JSON Data - Pre-bundled shift schedules
+- LocalStorage/SessionStorage - UI state persistence
+- Export Libraries - PDF and Excel generation
 
 #### Development & Deployment
 
 - Bun - JavaScript runtime and package manager
 - ESLint/Prettier - Code quality and formatting
 - GitHub Actions - CI/CD pipeline
-- GitHub Pages - hosting and deployment
+- GitHub Pages - Static hosting and deployment
+
+> [!NOTE] > **Server-sync branch** Ultimate Express - fastest fork of express, based on µWebSockets
